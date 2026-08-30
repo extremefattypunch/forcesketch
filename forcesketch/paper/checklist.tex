@@ -5,25 +5,26 @@
 \item {\bf Claims}
     \item[] Question: Do the main claims in the abstract and introduction accurately reflect the paper's contributions and scope?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The abstract states the negative result first --- that no estimator at $K\le4$ recovers the exact top-5\% acquisition set --- and scopes the positive result to screening. It also states where the wall-clock benefit vanishes ($B{=}1$) rather than only where it holds. Every numeric claim in the paper is generated from the raw result records rather than transcribed, so the text cannot drift from the data.
+    \item[] Justification: The abstract leads with the negative result (at $K\le4$ no estimator recovers the exact top-5\% set) and confines the positive claim to screening. It also gives the batch size at which the wall-clock benefit disappears.
 
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Section~\ref{sec:limitations} states that the systems benefit is absent at batch size~1 and that the screening gate is a net slowdown there; that batched reverse mode's advantage narrows with batch size and reverses by $B{=}64$ on our 8\,GB GPU, a crossover we report as measured without claiming a mechanism and which will sit elsewhere on other hardware; that we have a single GPU; that \texttt{torch.func} remains unavailable; that committee disagreement is only a proxy for error; that calibration coverage is marginal and under exchangeability, not out-of-distribution; and that rMD17 spans only 9--24 atoms, so molecule size is a weak axis.
+    \item[] Justification: Section~\ref{sec:limitations} gives them: the gate is a net slowdown at batch size~1, the batched-versus-serial crossover is specific to our 8\,GB GPU, calibration is marginal and under exchangeability, and committee disagreement is only a proxy for error. We also say there that we ran no active-learning loop.
 
 \item {\bf AI / LLM disclosure} \emph{(important)}
+    \item[] Question: Does the paper disclose any use of AI/LLMs in the research or writing (e.g., ideation, code generation, data processing, drafting), in line with the NeurIPS LLM policy?
     \item[] Answer: \answerYes{}
-    \item[] Justification: An AI coding assistant (Claude) was used extensively throughout: implementing the estimator library, benchmark harness and analysis code; running experiments; diagnosing the TorchScript/TensorExpr interaction described in Appendix~\ref{app:tensorexpr}; and drafting and revising this manuscript. The research question, the experimental design, the decision to lead with the negative result, and all scientific claims were directed and verified by the author, who takes full responsibility for the correctness, originality and integrity of the content. Every quantitative claim traces to a committed raw result record --- the manuscript contains no transcribed number, only generated macros, apart from the fixed thresholds that define the evaluation --- and the analysis code includes automated audits that fail if a configuration or random seed is dropped from a reported grid, if the lane-cost model diverges between prose, library and figures, or if a non-anonymous build is frozen.
+    \item[] Justification: Claude was used throughout: writing the estimator library and analysis code, running the experiments, and drafting the manuscript. The author set the research question and the experimental design, checked the results against the raw records, and is responsible for the content.
 
 \item {\bf Research integrity \& originality}
     \item[] Question: Do you confirm that this is an original submission --- not a duplicate or lightly tweaked resubmission, nor one of multiple versions of the same work submitted to this workshop --- and that you comply with research-integrity guidelines?
     \item[] Answer: \answerYes{}
-    \item[] Justification: This is original work, submitted once to this workshop, and it is not a duplicate or lightly tweaked resubmission. It is a single-version submission here; it may be concurrently under review at another non-archival workshop, which this venue's call for papers explicitly permits, and we disclose that rather than leave it implicit. It builds on a published multi-head-committee method, which is cited, and uses that work's publicly released checkpoints and data splits; those artifacts are identified by content hash in the artifact's freeze manifest so the provenance is checkable.
+    \item[] Justification: Original work, submitted once here, and not a reworked version of an earlier submission. It may be under review concurrently at another non-archival workshop, which this call for papers permits.
 
 \item {\bf Reproducibility} \emph{(optional)}
     \item[] Question: Where applicable, does the paper provide enough information (data, code, settings) to reproduce the main results?
     \item[] Answer: \answerYes{}
-    \item[] Justification: All datasets and model checkpoints are public and are pinned by SHA-256 in the artifact's freeze manifest, together with the environment lockfile, the exact library commit, and the ten probe seeds, which were frozen before the final evaluation and none of which were discarded. The reported confidence intervals are paired bootstraps over structures with $10^4$ resamples. The estimator library, experiment scripts, frozen configuration and every raw result record are available as an anonymised artifact at \url{\fsCodeUrl}; see the data and code availability statement.
+    \item[] Justification: Datasets, checkpoints, the environment lockfile and the ten random seeds are pinned by SHA-256 in the artifact's freeze manifest; the code and every raw result record are at \url{\fsCodeUrl}. Confidence intervals are paired bootstraps over structures with $10^4$ resamples.
 
 \end{enumerate}
