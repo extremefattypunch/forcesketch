@@ -1,7 +1,7 @@
 {
-  "frozen": false,
-  "git_commit": "5c47eaf63659eb82688276fd0864abd0e2c97d40",
-  "git_dirty": true,
+  "frozen": true,
+  "git_commit": "5b92b15a024790aac0e19016b28b95d93482c300",
+  "git_dirty": false,
   "n_bootstrap_resamples": 10000,
   "seeds": {
     "schema_version": 1,
@@ -279,7 +279,5 @@
     }
   },
   "n_macros": 253,
-  "audit_problems": [
-    "working tree is dirty -- commit before freezing"
-  ]
+  "audit_problems": []
 }
