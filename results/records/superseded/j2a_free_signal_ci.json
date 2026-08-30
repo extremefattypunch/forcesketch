@@ -1,0 +1,186 @@
+{
+ "vs_free": [
+  {
+   "system": "disjoint_test_1200K",
+   "free_signal": "energy_std",
+   "delta": 0.14103318860843328,
+   "ci_lo": 0.08699517446713738,
+   "ci_hi": 0.19526936131641245,
+   "boot_sd": 0.02754149622224555,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "disjoint_test_1200K",
+   "free_signal": "force_norm",
+   "delta": 0.13578997718743102,
+   "ci_lo": 0.0755873316653175,
+   "ci_hi": 0.20473893083137298,
+   "boot_sd": 0.0328391572040724,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "free_signal": "force_norm",
+   "delta": 0.18150250202369567,
+   "ci_lo": 0.12548729671057474,
+   "ci_hi": 0.24301495480896187,
+   "boot_sd": 0.030029220592521645,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "same_test_1200K",
+   "free_signal": "force_norm",
+   "delta": 0.14602343807491358,
+   "ci_lo": 0.0791052407081835,
+   "ci_hi": 0.20095355682909863,
+   "boot_sd": 0.031298103207799535,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "free_signal": "energy_std",
+   "delta": 0.08764210526315785,
+   "ci_lo": 0.009128110418381352,
+   "ci_hi": 0.17782453741590534,
+   "boot_sd": 0.04333863412072763,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "free_signal": "force_norm",
+   "delta": 0.06738947368421044,
+   "ci_lo": -0.010791052631578885,
+   "ci_hi": 0.19208473684210522,
+   "boot_sd": 0.0520386947747077,
+   "significant": false,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "free_signal": "energy_std",
+   "delta": 0.09273684210526312,
+   "ci_lo": 0.0035773684210525973,
+   "ci_hi": 0.17932672160473082,
+   "boot_sd": 0.04430287073988244,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 2
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "free_signal": "force_norm",
+   "delta": 0.11229473684210522,
+   "ci_lo": -0.003119473684210496,
+   "ci_hi": 0.2055599999999999,
+   "boot_sd": 0.05313681760451135,
+   "significant": false,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 2
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "free_signal": "energy_std",
+   "delta": 0.1685684210526316,
+   "ci_lo": 0.05617471435360235,
+   "ci_hi": 0.2748924067288474,
+   "boot_sd": 0.055979334163666156,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "free_signal": "force_norm",
+   "delta": 0.23016842105263158,
+   "ci_lo": 0.13789539420670938,
+   "ci_hi": 0.30467300632911387,
+   "boot_sd": 0.0426936935061238,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ ],
+ "absolute": [
+  {
+   "system": "disjoint_test_1200K",
+   "point": 0.77307013025241,
+   "ci_lo": 0.731763742733093,
+   "ci_hi": 0.8168322034366031,
+   "boot_sd": 0.021634643474691042,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "point": 0.7878523070130252,
+   "ci_lo": 0.7502061639929355,
+   "ci_hi": 0.8329274080551644,
+   "boot_sd": 0.02097596247305461,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "same_test_1200K",
+   "point": 0.847588122746339,
+   "ci_lo": 0.8121271110824931,
+   "ci_hi": 0.8785362025216269,
+   "boot_sd": 0.01672612408551782,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "point": 0.7373052631578947,
+   "ci_lo": 0.6627197875989174,
+   "ci_hi": 0.8180223951560548,
+   "boot_sd": 0.039615499927627425,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "point": 0.7596631578947368,
+   "ci_lo": 0.6859644187624581,
+   "ci_hi": 0.809418066488977,
+   "boot_sd": 0.03147783306022383,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 2
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "point": 0.8303368421052632,
+   "ci_lo": 0.7685658221698375,
+   "ci_hi": 0.8732003893294881,
+   "boot_sd": 0.026675880727577917,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ ]
+}

@@ -1,0 +1,103 @@
+experiment_id: j8_lane_bench_water
+version: 2
+status: pre-registered
+# v1 was written BEFORE any water timing existed and stated the same four
+# predictions in prose. v2 changes NO prediction and NO threshold -- it only makes
+# the criteria machine-readable, after an adversarial review found that
+# `j8_water_verdict.py` loaded this file and never used it (every threshold was
+# hardcoded in the scorer, so the two could drift silently), and that P3 and P4
+# each state TWO conditions of which the scorer tested only one.
+#
+# The v1 prose is preserved verbatim in `statement` for every prediction so the
+# pre-registration is auditable against what was actually written first.
+
+hypothesis:
+  primary: >
+    Lane reduction pays only when the backward pass is compute-bound rather than
+    launch-bound. Water carries ~17,150 edges per structure against 3BPA's 520
+    (33x), so at equal batch size water does ~33x the work. If the mechanism
+    inferred from 3BPA is right, water should enter the lane-proportional regime
+    at a batch size roughly 33x smaller than 3BPA did.
+
+# 3BPA reference values, measured on the same GPU class before water ran.
+reference:
+  threebpa_batched_slope_flat: 0.57      # ms/lane, B<=16
+  threebpa_serial_slope: 10.9            # ms/lane, independent of B
+  threebpa_speedup_at_B16: 1.07          # total, exact L=8 vs K=3 at L=4
+  threebpa_transition_batch: 64          # first B with batched slope > 1 ms/lane
+
+predictions:
+  - id: P1
+    statement: >
+      Water's batched slope exceeds 1 ms/lane at B = 16, i.e. it is already
+      lane-proportional there, unlike 3BPA which was flat at 0.57 ms/lane.
+    confidence: high
+    falsification_clause: true      # if this fails, drop acceleration entirely
+    criteria:
+      - metric: batched_slope
+        at_batch: 16
+        op: gt
+        threshold: 1.0
+
+  - id: P2
+    statement: >
+      Water's total speedup (exact L=8 vs K=3 at L=4) at B = 16 is >= 1.4x,
+      versus 3BPA's 1.07x at the same batch size.
+    confidence: high
+    criteria:
+      - metric: total_speedup
+        at_batch: 16
+        op: ge
+        threshold: 1.4
+
+  - id: P3
+    statement: >
+      The launch-bound-to-compute-bound transition for water occurs at B <= 4,
+      i.e. at roughly 1/16 to 1/33 of 3BPA's transition batch size, tracking
+      edges rather than structures.
+    confidence: medium
+    criteria:
+      # both halves are tested: the batch threshold AND the ratio-to-3BPA claim
+      - metric: transition_batch
+        op: le
+        threshold: 4
+      - metric: transition_batch_ratio_vs_3bpa
+        op: between
+        threshold: [0.030, 0.0625]     # 1/33 to 1/16
+
+  - id: P4
+    statement: >
+      The serial path remains approximately affine in L. Its slope will be
+      LARGER than 3BPA's ~10.9 ms/lane, because at ~17k edges per structure the
+      per-lane backward is no longer purely launch-latency-bound.
+    confidence: medium
+    criteria:
+      # both halves: affine-in-L (fit quality) AND slope larger than 3BPA's
+      - metric: serial_fit_r2_min
+        op: ge
+        threshold: 0.95
+      - metric: serial_slope_min
+        op: gt
+        threshold: 10.9
+
+primary_metric: batched slope (ms per lane) from a least-squares fit over L in {1,2,3,4,8}
+secondary_metrics: [total_speedup, transition_batch, serial_slope, serial_fit_r2_min]
+
+falsification: >
+  If water's batched slope at B = 16 is still below 1 ms/lane, the edge-count
+  explanation of the launch-bound regime is wrong and the J8 mechanism must be
+  restated. That outcome would also remove the last route to a positive
+  acceleration claim at deployable batch sizes, and acceleration should then be
+  dropped from the paper entirely rather than scoped.
+
+admissibility:
+  # conditions a run must satisfy before it may be scored at all
+  require_non_mig: true
+  require_exclusive_node: true
+  max_relative_iqr: 0.03          # co-tenancy guard; the shared-node run hit 0.105
+  min_lanes_measured: [1, 2, 3, 4, 8]
+
+hardware: A100-SXM4-80GB, exclusive node, MIG disabled
+config: {iters: 50, warmup: 25, dtype: float32, batch_sizes: [1,2,4,8,16,32], lanes: [1,2,3,4,8]}
+analysis_script: experiments/j8_lane_bench.py
+scoring_script: experiments/j8_water_verdict.py

@@ -1,0 +1,14 @@
+== holygpu8a29104.rc.fas.harvard.edu gpu_requeue 39421319
+NVIDIA A100-SXM4-80GB, Disabled
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+[3bpa-disjoint_test_300K] S=1669 rmse=   50.9 disagr= 20.3 overconf=  2.5x (50s)
+[3bpa-disjoint_test_600K] S=2138 rmse=   94.0 disagr= 25.0 overconf=  3.8x (63s)
+[3bpa-disjoint_test_1200K] S=2139 rmse=  200.9 disagr= 33.6 overconf=  6.0x (61s)
+[3bpa-overlapping_test_300K] S=1669 rmse=   42.4 disagr=  5.0 overconf=  8.4x (48s)
+[3bpa-overlapping_test_600K] S=2138 rmse=   79.9 disagr=  6.9 overconf= 11.5x (61s)
+[3bpa-overlapping_test_1200K] S=2139 rmse=  177.2 disagr= 13.1 overconf= 13.5x (61s)
+[3bpa-same_test_300K] S=1669 rmse=   43.4 disagr=  4.4 overconf=  9.9x (50s)
+[3bpa-same_test_600K] S=2138 rmse=   82.5 disagr=  5.4 overconf= 15.4x (67s)
+[3bpa-same_test_1200K] S=2139 rmse=  187.1 disagr=  7.3 overconf= 25.8x (65s)
+
+wrote 9 caches to /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/processed

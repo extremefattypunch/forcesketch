@@ -1,0 +1,35 @@
+{
+ "fig1_factor_a": {
+  "records": {
+   "j2a_oracle_panel.jsonl": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22"
+  }
+ },
+ "fig2_gate_forest": {
+  "records": {
+   "j9a_leading_only_ci_global_L4.json": "abfd602ef708816a1cc5cb2c8d6935aae1902e34f0d641c0bf434bfa18c2981b",
+   "j9a_leading_only_ci_global_L5.json": "490cb8f82d9be4181b18d7d2a4880d580620a315f7fc699ec2ef90c0c796637c",
+   "j9a_leading_only_ci_global_L6.json": "cc3104b410d0fa816a32f61608956d4af514bc9fd3b0e182373f3f065dc56646"
+  }
+ },
+ "fig3_extensivity": {
+  "records": {
+   "j6b_foundation_verdict.json": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+   "j6c_size_normalisation.json": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b"
+  }
+ },
+ "fig4_speedup": {
+  "records": {
+   "j8_lane_bench_NVIDIA_A100-SXM4-80GB_pair.jsonl": "f936e9244c385b7bbf515335f0e6343fd7fd985c1b49dec04485fe19f937dd97",
+   "j8_lane_bench_NVIDIA_H200_pair.jsonl": "83dfde499e1fcefbd47e5b43308174236776af21a1486b45a25129fad2e830df",
+   "j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition_pair.jsonl": "58db265fdb4a36b16e0ce629c3c382c5dca9a4664635fe36bb2180ef2d0f4544",
+   "j8_lane_bench_water_NVIDIA_A100-SXM4-80GB_pair.jsonl": "3f5668f9b48b12559b40ea645069586cc018fba322272236acd7f4e8d5ec0435",
+   "j8_lane_bench_water_NVIDIA_H200_pair.jsonl": "3a47be0935671fa324ff38478b9692efab6a165b9edfdef09b21bf4a734eda85",
+   "j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition_pair.jsonl": "29894410ede325964ebbe34bd4acd81c59adc9e17bd696a1e4c66dce53f952af"
+  }
+ },
+ "fig5_beta_law": {
+  "records": {
+   "j3_extreme_value_v2.json": "846b6de75bd46b49b67ff9ab8e94d2a0b473993306a7283d90de676f712a3bbc"
+  }
+ }
+}

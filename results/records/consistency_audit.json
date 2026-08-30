@@ -1,0 +1,1090 @@
+{
+ "n_claims": 507,
+ "n_unverified": 134,
+ "unverified": [
+  {
+   "doc": "J2A_ORACLE_PANEL.md",
+   "subject": "j2a panel runtime",
+   "value": "5.4 s",
+   "status": "unverifiable",
+   "evidence": "j2a_oracle_panel.jsonl records carry no `seconds`/runtime field (unlike j5_water_caches.jsonl which does). No other record reports j2a wall time."
+  },
+  {
+   "doc": "J2A_ORACLE_PANEL.md",
+   "subject": "3BPA committee disagreement spread factor",
+   "value": "4.6\u00d7",
+   "status": "wrong",
+   "evidence": "33.4833 / 7.16601 = 4.672, which rounds to 4.7x, not 4.6x. (4.6 is only recoverable by dividing the already-rounded values, 33.5/7.2 = 4.65.) Rounding-level, but it is the number quoted in prose."
+  },
+  {
+   "doc": "J2A_ORACLE_PANEL.md",
+   "subject": "j2a CI resample count (caveats bullet)",
+   "value": "10,000 resamples",
+   "status": "wrong",
+   "evidence": "This is the NEW (post-strikethrough) text of the caveat, so it is not preserved history. Both CI records have n_boot=100000 on every entry and meta.n_boot=100000, and \u00a71 of the same document says '100,000 resamples'. The correction that raised the count to 100,000 was not propagated into this bullet."
+  },
+  {
+   "doc": "J2A_ORACLE_PANEL.md",
+   "subject": "cache regeneration cost estimate",
+   "value": "~2 GPU-minutes",
+   "status": "unverifiable",
+   "evidence": "No record holds a per-cache GPU build time for the 3BPA overlapping/same caches. The closest datum is j5_water_caches.jsonl (~64 s per water cache), which is a different system; nothing backs the 2-minute figure. The underlying fact that energy_std is missing for those two caches IS verified (no energy_std rows for overlapping_test_1200K or same_test_1200K)."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "j2b runtime per configuration",
+   "value": "~4 s",
+   "status": "unverifiable",
+   "evidence": "j2b_*.jsonl / sweep*.jsonl records carry no timing field."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "max-component vs global enrichment, blanket comparison",
+   "value": "\"worse still\" on all systems",
+   "status": "wrong",
+   "evidence": "Max-comp enrichment vs global, per system: disjoint 3.074 vs 3.074 (equal), overlapping 3.257 vs 3.981 (worse), same 5.461 vs 5.296 (BETTER), ethanol 2.189 vs 4.147 (worse), aspirin 0.961 vs 1.791 (worse), azobenzene 4.243 vs 3.960 (BETTER). Max-component is worse on only 3 of 6 systems and better on 2, so the blanket 'worse still' is not supported; only the aspirin instance is."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "control-variate seed-wise skip spread, aspirin at 5 lanes",
+   "value": "0.766\u20130.788",
+   "status": "wrong",
+   "evidence": "sweepcv_global_K4.jsonl (identical file to j2b_factor_b_global.jsonl, md5 1cdf98093f73...), control_variate, rmd17-disjoint_aspirin, 10 probe seeds: 0.7665, 0.7750, 0.7783, 0.7800, 0.7851, 0.7902, 0.7953, 0.7986, 0.8003, 0.8071. The range is 0.766\u20130.807; 0.788 is the seed MEAN (0.78764), not the maximum. The quoted spread understates the seed risk the sentence is making a point of."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "j9a leading-only minus control-variate skip difference, L=5",
+   "value": "+0.021 +0.036 -0.005 +0.078 +0.060 +0.059",
+   "status": "wrong",
+   "evidence": "results/records/j9a_leading_only_ci_global_L5.json now holds: disjoint +0.0392 [+0.0284,+0.0500], same +0.0334 [+0.0242,+0.0430], overlapping -0.0102 [-0.0163,-0.0048], ethanol +0.0971 [+0.0797,+0.1147], aspirin +0.0333 [+0.0170,+0.0500], azobenzene +0.0688 [+0.0530,+0.0851]. I re-ran experiments/j9a_leading_only_ci.py --lanes 5 and it reproduced the record exactly, so the record is current and the document's column is stale. The document's numbers are instead recoverable from the OLD sweep records (sweep_global_r04 LO minus sweepcv_global_K4 CV mean: 0.9293-0.9087=+0.021, 0.8788-0.8426=+0.036, 0.9427-0.9482=-0.005, 0.9171-0.8393=+0.078, 0.8477-0.7876=+0.060, 0.8215-0.7625=+0.059), which pre-date the J1 split repair (their n_test=1259 vs the current split's 1252). Every downstream sentence keyed to +0.021/-0.005 inherits the error."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "monotonic shrinkage of leading-only advantage with budget",
+   "value": "monotone on 6/6",
+   "status": "wrong",
+   "evidence": "Using the three j9a records, |delta| for rmd17-disjoint_aspirin is 0.1030 (L4) -> 0.0333 (L5) -> 0.0421 (L6), which is not monotone. The claim is monotone only under the document's stale L=5 column (+0.103 -> +0.060 -> +0.042). The other five systems are monotone in the records."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "leading-only minus control-variate skip difference, water systems at 5 lanes",
+   "value": "+0.582, +0.336, -0.006, -0.009",
+   "status": "unverifiable",
+   "evidence": "No record in results/records/ contains water leading-only-vs-control-variate skip results. The record that held them, j9a_leading_only_ci_global_L5.json, was overwritten by a molecular re-run (results/records/review_candidates.json documents exactly this: 'the water L=5 invocation overwrote ... only the water rows'; that entry quotes water-disjoint_pimd -0.0062 ci [-0.0155, 0.0000] and water-overlapping_pimd -0.0089 ci [-0.0203, 0.0000], consistent with the -0.006/-0.009 in the table). results/records/superseded/ holds no j9a copy. The two MD magnitudes (+0.582, +0.336) have no surviving corroboration at all."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "srank separation, flatter-system leading-only advantage range",
+   "value": "+0.021 to +0.582, 7/7 significant",
+   "status": "wrong",
+   "evidence": "The lower endpoint +0.021 is the stale 3BPA disjoint L=5 value; the current record gives +0.039, so the range as stated is contradicted by j9a_leading_only_ci_global_L5.json. The five molecular members are significant in that record; the two water members (+0.582, +0.336) have no record at all, so '7/7 significantly' cannot be checked."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "srank separation, concentrated-system point estimates and intervals",
+   "value": "-0.005 to -0.009; [-0.015,+0.000] and [-0.020,+0.000]",
+   "status": "wrong",
+   "evidence": "3BPA overlapping is -0.0102 in j9a_leading_only_ci_global_L5.json, not -0.005, so the stated range is contradicted. The two water intervals match the values preserved in review_candidates.json (-0.0155 and -0.0203 lower bounds, ci_hi 0.0000) but the record that held them no longer exists on disk, so they are currently unbacked."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "srank does not predict magnitude",
+   "value": "2.944/+0.582 vs 2.993/+0.021",
+   "status": "wrong",
+   "evidence": "sranks verified from j5_spectrum.json (2.9435, 2.9928). The +0.021 contradicts j9a_leading_only_ci_global_L5.json (+0.0392) and the +0.582 has no record. The qualitative point (magnitudes differ hugely at near-identical srank) is unaffected."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "split-draw variability, systems absent from the record",
+   "value": "disjoint / overlapping / ethanol rows",
+   "status": "unverifiable",
+   "evidence": "j9b_split_draw_variability_L5.json contains only three entries (same_test_1200K, rmd17-disjoint_aspirin, rmd17-disjoint_azobenzene). There is no other j9b record anywhere in the repo (only experiments/j9b_split_draw_variability.py). Additionally the 'canonical' and 'reported 95% CI' columns of these three rows reproduce the stale L=5 values that j9a_leading_only_ci_global_L5.json now contradicts."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "split-draw width-ratio range",
+   "value": "1.5\u20132.3x on 5 of 6",
+   "status": "unverifiable",
+   "evidence": "Only three of the six width ratios exist in a record (1.4642, 1.8160, 1.7069). The 2.2x and 2.3x endpoints (3BPA disjoint, ethanol) and the 0.9x exception (overlapping) have no record. The three recorded ratios are consistent with the claim."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "split-draw redraws outside reported CI",
+   "value": "4\u201315 of 20; median ~7/20",
+   "status": "unverifiable",
+   "evidence": "Record covers 9/20, 5/20, 5/20 only; the 4/20 and 15/20 endpoints are on systems absent from the record. Note also that the document's own six values (8,4,9,15,5,5) have median 6.5, not 7."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "split mean vs canonical point estimate",
+   "value": "4 of 6; four listed pairs",
+   "status": "unverifiable",
+   "evidence": "Only the last two pairs are record-backed (j9b: aspirin split_mean 0.068228 > canonical 0.060068; azobenzene 0.062757 > 0.059091). The first two are on systems absent from the record. Separately, by the document's own table the count under a magnitude reading is 5 of 6, not 4 \u2014 3BPA overlapping's |-0.008| also exceeds |-0.005|; the four listed pairs are the ones that exceed in SIGNED value, so 'in magnitude' is the wrong qualifier."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "3BPA overlapping split-draw width ratio",
+   "value": "0.9x",
+   "status": "unverifiable",
+   "evidence": "3BPA overlapping is not among the three entries in j9b_split_draw_variability_L5.json."
+  },
+  {
+   "doc": "J2B_FACTOR_B.md",
+   "subject": "percentile bootstrap interval coverage shortfall",
+   "value": "~87\u201390% vs nominal 95%",
+   "status": "unverifiable",
+   "evidence": "No JSON record holds a coverage simulation. The figures are stated in a sibling document, results/REVIEW_FINDINGS.md \u00a75 ('0.718 at block_len=1, 0.873 at 3, 0.902 at 8 ... block lengths are 2\u20138, so intervals reported as 95% attain roughly 87\u201390%'), and are consistent with the block_len values 2\u20135 seen in the j2a/j9a records \u2014 but nothing machine-readable backs them."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "frozen split helper: 07_gate_baselines line + formula",
+   "value": "line 202; int(0.2*S)",
+   "status": "wrong",
+   "evidence": "The formula is right but the line number is off by two: forcesketch/scripts/07_gate_baselines.py:202 is `g = torch.Generator().manual_seed(SPLIT_SEED)`; `n1, n2 = int(0.2 * S), int(0.4 * S)` is at line 204."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "frozen split helpers disagreement rate",
+   "value": "\"most S\"",
+   "status": "wrong",
+   "evidence": "int(round(0.2S)) != int(0.2S) exactly when frac(0.2S) in {0.6, 0.8}, i.e. 2 of every 5 integers. Enumerated S=1..5000: 2000/5000 = 40% disagree, not a majority. (True at S=2139: 428 vs 427; false at S=1000 and S=500: both 200 / 100.)"
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "AR(1) tau_int validation of the Sokal estimator",
+   "value": "recovered 1.00/1.85/3.94/9.13/18.50 vs analytic 1.00/1.86/4.00/9.00/19.00",
+   "status": "unverifiable",
+   "evidence": "No record file holds these; there is no j1 autocorr-validation record and no test asserts them (tests/test_splits.py has no AR(1) case). The analytic column is exactly (1+phi)/(1-phi) for phi = 0, 0.3, 0.6, 0.8, 0.9 -> 1.00/1.857/4.00/9.00/19.00, so that half checks out. Re-running the shipped integrated_autocorr_time on those AR(1) series (n=200,000, seed=20260901) gives 1.00/1.83/3.94/9.02/18.54 -- consistent within Monte-Carlo error, but n and seed are unrecorded so the exact quoted figures cannot be reproduced."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "blocked-vs-random Factor A: 3BPA disjoint",
+   "value": "blocked 0.792, random 0.806, diff -0.014",
+   "status": "wrong",
+   "evidence": "Recomputed Factor A (AUROC, top-5% of err_e_max, signal sig_exact_global) from results/perstructure/j2a/disjoint_test_1200K.pt restricted to manifests/splits/disjoint_test_1200K__*.json test roles: blocked = 0.7672, random = 0.8056, diff = -0.0384. The random value matches the doc; the blocked value does not. Reconstructing the PRE-correction block split (permutation seeded by SPLIT_SEED alone, no system-hash mixing) reproduces the doc's 0.7920 exactly -- so the blocked/difference columns are stale, predating the seed fix announced in the same document. random_frame_split does not mix the system hash, which is why only the blocked column moved."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "blocked-vs-random Factor A: 3BPA overlapping",
+   "value": "blocked 0.774, random 0.765, diff +0.009",
+   "status": "wrong",
+   "evidence": "Current manifests: blocked = 0.7838, random = 0.7649, diff = +0.0190. Old (pre-seed-fix) blocked = 0.7738, matching the doc's 0.774."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "blocked-vs-random Factor A: 3BPA same",
+   "value": "blocked 0.845, random 0.867, diff -0.022",
+   "status": "wrong",
+   "evidence": "Current manifests: blocked = 0.8472, random = 0.8674, diff = -0.0202. Old blocked = 0.8454, matching the doc's 0.845. (This row is the closest of the six; the difference still moves from -0.022 to -0.020.)"
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "blocked-vs-random Factor A: rMD17 ethanol",
+   "value": "blocked 0.726, random 0.707, diff +0.019",
+   "status": "wrong",
+   "evidence": "Current manifests: blocked = 0.7598, random = 0.7067, diff = +0.0531. Old blocked = 0.7258, matching the doc's 0.726. This is the largest discrepancy and the only |difference| that now exceeds the ~0.04 threshold the section argues against."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "blocked-vs-random Factor A: rMD17 aspirin",
+   "value": "blocked 0.757, random 0.744, diff +0.013",
+   "status": "wrong",
+   "evidence": "Current manifests: blocked = 0.7415, random = 0.7436, diff = -0.0021 (sign flips). Old blocked = 0.7565, matching the doc's 0.757."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "blocked-vs-random Factor A: rMD17 azobenzene",
+   "value": "blocked 0.780, random 0.807, diff -0.027",
+   "status": "wrong",
+   "evidence": "Current manifests: blocked = 0.8361, random = 0.8073, diff = +0.0289 (sign flips). Old blocked = 0.7803, matching the doc's 0.780."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "mean absolute blocked-vs-random Factor A difference",
+   "value": "0.017; 3 positive / 3 negative",
+   "status": "wrong",
+   "evidence": "Under the shipped (regenerated) manifests the six differences are -0.0384, +0.0190, -0.0202, +0.0531, -0.0021, +0.0289, giving mean |difference| = 0.0269, not 0.017. Under the old pre-seed-fix splits the mean is 0.01727 -> 0.017, confirming the quoted figure is stale. The \"three positive and three negative\" half still holds under the new splits (positive: overlapping, ethanol, azobenzene; negative: disjoint, same, aspirin), although two rows flip sign relative to the table."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "bootstrap CI half-width for Factor A",
+   "value": "~0.04",
+   "status": "unverifiable",
+   "evidence": "No record stores a CI for these blocked/random Factor A values. Recomputing with the shipped paired_bootstrap (scheme='block', block_len = the recorded guard, n_boot=2000) on each system's blocked test role gives half-widths 0.0415 (3BPA same), 0.0508 (overlapping), 0.0552 (disjoint), 0.0839 (azobenzene), 0.0990 (aspirin), 0.1056 (ethanol) -- mean 0.073. So \"~0.04\" is the best case (3BPA only) and understates rMD17 by 2-2.5x."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "guard-band dropped-frame range",
+   "value": "16-64 frames",
+   "status": "wrong",
+   "evidence": "Contradicted by the split table in the same document and by j1_splits.json: dropped counts for the six systems are 96, 48, 56, 30, 36, 16 -> range 16-96. The 16-64 range is the pre-seed-fix one (old dropped counts 64, 24, 32, 24, 24, 16)."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "calibration block span after the seed fix",
+   "value": "39-58%, two runs per system",
+   "status": "wrong",
+   "evidence": "Recomputed (max(cal) - min(cal) + 1)/n and the number of contiguous cal runs over all 14 shipped contiguous_block manifests. Spans are 18.8%-89.4%, not 39-58%. Over the six headline systems: disjoint 39.2%, overlapping 49.7%, same 49.6%, ethanol 49.4%, aspirin 29.4%, azobenzene 19.6%. Worse, \"two runs per system\" fails for two of the fourteen: rmd17-disjoint_azobenzene (cal = indices 702-897, a SINGLE contiguous run of 196 frames spanning 19.6%) and water-naive_pimd_T300K (single run, 18.8%) -- i.e. exactly the pathology the correction claims to have removed still holds for one of the six headline systems. The identical wrong sentence also appears in results/REVIEW_FINDINGS.md."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "calibration power 3BPA alpha=0.01 coverage",
+   "value": "0.992 [0.984, 0.998]",
+   "status": "wrong",
+   "evidence": "Only 3BPA disjoint (n_cal=395) gives 0.99242 [0.98415, 0.99793] -> 0.992 [0.984, 0.998]. The other two of the \"all three\" give 0.990 [0.981, 0.997]: overlapping (n_cal=416) 0.99041 [0.98147, 0.99671] and same (n_cal=412) 0.99029 [0.98131, 0.99667]. The row header claims a single value for all three systems."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "rMD17 n_cal after guard-band drops",
+   "value": "n_cal ~= 194",
+   "status": "wrong",
+   "evidence": "j1_splits.json rMD17 n_cal = 188 (ethanol), 188 (aspirin), 196 (azobenzene); none is 194 and the mean is 190.7. 194 is the OLD pre-seed-fix value (reconstructing the seed-only split gives n_cal = 194, 194, 196), and it is also ethanol's current n_DESIGN. The \"20% of 1000 = 200\" arithmetic is correct."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "bootstrap coverage simulation, IID vs moving block",
+   "value": "62.3% IID, 89.0% block at nominal 95%",
+   "status": "unverifiable",
+   "evidence": "No record file contains these figures and no test asserts them. Two other in-repo sources give different numbers for related simulations: the docstring of src/.../evaluation/bootstrap_block.py reports AR(1) phi=0.5 (tau_int=3), n=400: 0.718 at block_len=1, 0.873 at block_len=3, 0.902 at block_len=8; review_candidates.json reports phi=0.6 (tau_int=4): iid 0.67-0.69, block 0.903-0.913. My own simulation at phi=0.6 (tau_int=4), percentile bootstrap of the mean, block_len=8: iid 0.668 / block 0.895 at n=400, and iid 0.627 / block 0.917 at n=2139 -- so 62.3% and 89.0% are plausible but depend on an unrecorded n."
+  },
+  {
+   "doc": "J1_SPLIT_REPAIR.md",
+   "subject": "vectorised AUROC timing",
+   "value": "3.6 s",
+   "status": "unverifiable",
+   "evidence": "No timing record exists. Re-running tail_metrics.auroc on a [10000, 2139] float64 batch on this machine (single torch thread) takes 1.88-1.90 s. Same order of magnitude; the claim is machine- and thread-dependent and unrecorded."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 runtime",
+   "value": "14 s",
+   "status": "unverifiable",
+   "evidence": "No runtime record. Re-running experiments/j3_extreme_value.py end-to-end on this machine took 16.0 s wall. Same order; unrecorded."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 predicted recall, isotropic shared model",
+   "value": "11 shared-model predictions",
+   "status": "wrong",
+   "evidence": "These reproduce the SUPERSEDED j3_extreme_value.json ['shared'] exactly, but contradict the current, reproducible j3_extreme_value_v2.json ['shared_iso']. Per-cell (doc -> v2): disjoint K=3 0.522 -> 0.512, K=4 0.600 -> 0.589, K=6 0.788 -> 0.812; overlapping K=4 0.757 -> 0.760; same K=4 0.656 -> 0.639; ethanol K=3 0.382 -> 0.418, K=4 0.472 -> 0.512, K=6 0.744 -> 0.750; aspirin K=4 0.544 -> 0.568; azobenzene K=4 0.548 -> 0.542, K=6 0.774 -> 0.798. The document's own \"Reproducibility repair\" section explains why the old values were unreproducible (one shared torch.Generator across all items), so this table should have been regenerated with the rest."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 predicted recall, independent marginal model",
+   "value": "11 indep-model predictions",
+   "status": "wrong",
+   "evidence": "Same defect: these match the superseded j3_extreme_value.json ['indep'] but not j3_extreme_value_v2.json ['indep']. Per-cell (doc -> v2): 0.510 -> 0.502, 0.574 -> 0.600, 0.808 -> 0.808, 0.770 -> 0.742, 0.622 -> 0.658, 0.402 -> 0.408, 0.482 -> 0.474, 0.714 -> 0.752, 0.556 -> 0.584, 0.550 -> 0.554, 0.788 -> 0.746."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 prediction MAE, old isotropic model",
+   "value": "~0.03-0.05",
+   "status": "wrong",
+   "evidence": "Recomputed from the superseded j3_extreme_value.json over all 18 rows: MAE(shared) = 0.0283, MAE(indep) = 0.0305 -- neither reaches 0.05. Over just the 11 rows printed in the doc: 0.0273 and 0.0296. Per-system MAE(shared) spans 0.010-0.049 (ethanol 0.010, same 0.018, aspirin 0.019, disjoint 0.027, overlapping 0.047, azobenzene 0.049), so \"0.03-0.05\" covers only 2 of 6 systems. Under the current record the corresponding MAEs are 0.0327 (shared_iso) and 0.0287 (indep). results/REVIEW_FINDINGS.md already lists this \"MAE 0.03-0.05\" as needing correction and says it was propagated into STAGE1_GO_NO_GO.md."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 K=6 measured-vs-predicted pairs",
+   "value": "4 pairs at K=6",
+   "status": "wrong",
+   "evidence": "The four pairs match the superseded j3_extreme_value.json ['shared'] exactly (disjoint 0.7935/0.7879, aspirin 0.772/0.784, ethanol 0.738/0.744, same 0.8336/0.8430) but not j3_extreme_value_v2.json ['shared_iso'], where they are 0.793/0.812, 0.772/0.780, 0.738/0.750, 0.834/0.847. Separately, the list is selective: it names 4 of the 6 K=6 systems and omits the two worst, overlapping (0.860 vs 0.882) and azobenzene (0.760 vs 0.774)."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "robustness of the Chernoff conclusion to the constant",
+   "value": "two orders of magnitude after a 10x improvement",
+   "status": "wrong",
+   "evidence": "Holds only at the strictest tolerance. Dividing the recorded K by 10 and comparing to 7: at eps=0.1, 80-115x (about two orders, claim holds); at eps=0.2, 20-29x (about 1.4 orders); at eps=0.5 -- the tolerance the immediately preceding sentence anchors on -- 3.2-4.6x, i.e. within a factor of 5 of the available budget, not two orders of magnitude."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 residual optimism of the prediction",
+   "value": "+0.03, \"a real modelling gap\"",
+   "status": "wrong",
+   "evidence": "This caveat bullet is NOT struck through, yet the Correction later in the same file withdraws it: \"the optimism was an artifact of the isotropic assumption, not a property of the real geometry. Under the corrected model the signed bias is -0.005.\" The +0.03 figure itself is real for the isotropic model (j3_extreme_value_v2.json shared_iso mean signed bias = +0.0327; superseded shared = +0.0261), but the deployed model's bias is -0.0050. Live text contradicting the correction in the same document."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 across-coordinate coupling of the noise ratio",
+   "value": "0.0126 vs 0.0121",
+   "status": "unverifiable",
+   "evidence": "No record holds these; they appear only as prose in the docstring of experiments/j3_extreme_value.py (line 98) and in results/REVIEW_FINDINGS.md, and the estimator's inputs (cache, K, seed) are unstated. Re-running the shipped _coupling estimator from tests/test_protocol_hygiene.py on the real caches at K=4, seed=1 gives shared_iso vs indep = 0.0171/0.0169 (3BPA disjoint), 0.0241/0.0253 (ethanol), 0.0254/0.0251 (azobenzene) -- same magnitude and same conclusion (the two modes are indistinguishable, |difference| < 0.002), but not the quoted pair. tests test_shared_iso_and_indep_are_NOT_distinguishable and test_shared_real_and_indep_are_distinguishable both pass, so the qualitative claim is locked in."
+  },
+  {
+   "doc": "J3_EXTREME_VALUE.md",
+   "subject": "J3 pre-repair reproduction discrepancy",
+   "value": "0.011 vs 0.017",
+   "status": "unverifiable",
+   "evidence": "No record holds either figure; the same sentence appears as a code comment at experiments/j3_extreme_value.py:150-155. Neither committed record produces 0.017 (j3_extreme_value.json shared MAE = 0.0283; j3_extreme_value_v2.json shared_real MAE = 0.0154), so the 0.017 must come from an intermediate record no longer on disk. Related propagation failure: results/STAGE1_GO_NO_GO.md line 86 still quotes \"MAE 0.017 vs 0.039\", which matches nothing in either surviving record."
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "water cache build wall time",
+   "value": "4.5 minutes",
+   "status": "unverifiable",
+   "evidence": "j5_water_caches.jsonl per-cache `seconds` sum to 257.94 s = 4.30 min (65.74+64.02+64.14+64.04). No slurm record exists for this run (it was built inside interactive job 39390119, elapsed 4h43m), so there is no wall-clock record. 4.5 min is plausible if the two checkpoint loads are counted, but the only recorded figure is 4.30 min."
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "water periodic-image edge fraction",
+   "value": "94.8%; 48,778 of 51,474 over three frames",
+   "status": "unverifiable",
+   "evidence": "No record holds a three-frame edge count or any TOTAL edge count. j5_water_caches.jsonl records only n_periodic_image_edges over the full 500 frames: 8,065,662 (MD) and 7,928,992 (PIMD), i.e. 16,131.3 and 15,858.0 periodic edges per structure. The quoted three-frame figures are internally consistent (48778/51474 = 94.76%) but imply 16,259 periodic edges/frame, ~0.8% above the 500-frame MD mean, and the denominator cannot be checked at all. Looked for a 3-frame smoke record and a total-edge field in j5_water_caches.jsonl and the j8 lane-bench records; neither exists."
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "water vs 3BPA edges per structure",
+   "value": "~17,150 vs 520, 33\u00d7",
+   "status": "unverifiable",
+   "evidence": "No record stores an edges-per-structure count for either system. j5_water_caches.jsonl stores only periodic-image edges (16,131/structure MD, 15,858/structure PIMD), so ~17,150 total is consistent but not derivable; 3BPA's 520 appears only in prose (J8_MATCHED_PAIR.md, J8_WATER_VERDICT.md) and the closest supporting figure is J8_SMOKE_A100.md's '33,138 edges' at B=64 \u2192 517.8/structure. The 33\u00d7 ratio is 17150/520 = 32.98, internally consistent with two unverifiable inputs."
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "3BPA in-distribution overconfidence",
+   "value": "6.2\u00d7 (206/33)",
+   "status": "wrong",
+   "evidence": "The arithmetic reproduces only from the 1200 K EXTRAPOLATIVE numbers: forcesketch/results/manifests/checkpoints.json disjoint force_rmse_committee_mev_A=206.4814, median_atom_disagreement_mev_A=33.4833 \u2192 6.167. Those are the 3BPA test_1200K metrics for a 300 K-trained model \u2014 the regime this same document's \u00a73 table labels 'extrapolative'. The genuinely in-distribution 3BPA overconfidence, from j5_3bpa_temperature_ladder.jsonl at 300 K, is 2.50\u00d7 (disjoint), 8.42\u00d7 (overlapping), 9.91\u00d7 (same). Additionally, 206/33 uses force_rmse_committee (mean of 8 per-head RMSEs) whereas the water column uses committee-mean force RMSE; computed the water way, 3BPA disjoint 1200 K is 200.94/33.58 = 5.98\u00d7, not 6.2\u00d7."
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "free-signal significant comparisons count",
+   "value": "8 of 10",
+   "status": "wrong",
+   "evidence": "Superseded and not propagated. Current record results/records/j2a_free_signal_ci.json gives 9 of 10 significant (only rmd17-disjoint_ethanol/force_norm is false); paper macro fsFreeSig=9, fsFreeSigTotal=10 in macro_provenance.json. results/records/superseded/README.md states explicitly: 'The free-signal count moved 8 of 10 \u2192 9 of 10: aspirin's force_norm interval resolves above zero (+0.112, CI [+0.008, +0.216])'. 8 of 10 is the count from the superseded copy at results/records/superseded/j2a_free_signal_ci.json. The same 8-of-10 figure is repeated in the 'What this changes' section."
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "Beta-law predicted K=4 recall, 3BPA disjoint",
+   "value": "0.600",
+   "status": "wrong",
+   "evidence": "0.600 is the `shared` value from the SUPERSEDED j3_extreme_value.json. The current record j3_extreme_value_v2.json (the one backing macro fsBetaMAE) gives, for disjoint_test_1200K K=4: shared_real=0.5682, shared_iso=0.5888, indep=0.600. Under the corrected model the 3BPA prediction is 0.568, not 0.600. (The qualitative ordering claim survives: water's 0.712 still exceeds 0.568.)"
+  },
+  {
+   "doc": "J5_WATER.md",
+   "subject": "Beta-law prediction bias vs dimension",
+   "value": "+0.03 at D=81; +0.036 to +0.104 at D=576",
+   "status": "wrong",
+   "evidence": "The D=81 leg is the withdrawn isotropic null. Recomputed from j3_extreme_value_v2.json over the six D=81 rows: shared_iso mean signed error +0.0313 (this is the +0.03 quoted), but shared_real \u2014 the corrected model that uses the real head-space directions \u2014 gives mean signed error \u22120.0042 (MAE 0.0077). Across all 18 rows shared_real gives mean signed bias \u22120.005, MAE 0.0154 (macro fsBetaMAE=0.015). J3_EXTREME_VALUE.md states directly: 'The D = 576 water prediction in J5_WATER.md \u00a75 was scored under the old isotropic model and its \"growing optimism with D\" conclusion is likewise an artifact; it should be rescored under shared_real.' That correction has not been propagated here. The +0.036 to +0.104 half does match j3_water.json's isotropic `shared` column, but there is no shared_real water record to compare it against, so the trend claim is unsupported."
+  },
+  {
+   "doc": "J5_TEMPERATURE_LADDER.md",
+   "subject": "energy_std coverage before the ladder",
+   "value": "four of ten",
+   "status": "wrong",
+   "evidence": "Eight of ten, not four. j2a_oracle_panel_all.jsonl carries an energy_std row for every cache tag except overlapping_test_1200K and same_test_1200K \u2014 i.e. the four water caches, disjoint_test_1200K and the three rMD17 caches all have it (8 of the 10 original system-regimes). 'Four of' is the MOLECULAR-only figure and its denominator was mis-transcribed: STAGE1_GO_NO_GO.md:151 says 'the free energy_std baseline covers only four of six systems' and J2A_ORACLE_PANEL.md:206 says 'missing for two of six systems'."
+  },
+  {
+   "doc": "J5_TEMPERATURE_LADDER.md",
+   "subject": "ladder overconfidence degradation factor",
+   "value": "2.5\u20132.6\u00d7",
+   "status": "wrong",
+   "evidence": "Recomputed 1200 K \u00f7 300 K overconfidence_ratio from j5_3bpa_temperature_ladder.jsonl: disjoint 5.98441/2.50449 = 2.389, overlapping 13.51601/8.41956 = 1.605, same 25.76890/9.91044 = 2.600. The true range is 1.6\u20132.6\u00d7; only the `same` committee falls inside the quoted 2.5\u20132.6\u00d7 band, and overlapping (1.61\u00d7) is far outside it. Using the rounded table values gives the same answer (2.4, 1.61, 2.61)."
+  },
+  {
+   "doc": "J5_TEMPERATURE_LADDER.md",
+   "subject": "total system-regime count",
+   "value": "nineteen",
+   "status": "wrong",
+   "evidence": "Sixteen distinct system-regimes, not nineteen. j2a_oracle_panel_all.jsonl has 19 cache_tags, but three pairs are the same regime measured twice: disjoint_test_1200K / 3bpa-disjoint_test_1200K, overlapping_test_1200K / 3bpa-overlapping_test_1200K, same_test_1200K / 3bpa-same_test_1200K. Each pair is numerically identical (exact_global e_max 0.773070 / 0.787852 / 0.847588 to 6 dp; force_rmse_mev_A_mean identical in j4_m_sweep.jsonl; n_structures 2139 in both). The arithmetic '10 original + 9 new' double-counts the three 1200 K regimes, which are members of both sets."
+  },
+  {
+   "doc": "J5_TEMPERATURE_LADDER.md",
+   "subject": "number of distinct evaluation temperatures",
+   "value": "four temperatures",
+   "status": "unverifiable",
+   "evidence": "Records document only three distinct temperatures: 300/600/1200 K for 3BPA (temperature_K in j5_3bpa_temperature_ladder.jsonl) and 300 K for water (split md_T300K / pimd_T300K in j5_water_caches.jsonl). The fourth must be the rMD17 sampling temperature (nominally 500 K), which appears in no record \u2014 searched j1_splits.json, j2a_oracle_panel*.jsonl and j3_extreme_value_v2.json for a temperature field on the rmd17-disjoint_* tags; none carries one. The periodic/non-periodic half is verified (periodic=true only on the water records)."
+  },
+  {
+   "doc": "J6_NAIVE_COMMITTEE.md",
+   "subject": "naive srank vs shared-trunk srank range",
+   "value": "naive 1.275\u20134.998 vs shared-trunk 1.212\u20134.254",
+   "status": "wrong",
+   "evidence": "j5_spectrum.json stable_rank_FQ spans 1.2122 (3BPA overlapping) to 4.2539 (water-disjoint MD). j6_naive_spectrum.json naive values: 4.9976, 4.5144, 3.8883, 1.2747. Only two of the four (4.998, 4.514) lie outside [1.212, 4.254]; water MD (3.888) and water PIMD (1.275) lie inside it. 'Naive committees sit outside that range' is true for half the panel, not all of it, which weakens the 'out of range' framing of the P2 section header."
+  },
+  {
+   "doc": "J4_M_SWEEP.md",
+   "subject": "overconfidence ratio, naive vs shared-trunk (cross-reference to J6)",
+   "value": "~24x -> ~2.6x",
+   "status": "wrong",
+   "evidence": "No matched pair in j6_naive_verdict.json detail.P4 goes 24 -> 2.6. The pair whose shared-trunk value is ~24 is water PIMD (24.077), and its naive value is 3.078, not 2.6. The pair whose naive value is ~2.6 is 3BPA identical-data (2.585), and its shared-trunk value is 25.769, i.e. ~26. Nor is it a median statement: over the four J6 pairs the medians are matched 18.80 and naive 2.571; over the 20 J4 systems at m=8 the medians are shared_trunk 7.61 and naive 2.571. The '~2.6x' half is defensible (naive median 2.571, naive range 2.28\u20133.08); the '~24x' half is not attributable to any single record and should be restated, e.g. '6\u201326x to 2.3\u20133.1x' as J6 itself puts it."
+  },
+  {
+   "doc": "J4_M_SWEEP.md",
+   "subject": "fraction of subsets favouring global, water PIMD",
+   "value": "0% at m=4 and m=8",
+   "status": "wrong",
+   "evidence": "global_beats_maxcomp_frac in j4_m_sweep.jsonl. water-overlapping_pimd_T300K: m=4 0.0, m=8 0.0 (matches). water-disjoint_pimd_T300K: m=4 = 0.1143 (11.4%, i.e. 8 of 70 subsets DO favour global), m=8 = 0.0 \u2014 so '0% at m=4' is false for this system. water-naive_pimd_T300K: m=4 = 1.0, m=8 = 1.0 \u2014 global wins on 100% of subsets. The claim holds only for water-overlapping PIMD and must be scoped to that system (or to shared-trunk water PIMD at m=8)."
+  },
+  {
+   "doc": "J4_M_SWEEP.md",
+   "subject": "water PIMD preference for max-component at all m",
+   "value": "at every committee size",
+   "status": "wrong",
+   "evidence": "True for the two shared-trunk water PIMD systems (global favoured on 32%/23%/11%/9%/0%/0%/0% of subsets for water-disjoint and 14%/2%/0%/0%/0%/0%/0% for water-overlapping, m=2..8 \u2014 a minority at every m). False for water-naive_pimd_T300K, which is one of the 20 systems in this very sweep: global_beats_maxcomp_frac = 0.929, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 for m=2..8. J6_NAIVE_COMMITTEE.md independently reports that global beats max-component on all four error scores for water-naive PIMD (P3 deltas +0.063, +0.046, +0.059, +0.061). The sentence must be scoped to shared-trunk water PIMD."
+  },
+  {
+   "doc": "J4_M_SWEEP.md",
+   "subject": "share of sweep systems that are water PIMD",
+   "value": "1 of 20",
+   "status": "wrong",
+   "evidence": "The 20 deduplicated systems in j4_m_sweep.jsonl include three water PIMD entries: water-disjoint_pimd_T300K, water-overlapping_pimd_T300K and water-naive_pimd_T300K. Counted as systems it is 3 of 20, not 1 of 20; counted as a chemistry/regime label it is one of several regimes, but 'out of twenty' invites the system count. Compounding the previous finding, one of those three (the naive one) does not exhibit the behaviour being scoped."
+  },
+  {
+   "doc": "J4_M_SWEEP.md",
+   "subject": "Haar-sketch variance-ratio scaling with r",
+   "value": "(r\u2212K)/(r+2), improving with r",
+   "status": "wrong",
+   "evidence": "The analytic quantity recorded elsewhere in the project is the relative sd sqrt(2(r\u2212K)/(K(r+2))) of v-hat_d/v_d (J3_EXTREME_VALUE.md line 67, experiments/j3_extreme_value.py; verified numerically there at K=4, r=7 -> 0.408). The J4 rendering drops the 2/K factor, and the expression as written is monotonically INCREASING in r at fixed K: d/dr[(r\u2212K)/(r+2)] = (K+2)/(r+2)^2 > 0. At fixed lane budget K=4, going from r=7 (M=8) to r=15 (M=16) takes the relative variance 2(r\u2212K)/(K(r+2)) from 0.167 to 0.324 \u2014 the sketch gets worse, not better. The claim only holds if K grows in proportion to r, which the sentence does not say. No record supports 'improves with r'."
+  },
+  {
+   "doc": "J4_M_SWEEP.md",
+   "subject": "training cost of an M=16 committee",
+   "value": "~2 GPU-days",
+   "status": "unverifiable",
+   "evidence": "No record backs it. I searched results/records/ (no training-time record exists; j6_naive_caches.jsonl records only inference 'seconds' of 113\u2013?? s per cache), slurm/logs/ (only J5/J6/J6B/J8 job logs, no committee training), and every .md/.py/.sh in the repo \u2014 '2 GPU-days' appears only in this sentence. gpt_plan.md section 10 gives no time estimate either."
+  },
+  {
+   "doc": "J6B_FOUNDATION_ACQUISITION.md",
+   "subject": "MPtraj committee AUROC range claim",
+   "value": "0.80\u20130.84",
+   "status": "wrong",
+   "evidence": "The stated interval excludes two of the four committee rows in the table immediately above it. Across the exact committee statistics the cells span 0.759\u20130.836 (exact global 0.759\u20130.798; exact max-component 0.805\u20130.822; exact max-atom 0.806\u20130.836), and the leading-only gate spans 0.753\u20130.791. 0.80\u20130.84 holds only for max-atom and max-component. The document's own headline elsewhere quotes exact global = 0.798."
+  },
+  {
+   "doc": "J6B_FOUNDATION_ACQUISITION.md",
+   "subject": "MPtraj fraction of acquired structures that differ",
+   "value": "one in five",
+   "status": "wrong",
+   "evidence": "Recomputed the two top-8000 sets: intersection 7,082, union 8,918. Of the 8,000 structures the gate acquires, 918 differ from the exact-global choice = 11.5%, i.e. about one in nine. The 20.6% figure is 1 - Jaccard, which is the fraction of the *union* held by only one set, not the fraction of an acquired set that differs. (At budget 1000 the corresponding numbers are 16.4% and 28.2%.)"
+  },
+  {
+   "doc": "J6B_FOUNDATION_ACQUISITION.md",
+   "subject": "MPtraj relative-error AUROC range",
+   "value": "below 0.5; 0.31\u20130.42",
+   "status": "wrong",
+   "evidence": "post_hoc.relative_error_auroc: force_norm 0.30707, leading_only 0.37474, exact_global 0.37587, energy_std 0.40782, exact_maxcomp 0.42118 \u2014 the 0.31\u20130.42 range is right for these five, but the record also contains random_null 0.50208, which is above 0.5. 'every signal below 0.5' is contradicted by the null in the same record; it should read 'every committee and free signal'."
+  },
+  {
+   "doc": "J6B_FOUNDATION_ACQUISITION.md",
+   "subject": "bootstrap chunking budget and prior interval sizes",
+   "value": "40M budget; at most 21M previously",
+   "status": "wrong",
+   "evidence": "The 40M budget is real (_MAX_INDEX_ELEMENTS = 40_000_000 in src/forcesketch_journal/evaluation/bootstrap_block.py) and 'unchanged' is verifiable \u2014 I checked torch.cat(_replicate_chunks(2139, 100000, 'block', 3)) is bit-identical to the single-shot moving_block_indices call. But 'at most 21M' is stale: 21M is 10,000 x 2,139, which describes the SUPERSEDED j2a records (results/records/superseded/j2a_global_vs_maxcomp_ci.json, n_boot 10000). The currently shipped j2a_global_vs_maxcomp_ci.json and j2a_free_signal_ci.json were regenerated at n_boot = 100,000 on n = 2,139 structures = 213.9M index elements, 5.3x the 40M budget, so those intervals do take the chunked path. The J6B document (mtime 00:11) predates the J2A regeneration (01:50) and the sentence was not updated."
+  },
+  {
+   "doc": "J6B_FOUNDATION_ACQUISITION.md",
+   "subject": "selection-overlap bound threshold attributed to the plan",
+   "value": "plan >= 0.95; protocol >= 0.90",
+   "status": "unverifiable",
+   "evidence": "The protocol half is verified: protocols/j6b_foundation_acquisition.yaml Q4 criteria threshold 0.90, and detail.Q4.threshold = 0.9. The '>= 0.95' attributed to the plan is not in gpt_plan.md \u2014 grepping the plan for jaccard/overlap/0.9x finds only 'overlap with exact-MHC acquisition' as a metric to record (line 999) and e_{0.95} quantile notation; no numeric overlap threshold appears anywhere."
+  },
+  {
+   "doc": "J6C_SIZE_NORMALISATION.md",
+   "subject": "J6D excluded water systems",
+   "value": "four MD systems; 4 positives; design n ~ 91",
+   "status": "wrong",
+   "evidence": "The count is right and the mechanism is right, but two details are not. Re-running j6d's own filter (y_d.sum() < 5) over the manifests: the four excluded systems are water-disjoint_md_T300K (design n 84), water-naive_md_T300K (88), water-overlapping_md_T300K (88) and water-naive_pimd_T300K (88) \u2014 three MD plus one PIMD, not 'four water MD systems'. Each has exactly 4 design positives, as claimed. Design n is 84\u201388 (mean 87), not \u224891; 94 is the design n of the two water PIMD systems that were *kept*."
+  },
+  {
+   "doc": "J6C_SIZE_NORMALISATION.md",
+   "subject": "J6C alpha* range under size-composition change",
+   "value": "0.30 to 1.25",
+   "status": "unverifiable",
+   "evidence": "No record and no script stores the audit's reweighting scenarios, and 0.30 is not on the registered grid [0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5], so it must come from a finer grid that is not recorded anywhere. The qualitative claim reproduces: applying the selection rule to size-restricted sub-pools on a 0.05 grid gives alpha* from 0.35 (N<=40) to 1.5 (N>=81); on the registered grid it gives 0.25 to 1.25. The direction and rough magnitude hold, but the specific pair '0.30 to 1.25' cannot be reproduced."
+  },
+  {
+   "doc": "J8_MATCHED_PAIR.md",
+   "subject": "Blackwell matched-pair serial fit R2 range",
+   "value": "0.9999-1.000",
+   "status": "wrong",
+   "evidence": "Water serial fits are 0.999932-1.000000 (in range), but the 3BPA B=1 serial fit is R2 = 0.99679 -- two orders of magnitude further from 1 than the quoted lower bound. Correct combined range is 0.9968-1.000."
+  },
+  {
+   "doc": "J8_MATCHED_PAIR.md",
+   "subject": "edges per structure (3BPA 520 / water 17,150)",
+   "value": "520 and 17,150 edges/structure",
+   "status": "unverifiable",
+   "evidence": "No record stores an edge count. j8_lane_bench_*.jsonl records num_atoms only (27 and 192). The nearest record, j5_water_caches.jsonl, gives n_periodic_image_edges = 8,065,662 over 500 structures = 16,131 periodic-image edges/structure -- not total edges, and not 17,150. The 17,150 figure appears only as a docstring in experiments/j5_water_caches.py. All 'edges' columns in the table are B x 520 or B x 17,150 arithmetic, not measurements."
+  },
+  {
+   "doc": "J8_MATCHED_PAIR.md",
+   "subject": "matched-pair run-condition equivalence",
+   "value": "same device, same run conditions",
+   "status": "wrong",
+   "evidence": "Same device and same physical node (both slurm logs report holygpu7c2131), but NOT the same run conditions: the 3BPA cell (job 39483448) used warmup=100, iters=200 while the water cell (job 39472564) used warmup=25, iters=50, and they are separate jobs run at different times. Also 'both passing admissibility' only holds for the rules the scorer implements -- the protocol's require_exclusive_node: true is never checked in experiments/j8_water_verdict.py and both runs were on the non-exclusive gpu_requeue partition."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "A100 water run IQR characterisation",
+   "value": "IQRs 0.6-1.3 ms, under 1% of medians",
+   "status": "wrong",
+   "evidence": "Recomputed from the surviving stdout of the run (slurm/logs/j8w_39410902.out, the job that wrote the since-destroyed j8_lane_bench_water_NVIDIA_A100-SXM4-80GB.jsonl): absolute IQR spans 0.27-7.17 ms (median 1.27), relative IQR spans 0.11%-10.71% (median 1.31%). 32 of 60 cells fall outside 0.6-1.3 ms and 34 of 60 exceed 1% of the median. Worst cell (B=8, L=1, serial): median 59.19 ms, IQR 6.34 ms = 10.7%."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "A100 water run admissibility under the pre-registered protocol",
+   "value": "'clean', 4/4",
+   "status": "wrong",
+   "evidence": "The run fails the pre-registered v2 admissibility gate it was scored against: protocols/j8_water_prediction_v2_frozen.yaml sets max_relative_iqr = 0.03, and this run's maximum relative IQR is 0.1071 with 19 of 60 cells above 3%. Under v3's per-cell rule, 19/60 = 32% excluded also exceeds max_excluded_cell_fraction = 0.10. Calling it 'clean' and reporting 4/4 without an admissibility note is not supported."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "A100 water run wall time",
+   "value": "14 min",
+   "status": "unverifiable",
+   "evidence": "No elapsed time is recorded in any record, in slurm/logs/j8w_39410902.out/.err, or in the sbatch scripts. No sacct output retained."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "universal edge threshold for the launch-to-compute transition",
+   "value": "10^4-1.5x10^4 edges",
+   "status": "wrong",
+   "evidence": "Only 3BPA's crossing is bracketed by measurement: between 8,320 edges (slope 0.57) and 33,280 (slope 8.08). Water's crossing is not bracketed at all -- its smallest measured batch, B=1 at 17,150 edges, is already above 1 ms/lane, so the data place the crossing somewhere below 17,150 with no lower bound. Worse, water's B=1 slope of 1.325 has R2 = 0.818 and is produced entirely by the L=8 point (a 7-lane measurement); refitting over L<=4 gives -0.048 (B=1), +0.541 (B=2), +9.187 (B=4) ms/lane, which puts water's crossing between 34,300 and 68,600 edges and destroys the overlap with 3BPA's bracket. The stated 10^4-1.5x10^4 interval is not derivable from either fit."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "system-dependence factor of the per-edge cost constant",
+   "value": "~3x",
+   "status": "wrong",
+   "evidence": "The two constants the sentence itself quotes give 0.026217/0.019589 = 1.34x, not ~3x. A factor near 3 only appears under a different pairing the text does not state (3BPA at 33,280 edges, 0.0262, against water at the matched 34,300 edges, 0.00784, = 3.34x). As written the number does not follow from the preceding sentence."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "R5 fastest-baseline map for water on A100",
+   "value": "batched at L>=4, serial at L=1",
+   "status": "wrong",
+   "evidence": "From slurm/logs/j8w_39410902.out, batched wins from L>=2, not L>=4. B=2: L=2 serial 82.55 vs batched 61.20; L=3 102.37 vs 62.38. B=4: L=2 80.69 vs 63.35; L=3 101.83 vs 71.19. Serial wins only at L=1 (B=2: 56.86 vs 60.27; B=4: 57.50 vs 60.85). The B=1 and B=8-32 rows of the table are correct."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "cost of fixing the batched implementation for water at B>=8",
+   "value": "3-5%",
+   "status": "wrong",
+   "evidence": "At L=8 the batched path is slower than serial by 2.13% (B=8, 241.86 vs 236.82), 4.30% (B=16, 457.60 vs 438.74) and 5.41% (B=32, 893.74 vs 847.86). The measured range is 2.1-5.4%; the quoted lower bound of 3% is not attained at B=8."
+  },
+  {
+   "doc": "J8_WATER_VERDICT.md",
+   "subject": "provenance of the removed 76.7 ms figure",
+   "value": "no cell within 1 ms of 76.7",
+   "status": "wrong",
+   "evidence": "Scanning all six surviving water lane-bench records, j8_lane_bench_water_NVIDIA_H200.jsonl has (B=32, L=1, batched) = 77.488 ms, which is 0.79 ms from 76.7 -- inside the 1 ms window the correction asserts is empty. (H200 B=1 L=8 serial = 75.604 is a further 1.10 ms away.) Separately, the destroyed A100 water run itself had (B=2, L=8, batched) = 77.26 ms, 0.56 ms away, which is a plausible origin for the figure. The substantive point -- 76.7 is not a B=1, L=8 serial time -- stands, but the categorical 1 ms statement is false and should be softened before publication."
+  },
+  {
+   "doc": "J8_SMOKE_A100.md",
+   "subject": "A100 3BPA record provenance pointer",
+   "value": "results/records/j8_lane_bench_NVIDIA_A100-SXM4-80GB.jsonl",
+   "status": "wrong",
+   "evidence": "That path does not exist. The file of that name was overwritten by a later, co-tenanted gpu_requeue re-run (job 39475272) and now sits at results/records/contaminated/j8_lane_bench_NVIDIA_A100-SXM4-80GB_cotenant_gpu_requeue.jsonl, whose numbers are completely different (serial slopes 19.06-19.50 vs the document's 10.92-11.07; max relative IQR 10.5% vs 1.16%). The document's numbers come from job 39408005 and survive only in slurm/logs/j8_39408005.out. The same filename-collision defect the suspension banner describes for the water run also destroyed this 3BPA record; the banner does not say so."
+  },
+  {
+   "doc": "J8_SMOKE_A100.md",
+   "subject": "3BPA B=64 atom and edge count",
+   "value": "1728 atoms, 33,138 edges",
+   "status": "unverifiable",
+   "evidence": "1728 = 64 x 27 follows from num_atoms = 27 in the record. The edge count is in no record -- no j8 record stores edges, and '33,138' appears nowhere else in either repository. Note it is also inconsistent with the 520 edges/structure used in J8_MATCHED_PAIR and J8_WATER_VERDICT (64 x 520 = 33,280; 33,138/64 = 517.8)."
+  },
+  {
+   "doc": "J8_SMOKE_A100.md",
+   "subject": "A100 serial batch-independence tolerance",
+   "value": "within 1%",
+   "status": "wrong",
+   "evidence": "From slurm/logs/j8_39408005.out the widest spread is 1.27% (L=1 column: 23.07, 22.92, 22.78, 22.81) and the fitted slopes span 1.37% (10.9200 to 11.0692). Other lane columns are within 0.4-0.9%. The correct statement is 'within about 1.4%'."
+  },
+  {
+   "doc": "J8_SMOKE_A100.md",
+   "subject": "fraction of exact evaluations avoided (headline)",
+   "value": "84-87%",
+   "status": "wrong",
+   "evidence": "This is the superseded workshop figure. The journal pipeline gives 82.2-94.3% (j2b_r0_4.jsonl, gate=leading_only, uq_lanes=5, score=global; macro fsLOSkipLo 0.822 / fsLOSkipHi 0.943). The correction was made in REVIEW_FINDINGS.md and propagated into J8_WATER_VERDICT.md:143, but NOT into this document -- this is the un-propagated correction the manuscript is most likely to inherit."
+  },
+  {
+   "doc": "J8_SMOKE_A100.md",
+   "subject": "Blackwell 3BPA serial slope B=1",
+   "value": "4.58 ms/lane; 2.6x lower",
+   "status": "wrong",
+   "evidence": "This is the NEW value introduced by the sm_120 correction blockquote, so it is in scope -- and it is already stale. It reproduces exactly from the PRE-FIX Blackwell run (slurm/logs/j8_39413479.out: B=1 serial slope 4.5756, lane signature 1.99 = 7 lanes). The corrected 8-lane re-run that backs J8_MATCHED_PAIR, results/records/j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl, gives 5.1040 ms/lane. The ratio to the laptop is therefore 11.7754/5.1040 = 2.31x, not 2.6x."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "workshop laptop SM count and memory",
+   "value": "~36 SMs, 8 GB",
+   "status": "unverifiable",
+   "evidence": "No workshop record stores an SM count or device memory. forcesketch/environment/smoke_test.json records only the compute capability (12, 0) and the wheel arch list. The 8 GB figure is corroborated narratively by forcesketch/results/GO_NO_GO.md:91 ('batched exhausts the 8 GB card'); the 36 SMs figure has no source in either repository."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell 3BPA run wall time",
+   "value": "4m49s",
+   "status": "unverifiable",
+   "evidence": "slurm_partition = gpu_requeue is recorded, but no elapsed time appears in any record, in slurm/logs/j8_39413479.out/.err, or in the sbatch scripts."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "batched-VJP guard fp64 agreement, Blackwell",
+   "value": "4.03e-15",
+   "status": "wrong",
+   "evidence": "results/records/j0b_guard_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition_torch2.13.0+cu129.json now holds max_rel_err_vs_serial_fp64 = 2.773824800613524e-15, i.e. 2.77e-15. The 4.03e-15 reproduces exactly from slurm/logs/j8_39413479.out (4.026519871858337e-15), the earlier job whose guard output was later overwritten by job 39483448. The document was written 2026-08-15 20:22; the record was rewritten 21:24."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "batched-VJP guard fp64 agreement, A100-SXM4-80GB",
+   "value": "3.20e-15",
+   "status": "wrong",
+   "evidence": "results/records/j0b_guard_NVIDIA_A100-SXM4-80GB_torch2.13.0+cu129.json now holds 1.923781716554541e-15 = 1.92e-15. The quoted 3.20e-15 reproduces from slurm/logs/j8_39408005.out (3.198846342643016e-15), the earlier exclusive-node job whose guard record was overwritten by job 39475272."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "batched-VJP guard fp64 agreement, RTX 5070 laptop",
+   "value": "50/50, 3e-15",
+   "status": "unverifiable",
+   "evidence": "No workshop guard record exists in either repository (searched forcesketch/environment, forcesketch/results/raw and all json/jsonl). The document flags this row as quoted from frozen workshop-v1.0 records, but those records are not present here."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "guard fp64 agreement range across devices",
+   "value": "3-4 x 10^-15",
+   "status": "wrong",
+   "evidence": "With the current records the range is 1.9-3.9 x 10^-15 (A100-80GB 1.92e-15, Blackwell 2.77e-15, H200 3.76e-15, A100 MIG 3.94e-15). Two of the four fall below the stated lower bound."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "guard device coverage",
+   "value": "four devices, two compute capabilities",
+   "status": "wrong",
+   "evidence": "Five guard records now exist, not four: the table omits j0b_guard_NVIDIA_H200_torch2.13.0+cu129.json (compute capability 9.0, 12/12, 3.758e-15). Counting it, the coverage is five devices and three compute capabilities (8.0, 9.0, 12.0) -- a stronger claim than the one made."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell 3BPA serial slope B=1",
+   "value": "slope 4.58, intercept 6.26",
+   "status": "wrong",
+   "evidence": "Reproduces exactly from the PRE-FIX 7-lane run (slurm/logs/j8_39413479.out: intercept 6.2618, slope 4.5756; serial lane signature 1.99). The corrected 8-lane record now in results/records/ gives intercept 6.1800 and slope 5.1040. The paper must quote 5.10/6.18."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell 3BPA serial slope across B",
+   "value": "4.58, 4.57, 4.61, 4.92",
+   "status": "wrong",
+   "evidence": "Pre-fix values (j8_39413479.out: 4.5756, 4.5718, 4.6077, 4.9227). The corrected record gives 5.1040, 5.3858, 5.4062, 5.7795 -- 11-17% higher and with a larger spread (1.132 vs 1.077 max/min). The qualitative 'independent of batch size' claim weakens correspondingly."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell per-lane cost vs laptop",
+   "value": "2.6x lower",
+   "status": "wrong",
+   "evidence": "11.7754/4.5756 = 2.57 with the pre-fix slope, but 11.7754/5.1040 = 2.31 with the corrected record. Against the A100 it is 10.9200/5.1040 = 2.14."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell 3BPA total speedup by B",
+   "value": "1.07 / 1.07 / 1.28 / 1.62",
+   "status": "wrong",
+   "evidence": "Pre-fix values (j8_39413479.out: 1.0740, 1.0685, 1.2820, 1.6229). The corrected 8-lane record gives 1.0944, 1.0963, 1.4506, 1.8304 -- and macro_provenance already ships fsThreeBPASpeedupBOne = 1.09. The B=16 figure the section is built on moves from 1.28x to 1.45x."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell 3BPA total speedup at B=16",
+   "value": "1.28x",
+   "status": "wrong",
+   "evidence": "Corrected record gives 1.4506x at B=16. The argument survives (1.45x is still well below the laptop's 1.85x) but every instance of 1.28x in this document must be reset to 1.45x."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "Blackwell vs A100 SM count and B=16 benefit",
+   "value": "188 vs 108 SMs; 1.28x vs 1.07x",
+   "status": "wrong",
+   "evidence": "SM counts verified from the records (188 and 108). The speedup pair is stale: with the corrected Blackwell record it is 1.45x vs 1.07x. The direction of the argument is unaffected and in fact strengthened."
+  },
+  {
+   "doc": "J8_SM120_CONTROL.md",
+   "subject": "batched vs serial as the fastest 3BPA baseline",
+   "value": "batched wins at L >= 2 on all three GPUs",
+   "status": "wrong",
+   "evidence": "False on two of the three GPUs at B=64. Corrected Blackwell record, B=64: serial beats batched at every lane count (L=1 10.53 vs 11.35, L=2 16.32 vs 18.96, L=3 22.13 vs 26.05, L=4 27.86 vs 33.77, L=8 50.99 vs 63.85); the same holds in the pre-fix run. Workshop laptop, B=64: serial 73.72 vs batched 83.55 at L=2, and serial wins through L=8 (241.03 vs 292.96) -- which the workshop itself reported. Only the A100 matches the stated invariant at B=64."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "test suite size",
+   "value": "20",
+   "status": "wrong",
+   "evidence": "`pytest tests/ -q` under fs-cpu: 63 tests collected, 63 passed in 3.84s. Doc says 20."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "record/file inventory",
+   "value": "4414 records / 31 files",
+   "status": "wrong",
+   "evidence": "Counted rows in results/records/*.jsonl + list lengths of *.json: 5,546 records across 72 top-level files today (77 files / 5,731 records incl. contaminated/ + superseded/). 4,414 is exactly the cumulative count of the first 24 files by mtime (the 11:21 sweep family), so it is a stale Stage-1 snapshot; 31 files by mtime hold 4,441 records."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "split manifest count",
+   "value": "12",
+   "status": "wrong",
+   "evidence": "manifests/splits/ holds 28 JSON manifests (14 systems x {contiguous_block, random_frame}); j1_splits.json records 14 systems. 12 = 6 molecular systems x 2 schemes, i.e. the Stage-1 state before water/naive were added."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "3BPA disjoint exact-global lower CI bound",
+   "value": "0.732",
+   "status": "wrong",
+   "evidence": "Current j2a_free_signal_ci.json absolute[disjoint].exact_global_ci = [0.72950, 0.81400] -> 0.729/0.730. The value 0.732 is from results/records/superseded/j2a_free_signal_ci.json (ci_lo 0.731764), which superseded/README.md says was regenerated at 100,000 resamples with a recorded seed. Correction not propagated."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "Beta-law moment agreement",
+   "value": "4-5 decimals in both moments",
+   "status": "wrong",
+   "evidence": "j3_extreme_value_v2.json beta_law (r=7, n_draws=200,000): |empirical-analytic| mean = 7.59e-5, 6.05e-4, 1.01e-4, 7.78e-5, 1.01e-3, 2.10e-4 for K=1..6; variance = 4.76e-5, 6.58e-5, 1.28e-4, 5.08e-5, 1.89e-5, 9.77e-5. The variances agree to 4-5 decimals, but the means agree only to 3-4 (K=5: 0.71530 vs 0.71429, K=2: 0.28632 vs 0.28571). The law form itself is correct: analytic_mean = K/r for the Beta factor, matching experiments/j3_extreme_value.py."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "Beta-law recall MAE (shared_real)",
+   "value": "0.017",
+   "status": "wrong",
+   "evidence": "j3_extreme_value_v2.json recall_prediction, 18 rows: mean|shared_real - measured| = 0.01540 -> 0.015, not 0.017. Macro fsBetaMAE = 0.015 and REVIEW_FINDINGS.md quotes 0.015. Six systems, K in {3,4,6} (three budgets) and D in {27,63,72,81} (3.0x) all verify."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "Beta-law recall MAE, real vs isotropic directions",
+   "value": "0.017 vs 0.039",
+   "status": "wrong",
+   "evidence": "j3_extreme_value_v2.json: MAE shared_real = 0.01540, shared_iso = 0.03274, indep = 0.02874. So the pair is 0.015 vs 0.033 (as REVIEW_FINDINGS.md correctly states); neither 0.017 nor 0.039 appears under any grouping."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "free-signal significant win count",
+   "value": "8/10",
+   "status": "wrong",
+   "evidence": "Current j2a_free_signal_ci.json vs_free: 10 comparisons, 9 significant (only ethanol-vs-force_norm is not, delta +0.0674, CI [-0.0299, +0.1647]). Macro fsFreeSig = 9, fsFreeSigTotal = 10. 8/10 is the superseded record's count; results/records/superseded/README.md explicitly documents 'The free-signal count moved 8 of 10 -> 9 of 10' because aspirin's force_norm interval now resolves above zero. Correction not propagated into STAGE1."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "blocked vs random split Factor A difference",
+   "value": "0.017",
+   "status": "unverifiable",
+   "evidence": "No record holds per-scheme (blocked-test vs random-test) Factor A values: j2a_oracle_panel.jsonl and j2a_oracle_panel_all.jsonl carry split_role='full_evaluation_set' only, and j1_splits.json has no AUROC fields. The number is backed only by the table in results/J1_SPLIT_REPAIR.md, whose six differences (-0.014, +0.009, -0.022, +0.019, +0.013, -0.027) do average to 0.01733 with 3 positive / 3 negative, so it is internally consistent but not record-backed."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "blocked split frame cost",
+   "value": "16-64 frames",
+   "status": "wrong",
+   "evidence": "manifests/splits/*__contiguous_block.json n_dropped for the six molecular systems: azobenzene 16, ethanol 30, aspirin 36, overlapping 48, same 56, disjoint 96 -> 16-96, not 16-64 (all 14 systems: 16-96). Alternative readings also fail: test frames lost vs the random scheme are 8-31."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "Stage-1 wall time",
+   "value": "< 1 minute",
+   "status": "unverifiable",
+   "evidence": "No timing field exists in the Stage-1 record family (j2a/j2b/sweep jsonl carry no 'seconds'); only cache-building records (j5_water_caches, j6_naive_caches) carry 'seconds'."
+  },
+  {
+   "doc": "STAGE1_GO_NO_GO.md",
+   "subject": "regeneration cost estimate",
+   "value": "~2 GPU-minutes",
+   "status": "unverifiable",
+   "evidence": "Forward-looking estimate; no record."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "review disposition counts",
+   "value": "13 / 22 / 0 (10 moot)",
+   "status": "wrong",
+   "evidence": "review_candidates.json carries no status field, so the split cannot be recomputed - but the arithmetic is self-contradicting: 13 + 22 + 0 = 35 against 39 candidates, and the same document later writes '## Refuted\\n\\nEleven, including:' and the heading '## Still unverified \u2014 18'. Three different counts for two categories."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "batched slope bias from the 7-lane bug",
+   "value": "15-18%",
+   "status": "wrong",
+   "evidence": "Measured directly on the surviving buggy run (results/records/superseded/j8_lane_bench_water_Blackwell.jsonl, whose L=8 cells are 0.878-0.893 of the corrected run's - the 7/8 signature): refitting each cell with the L=8 point relabelled x=7 raises the slope by a factor 1/0.849 in every lane-proportional cell, i.e. the published slope was low by 15.0-15.1% (batched cells: 13.1, 14.9, 15.0, 15.1, 15.1, 15.1%). The pure OLS factor for x=[1,2,3,4,8] with a 7-lane point is 24.8/29.2 = 0.8493 = 15.07% exactly, and review_candidates.json entry 16 itself records 'observed ratios 0.848-0.853', i.e. 14.7-15.2%. 18% is not attained anywhere."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "water n_cal range",
+   "value": "92-94",
+   "status": "wrong",
+   "evidence": "Current j1_splits.json / manifests/splits: blocked n_cal for the four water systems is 84 (disjoint MD), 91 (disjoint PIMD), 91 (overlapping MD), 88 (overlapping PIMD); naive water 91 and 94. Range 84-94, and no water system has n_cal 92 or 93. The document itself later writes 'water's n_cal = 84\u201394', which is the correct current value - the two statements disagree. (92-94 is the pre-split-repair value quoted in review_candidates.json entry 34.)"
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "alpha=0.05 across shipped records / n_cal range",
+   "value": "alpha=0.05; n_cal 92-428",
+   "status": "wrong",
+   "evidence": "alpha: verified - every gate row in every results/records/*.jsonl has alpha == 0.05 (distinct set {0.05}). n_cal: the manifests span 84-428 (blocked min 84 on water-disjoint MD, random max 428 on the 3BPA systems), not 92-428. The no-op conclusion still holds (for n_cal=84, k=ceil(85*0.95)=81<=84), but the quoted range is wrong on its lower end."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "leading-only sign test over 10 system-regimes",
+   "value": "7 wins / 3 nulls",
+   "status": "unverifiable",
+   "evidence": "No surviving record holds the water leading-only-vs-control-variate L=5 deltas. j9a_leading_only_ci_global_L5.json now contains only the 6 molecular systems (5 significant positive, 1 significant negative), and no other record in results/records/ contains a water system together with skip_lo/skip_cv (j6_naive_leading_only_L5.json covers the *naive* water committees, different systems). The 10-row table lives only in J2B_FACTOR_B.md; the missing water rows are exactly review_candidates.json entry 15 ('j9a's output filename omits the cache set, so a water run silently overwrote the record'). Note also that the surviving evidence describes 8 resolved signs (7 positive + 1 resolved negative, 3BPA overlapping) + 2 nulls, so '7 wins / 3 nulls' drops the resolved negative."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "split-draw CI width ratio",
+   "value": "1.5-2.3x on 5 of 6",
+   "status": "unverifiable",
+   "evidence": "j9b_split_draw_variability_L5.json contains only 3 systems, not 6: same 1.4642, aspirin 1.8160, azobenzene 1.7069 (range 1.46-1.82). The endpoints 1.5 and 2.3 come from rows (3BPA disjoint 2.2x, ethanol 2.3x, overlapping 0.9x) that appear only in J2B_FACTOR_B.md's table and are backed by no surviving record."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "split redraws outside reported CI",
+   "value": "4-15 of 20",
+   "status": "unverifiable",
+   "evidence": "j9b_split_draw_variability_L5.json n_outside_reported_ci: same 9, aspirin 5, azobenzene 5 (n_splits = 20 on all three) -> 5-9 of 20 in the record. The quoted endpoints 4 (3BPA overlapping) and 15 (ethanol) are in J2B_FACTOR_B.md's table only, with no surviving record."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "split-inclusive effect size vs canonical draw",
+   "value": "larger",
+   "status": "wrong",
+   "evidence": "j9b_split_draw_variability_L5.json: split_q025 > 0 on all three recorded systems (0.0135, 0.0435, 0.0334), so the same-sign claim holds. But split_mean exceeds canonical_delta on only 2 of 3: aspirin 0.0682 vs 0.0601 and azobenzene 0.0628 vs 0.0591, while same_test_1200K is *smaller*, 0.0278 vs 0.0362. J2B_FACTOR_B.md states the correct scoped version ('on four of six systems the split mean exceeds the canonical point estimate'); REVIEW_FINDINGS' unqualified 'the effect sizes are slightly larger' overstates it."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "post-repair calibration span",
+   "value": "39-58% in 2 runs",
+   "status": "unverifiable",
+   "evidence": "The manifests do carry two contiguous cal runs per system (e.g. disjoint_test_1200K cal = [1078..1274] + [1719..1916]), but no record stores the span fraction. Computed by hand for disjoint: the two cal runs span indices 1078-1916 = 39.2% of n=2139, consistent with the low end of the quoted range; a full 14-system recomputation is not backed by any record."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "auprc order-invariance test",
+   "value": "200 orderings",
+   "status": "unverifiable",
+   "evidence": "No test in tests/ (test_splits.py, test_calibration_and_ledger.py, test_protocol_hygiene.py) exercises 200 orderings; grep for '200' with ordering/permutation keywords returns nothing. The tie-averaged implementation in tail_metrics.py is order-independent by construction, so the property holds, but the 200-ordering figure is not recorded."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "r0 sweep effect on leading-only advantage",
+   "value": "+0.044 -> +0.038, 14%",
+   "status": "unverifiable",
+   "evidence": "+0.044 verified: mean leading-only-minus-control-variate skip advantage over the 24 matched-budget global cells (L=4..7 x 6 systems, cv_r0=2) = +0.0445, and 20/24 favour leading-only. But no record has a control-variate cell with r0=1 at a 5-lane budget: the available (score=global, uq_lanes=5) control-variate cells are r0=2,K=4 and r0=3,K=4 only. Taking the best control variate over every available r0 at each budget gives mean advantage +0.0366 (a 17.7% reduction), not +0.038/14%. At 5 lanes specifically the mean advantage is +0.0414 (r0=2) and +0.0410 (r0=3), and 5/6 systems favour leading-only under both."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "J8 water pre-registered verdict score",
+   "value": "3/4",
+   "status": "wrong",
+   "evidence": "The 1/64 half is verified: j8_verdict_blackwell_v2.json transition_batch_ratio_vs_3bpa = 0.015625 = 1/64 against protocols/j8_water_prediction_v2_frozen.yaml threshold [0.030, 0.0625] = [1/33, 1/16]. But the score is 2/4 under the frozen v2 protocol (P1 pass, P2 pass, P3 fail, P4 fail - serial_slope_min 5.720 against threshold 10.9), and verdicts.json records 'J8 water systems prediction (matched Blackwell pair) ... score: 2/4'. 3/4 is only j8_verdict_blackwell_v3.json, whose P4 threshold (5.396) verdicts.json flags as 'authored after seeing v2's outcome'."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "test suite size",
+   "value": "20",
+   "status": "wrong",
+   "evidence": "`pytest tests/ -q`: 63 passed. Same stale figure as STAGE1_GO_NO_GO.md."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "fsGateCVSkip macro existence",
+   "value": "\\fsGateCVSkipLo/Hi",
+   "status": "wrong",
+   "evidence": "paper/macros.tex defines 41 macros; no macro named fsGateCVSkipLo or fsGateCVSkipHi exists (grep over the whole repo returns only this line of REVIEW_FINDINGS.md). The only skip macros are \\fsLOSkipLo{0.822} and \\fsLOSkipHi{0.943}."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "leading-only skip fraction range",
+   "value": "82-94%",
+   "status": "wrong",
+   "evidence": "The 0.822-0.943 range comes from j2b_r0_4.jsonl, whose rows carry split_sha256 values (disjoint e6bcdc4b1018, overlapping 68c9d91067c4, aspirin 8bcde890f568, azobenzene 1c74f3476bc5, ethanol 7937a2b78363, same 0ba45e251f66) that match NO manifest now in manifests/splits/ (current content_sha256: 0068305d4e7f, dfd9bea8242d, b9c320f2b20a, f4ff0a291428, 91f4a6b9f5f3, 2cb7eff0771f). Every 186-row gate record in results/records/ is on the pre-repair splits. Under the corrected splits the same document reports (and j9a_leading_only_ci_global_L5.json records) leading-only skip_lo = 0.8355, 0.9301, 0.8701, 0.8564, 0.9286, 0.8681, i.e. 84-93%, not 82-94%. Macro \\fsLOSkipLo/\\fsLOSkipHi (0.822/0.943) inherits the same problem, as do the 0.762-0.948 and 0.787-0.949 rows above."
+  },
+  {
+   "doc": "REVIEW_FINDINGS.md",
+   "subject": "review workflow meta-counts",
+   "value": "1 of 28; 16 agents",
+   "status": "unverifiable",
+   "evidence": "No record of the verification workflow exists in results/records/; review_candidates.json stores only the 39 candidates with no verifier status."
+  },
+  {
+   "doc": "STAGE2_ENVIRONMENT.md",
+   "subject": "RTX PRO 6000 node count",
+   "value": "192 nodes",
+   "status": "wrong",
+   "evidence": "`sinfo`: gpu_requeue holds 24 RTX PRO 6000 Blackwell nodes (holygpu7c[1710...2334]) with gpu:nvidia_rtx_pro_6000_blackwell_server_edition:8 each = 192 GPUs, not 192 nodes."
+  },
+  {
+   "doc": "STAGE2_ENVIRONMENT.md",
+   "subject": "3BPA dataset file count and hashes",
+   "value": "5 files",
+   "status": "wrong",
+   "evidence": "freeze.json lists 10 3BPA datasets and all 10 are staged at /n/holylabs/.../forcesketch-data/data/3bpa. I recomputed sha256 for all ten (iso_atoms, test_1200K, test_1200K_ref, test_300K, test_300K_ref, test_600K, test_600K_ref, train_300K, train_300K_100, val_300K_300): 10/10 match freeze.json and every byte count matches. The hash claim holds; the count '5' does not."
+  },
+  {
+   "doc": "STAGE2_ENVIRONMENT.md",
+   "subject": "J0 cluster reproduction table",
+   "value": "7 rows, published column 206.4814 / 1.0852 / 33.4833 / 180.3375 / 12.8091 / 190.9938 / 7.1660",
+   "status": "unverifiable",
+   "evidence": "The 'published' column verifies exactly against forcesketch/results/manifests/checkpoints.json (206.48137, 1.08515, 33.48332, 180.33748, 12.80914, 190.99383, 7.16601). The 'cluster' column and every rel-diff have no record: results/records/ contains no J0 reproduction record at all (only the four j0b_guard_*.json files)."
+  },
+  {
+   "doc": "STAGE2_ENVIRONMENT.md",
+   "subject": "J0 metric count",
+   "value": "nine metrics",
+   "status": "unverifiable",
+   "evidence": "The table immediately above lists only 7 rows (disjoint 3, overlapping 2, same 2). checkpoints.json exposes 6 comparable metrics per variant (18 total). With no cluster-run record, neither the count 'nine' nor the 1e-8-1.5e-5 band can be recomputed; the band is consistent with the table's own 7 values (1.3e-8 to 1.5e-5)."
+  },
+  {
+   "doc": "STAGE2_ENVIRONMENT.md",
+   "subject": "force_rmse_committee definition",
+   "value": "mean of 8 per-head RMSEs; 201.3 vs 206.5",
+   "status": "unverifiable",
+   "evidence": "The definitional half verifies: checkpoints.json disjoint force_rmse_per_head_mev_A has mean 206.48137, exactly equal to force_rmse_committee_mev_A (206.5). The alternative 201.3 (RMSE of the committee-mean force on the same 200-frame validation set) appears in no record and cannot be recomputed - the shipped caches (results/processed/head_forces_*.pt) are the 1200 K test sets, not that validation set."
+  },
+  {
+   "doc": "STAGE2_ENVIRONMENT.md",
+   "subject": "J8 benchmark grid and submitted job",
+   "value": "job 39407869; B in {1,4,16,64}; L in {1,2,3,4,8}",
+   "status": "unverifiable",
+   "evidence": "The grid verifies: every 3BPA lane-bench record has batch_size in {1,4,16,64}, lanes in {1,2,3,4,8}, impl in {serial,batched}, 40 rows; slurm/j8_bench.sbatch line 8 is '#SBATCH --exclusive'. Job 39407869 appears in no record: the surviving A100 3BPA run is slurm_job_id 39475272 on gpu_requeue (and is filed under results/records/contaminated/ as co-tenanted)."
+  }
+ ],
+ "n_contradictions_reported": 16,
+ "confirmed_contradictions": [
+  {
+   "subject": "Beta-law recall prediction MAE (real vs isotropic head-space directions)",
+   "docs": "STAGE1_GO_NO_GO.md vs J3_EXTREME_VALUE.md and REVIEW_FINDINGS.md",
+   "detail": "STAGE1_GO_NO_GO.md states the MAE twice as 0.017 (line 77 'mean absolute error 0.017 (corrected -- see below)' and line 86 'MAE 0.017 vs 0.039'). J3_EXTREME_VALUE.md (lines 127-128, 162, 205) and REVIEW_FINDINGS.md (line 56) give 0.015 vs 0.033. Recomputed from results/records/j3_extreme_value_v2.json['recall_prediction'] over all 18 rows: shared_real MAE = 0.0154, signed bias -0.0050; shared_iso MAE = 0.0327, signed bias +0.0327. The records back 0.015/0.033; STAGE1's 0.017 and 0.039 match no current record. The correction (documented in CONSISTENCY_AUDIT.md as 'J3_EXTREME_VALUE.md -- per-item seeding; MAE 0.017 -> 0.015') was never propagated to STAGE1, even though STAGE1's own blockquote is the text describing that very correction.",
+   "severity": "major",
+   "verdict": {
+    "reasoning": "NOT REFUTED \u2014 the two documents give two different values for the same quantity, and I traced the stale pair to a superseded version of the very document STAGE1 cites.\n\nWHAT I RAN\n\n1. Recomputed both MAEs directly from the records (fs-cpu python, `results/records/`):\n   - `j3_extreme_value_v2.json['recall_prediction']`, all 18 rows (6 systems x K in {3,4,6}, D in {27,63,72,81}):\n     shared_real MAE = 0.0154, signed bias -0.0050, max abs err 0.0540\n     shared_iso  MAE = 0.0327, signed bias +0.0327, max abs err 0.0680\n     indep       MAE = 0.0287, signed bias +0.0259, max abs err 0.0840\n     These reproduce the J3 table (lines 161-164) exactly, and REVIEW_FINDINGS.md line 56 (\"MAE 0.015 vs 0.033\", \"bias -0.005 vs +0.033\").\n   - The older `j3_extreme_value.json` (pre-`shared_real` schema; keys shared/indep only): shared MAE = 0.0283, indep MAE = 0.0305. Neither is 0.017 or 0.039.\n2. `TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 python tools/paper_numbers.py` -> `\\fsBetaMAE = 0.015 <- j3_extreme_value_v2.json`. `j3_mae()` (tools/paper_numbers.py:112-114) is mean|shared_real - measured| over all rows, i.e. exactly the quantity both documents name.\n3. Checked the \"different thing\" hypotheses and closed them: same estimator (top-5% max-component recall), same 6 systems, same 3 budgets, same D range, same two modes being contrasted (real head-space directions vs isotropic). STAGE1 line 75-77 (\"reproduces the measured top-5% recall across six systems, three budgets and a 3x range in D, with no free parameters and mean absolute error 0.017\") is word-for-word the same claim as J3's headline sentence, which now reads 0.015.\n4. Decisive evidence from git history. `git show 1ba158e:forcesketchJournalReady/results/J3_EXTREME_VALUE.md` \u2014 the pre-repair version of J3 \u2014 contains at lines 127-128 \"MAE 0.017 with real directions versus 0.039 isotropic\" and a table reading shared_real 0.0172 / +0.0041 / 0.0533 and shared_iso 0.0394 / +0.0364 / 0.0833. So 0.017 and 0.039 are precisely the pre-per-item-seeding values of shared_real and shared_iso \u2014 the same two cells, not a different measurement. Commit ebcac36 regenerated J3 and the record to 0.0154 / 0.0327 after the seeding repair (J3 lines 190-206: one shared torch.Generator consumed across every (system, K, mode, replicate) made draws order-dependent). `git log -- results/STAGE1_GO_NO_GO.md` shows STAGE1 has exactly one commit, 1ba158e, and its lines 77 and 86 still hold the 1ba158e text: the correction was never propagated.\n5. The project's own audit already flags this: `results/records/consistency_audit.json` line 2839 \u2014 \"Neither committed record produces 0.017 ... Related propagation failure: results/STAGE1_GO_NO_GO.md line 86 still quotes 'MAE 0.017 vs 0.039', which matches nothing in either surviving record.\" CONSISTENCY_AUDIT.md line 46 records the correction as \"J3_EXTREME_VALUE.md -- per-item seeding; MAE 0.017 -> 0.015\".\n\nAGGRAVATING DETAIL: STAGE1 line 77 marks its 0.017 \"(corrected -- see below)\", but the blockquote it points to (lines 81-87) is itself the stale text. The document's own correction pointer resolves to the wrong number, so a reader following it is not rescued.\n\nMINOR CAVEAT (does not affect the verdict): the intermediate record that produced 0.0172/0.0394 is no longer on disk, so 0.017/0.039 cannot be reproduced from any shipped record. The authoritative record is j3_extreme_value_v2.json and it gives 0.0154/0.0327.",
+    "refuted": false,
+    "fix": "Edit `/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/STAGE1_GO_NO_GO.md` (two edits; J3_EXTREME_VALUE.md and REVIEW_FINDINGS.md are already correct and need no change):\n\n- Line 77: change `error **0.017** (corrected \u2014 see below).` to `error **0.015** (corrected \u2014 see below).`\n- Line 86: change `> error (MAE 0.017 vs 0.039) and removes the apparent optimism. Coupling matters.` to `> error (MAE 0.015 vs 0.033) and removes the apparent optimism. Coupling matters.`\n\nValues from `results/records/j3_extreme_value_v2.json['recall_prediction']`: shared_real MAE 0.0154, shared_iso MAE 0.0327 (macro `\\fsBetaMAE` = 0.015 via tools/paper_numbers.py). Optionally append to the line-87 pointer: \"See `J3_EXTREME_VALUE.md` (the 0.017/0.039 pair predates the per-item seeding repair).\""
+   }
+  },
+  {
+   "subject": "mean absolute blocked-vs-random Factor A difference",
+   "docs": "STAGE1_GO_NO_GO.md vs J1_SPLIT_REPAIR.md",
+   "detail": "STAGE1_GO_NO_GO.md line 126: 'blocked and random test splits differ by 0.017 mean absolute'. J1_SPLIT_REPAIR.md line 56 gives 0.027 and its own correction blockquote (lines 59-65) says explicitly 'It gave mean |difference| 0.017; the shipped manifests give 0.027.' results/records/j1_split_comparison.json['summary']['mean_abs_difference'] = 0.02693, max 0.05307, 3 positive / 3 negative. The 0.017 is the pre-seed-fix value. This matters beyond rounding: J1 notes ethanol's +0.053 now exceeds the ~0.04 bootstrap half-width the original argument leaned on, so STAGE1 still carries the stronger 'sampling noise' framing that J1 has already retracted.",
+   "severity": "major",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "CONFIRMED \u2014 the two documents give two different values for the same quantity, and I reproduced both from the records.\n\nWHAT I RAN\n\n1. Re-derived the current value from scratch:\n   `TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 /n/holylabs/.../fs-cpu/bin/python experiments/j1_split_comparison.py --out <scratchpad>/j1_recheck.json`\n   Output: disjoint -0.0384, overlapping +0.0190, same -0.0202, ethanol +0.0531, aspirin -0.0021, azobenzene +0.0289; mean |difference| = 0.0269, max = 0.0531, 3 positive / 3 negative. Bit-for-bit consistent with results/records/j1_split_comparison.json (mean_abs_difference 0.02693, max 0.05307). So J1_SPLIT_REPAIR.md line 56's 0.027 is correct and current.\n\n2. Checked the definition is unambiguous. experiments/j1_split_comparison.py:53-58 fixes the quantity completely: signal `sig_exact_global`, error `err_e_max`, `error_p = 0.05`, AUROC on the `test` role of `manifests/splits/<sys>__contiguous_block.json` vs `<sys>__random_frame.json`, over the same 6-system panel (3BPA disjoint/overlapping/same + rMD17 ethanol/aspirin/azobenzene). That is exactly what STAGE1 line 126 describes in words (\"blocked and random test splits differ by X mean absolute with no consistent sign\"). No water systems are in either panel, so the subset is identical.\n\n3. Tried to refute by finding a different-thing reading. Swept every plausible alternative definition on the SHIPPED manifests: signal in {sig_exact_global, sig_exact_maxcomp, sig_exact_maxatom} x error in {err_e_max, err_e_rmse, err_e_maxcomp, err_e_q95} x error_p in {0.01, 0.05, 0.10, 0.20} \u2014 48 variants. Only one rounds to 0.017 (sig_exact_maxatom / err_e_q95 / p=0.10, 0.0168), a combination that appears nowhere in either document and contradicts STAGE1's own primary framing (global statistic, top-5% error). Subsets also fail to explain it: 3BPA-only 0.0259, rMD17-only 0.0280.\n\n4. Positively identified 0.017 as the stale value, not a different measurement. I reconstructed the pre-seed-fix blocked split by reverting the one line at src/forcesketch_journal/data/splits.py:93-95 (permutation seeded by `seed` alone, without the blake2b system-name mix), rebuilt the `test` role for each system with the same guard bands from `integrated_autocorr_time`, and recomputed the identical AUROC quantity against the shipped random_frame manifests:\n   disjoint -0.0137, overlapping +0.0090, same -0.0220, ethanol +0.0191, aspirin +0.0129, azobenzene -0.0269 -> mean |difference| = 0.0173, max 0.0269, 3 positive / 3 negative.\n   0.0173 rounds to exactly the 0.017 STAGE1 quotes, and \"3 positive / 3 negative\" matches STAGE1's \"no consistent sign\". So STAGE1's number is the same estimator on superseded splits \u2014 the definition of a stale copy, not a different quantity.\n\n5. Independent corroboration: results/records/consistency_audit.json carries a claim with subject \"mean absolute blocked-vs-random Factor A difference\", status \"wrong\", evidence \"Under the old pre-seed-fix splits the mean is 0.01727 -> 0.017, confirming the quoted figure is stale.\" That audit pass fixed J1_SPLIT_REPAIR.md (CONSISTENCY_AUDIT.md line 44: \"mean |diff| 0.017 -> 0.027\") but its document list covers only the 14 J*.md files \u2014 STAGE1_GO_NO_GO.md was never scanned, which is exactly why the stale value survives there. File mtimes agree: STAGE1_GO_NO_GO.md Aug 16 00:12, j1_split_comparison.json Aug 16 02:48.\n\nThe substantive point in the audit also holds: under the old splits max |diff| was 0.0269, comfortably inside the ~0.04 bootstrap half-width, which is what licensed the sampling-noise reading; under the shipped manifests ethanol's +0.053 exceeds it, and J1 has explicitly retracted that framing (lines 66-75). STAGE1 does not use the words \"sampling noise\", so that part of the audit's wording is slightly stronger than the text, but STAGE1's \"Trajectory leakage is a non-issue here\" rests on the smaller number and should be brought in line.\n\nSeparate issue, out of scope, flagged so no one blanket-replaces: STAGE1 lines 77 and 86 also contain \"0.017\", but that is the J3 extreme-value prediction MAE, a different quantity \u2014 and per CONSISTENCY_AUDIT.md line 46 J3 was itself regenerated to 0.015, so those lines need their own check.",
+    "fix": "Edit /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/STAGE1_GO_NO_GO.md, lines 125-128 (the \"Trajectory leakage\" bullet). Do NOT touch the other \"0.017\" occurrences at lines 77 and 86 \u2014 those are the J3 MAE, a different number.\n\nReplace:\n\n**Trajectory leakage is a non-issue here, and that is now provable.** Measured\n\u03c4_int is 1.0\u20134.0; blocked and random test splits differ by 0.017 mean absolute\nwith no consistent sign. The workshop's random-frame split was not materially\nleaky. Blocked splits are adopted anyway, since they cost 16\u201364 frames.\n\nWith:\n\n**Trajectory leakage shows no consistent signature, and that is now measured.**\nMeasured \u03c4_int is 1.0\u20134.0; blocked and random test splits differ by **0.027** mean\nabsolute, 3 positive and 3 negative, with the largest single difference 0.053\n(ethanol). That largest difference exceeds the ~0.04 bootstrap half-width, so the\ndefensible claim is \"no leakage signature\", not \"the difference is sampling\nnoise\": a leaking random-frame split would inflate the random score *consistently*,\nthe signs are mixed 3/3, and the largest difference favours the **blocked** split \u2014\nthe opposite of a leakage pattern. The workshop's random-frame split was therefore\nnot materially leaky. Blocked splits are adopted anyway, since they cost 16\u201364\nframes. See `J1_SPLIT_REPAIR.md`.\n\nOptionally append a one-line correction blockquote in STAGE1's house style, e.g.\n\"> **Corrected after a cross-document audit.** This previously read 0.017, the value\n> computed before the split seed was mixed with the system name; the shipped\n> manifests give 0.027 (`results/records/j1_split_comparison.json`).\"\n\nAlso worth doing so this class of miss stops recurring: add STAGE1_GO_NO_GO.md (and the other non-J* results documents) to the consistency-audit document list \u2014 the Aug 16 audit scanned only the 14 J*.md files, which is why this copy was left stale."
+   }
+  },
+  {
+   "subject": "RTX PRO 6000 Blackwell 3BPA serial slope at B=1, and per-lane cost vs the laptop",
+   "docs": "J8_SMOKE_A100.md vs J8_SM120_CONTROL.md",
+   "detail": "J8_SMOKE_A100.md line 59 still reads 'On the RTX PRO 6000 Blackwell the serial slope is 4.58 ms/lane -- 2.6x lower.' J8_SM120_CONTROL.md's SUPERSEDED banner (lines 14, 17) gives the corrected 8-lane figures: 5.104 ms/lane and '2.3x lower'. Refit from results/records/j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl (B=1, serial, lanes 1/2/3/4/8, status ok): slope 5.104 ms/lane, intercept 6.180, R2 0.9968. Laptop/Blackwell ratio is 11.78/5.104 = 2.31x, not 11.78/4.58 = 2.57x. The 4.58 is the pre-fix 7-lane number; J8_SM120_CONTROL was given a correction banner and J8_SMOKE_A100 was not, so the same falsifying datum appears with two values across the two documents.",
+   "severity": "major",
+   "verdict": {
+    "fix": "In /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_SMOKE_A100.md, lines 58-59, replace:\n\n  > A100 matching its slope to within 8%. On the RTX PRO 6000 Blackwell the serial\n  > slope is **4.58 ms/lane** \u2014 2.6\u00d7 lower. The laptop/A100 agreement was a\n\nwith:\n\n  > A100 matching its slope to within 8%. On the RTX PRO 6000 Blackwell the serial\n  > slope is **5.10 ms/lane** (intercept 6.18, R\u00b2 = 0.9968) \u2014 2.3\u00d7 lower. The laptop/A100 agreement was a\n\ni.e. 4.58 -> 5.10 and 2.6\u00d7 -> 2.3\u00d7, sourced from results/records/j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl (B=1, serial, lanes 1/2/3/4/8, job 39483448) rather than the pre-fix 7-lane log slurm/logs/j8_39413479.out. Ideally add a pointer to results/J8_MATCHED_PAIR.md, which already carries 5.10.\n\nSecondary (not part of the reported contradiction, already covered by that document's own SUPERSEDED banner): J8_SM120_CONTROL.md lines 97 and 101 still print the pre-fix 4.58 / 6.26 and 4.58 / 4.57 / 4.61 / 4.92 in the body text; if the body is ever de-banner-ed they must become 5.10 / 6.18 and 5.10 / 5.39 / 5.41 / 5.78.",
+    "reasoning": "CONTRADICTION IS REAL \u2014 could not refute.\n\nWhat I ran (env: /n/holylabs/hekstra_lab/Everyone/ianpoon/envs/fs-cpu/bin/python, cwd forcesketchJournalReady):\n\n1. Read results/J8_SMOKE_A100.md (line 59) and results/J8_SM120_CONTROL.md (lines 14, 17, 97, 101).\n\n2. Refit the corrected record results/records/j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl. All 40 rows are status=\"ok\", all from a single slurm job 39483448, lanes {1,2,3,4,8}, B in {1,4,16,64}, impl in {serial,batched}. Plain OLS of median_ms on lanes:\n   B=1  serial slope=5.1040 intercept=6.1800 R2=0.9968  (medians 11.437/17.399/20.581/25.950/47.405)\n   B=4  serial slope=5.3858 intercept=4.3660 R2=1.0000\n   B=16 serial slope=5.4062 intercept=4.3271 R2=1.0000\n   B=64 serial slope=5.7795 intercept=4.7591 R2=1.0000\n   These reproduce the audit's claim exactly and match the \"corrected (8 lanes)\" column of J8_SM120_CONTROL.md's SUPERSEDED banner (5.10 / 5.39 / 5.41 / 5.78).\n\n3. Traced the origin of 4.58. Fit the pre-fix medians printed in slurm/logs/j8_39413479.out (B=1 serial: 9.76, 15.19, 20.60, 26.02, 42.10) against x = 1,2,3,4,8 -> slope 4.5756, intercept 6.2618; across B -> 4.5756 / 4.5718 / 4.6077 / 4.9227. That reproduces \"4.58\" and the string \"4.58, 4.57, 4.61, 4.92\" verbatim. So 4.58 is the 7-lane pre-fix fit of the SAME quantity, not a different measurement.\n\n4. Ratios: 11.78/4.5756 = 2.572 -> \"2.6x\"; 11.78/5.1040 = 2.308 -> \"2.3x\". Exactly as the audit states.\n\n5. Cross-checked the canonical corrected document: results/J8_MATCHED_PAIR.md line 18 gives 3BPA, B=1, Blackwell serial slope 5.10, with lane signature (T8-T1)/(T4-T1) = 2.33 confirming 8 genuine lanes and serial fits R2 = 0.9999-1.000.\n\n6. results/records/consistency_audit.json independently classifies both quotes as status=\"wrong\" against the same corrected record (\"Blackwell 3BPA serial slope B=1\" for both J8_SMOKE_A100.md and J8_SM120_CONTROL.md, plus \"Blackwell per-lane cost vs laptop\": 11.7754/4.5756=2.57 vs 11.7754/5.1040=2.31).\n\nWhy the usual false-alarm escapes do NOT apply here:\n- Same device (RTX PRO 6000 Blackwell Server Edition, 188 SMs, sm_120, non-MIG), same system (3BPA, 27 atoms, 520 edges), same impl (serial), same batch size (B=1), same lane grid (1,2,3,4,8), same estimator (least squares on median_ms vs lanes), same dtype/fuser settings. There is no split, subset, error-score or budget difference to hide behind.\n- The only difference between 4.58 and 5.104 is that the cell labelled L=8 executed 7 lanes in the pre-fix run \u2014 which is the defect the correction banner exists to repair, not a legitimate alternative quantity.\n- The nearest thing to a defense is that J8_SMOKE_A100.md carries a doc-level \"TIMING NUMBERS IN THIS DOCUMENT ARE SUSPENDED\" banner. It does not rescue the line: it supplies no corrected value, and the 4.58 sits inside a blockquote added AFTER that banner as the sm_120 cross-reference correction, so a reader following the correction trail reads 4.58 / 2.6x in J8_SMOKE_A100 while the very document it points to (J8_SM120_CONTROL) now says 5.104 / 2.3x. J8_SM120_CONTROL got a SUPERSEDED banner; J8_SMOKE_A100 did not. That is precisely the un-propagated-correction pattern.",
+    "refuted": false
+   }
+  },
+  {
+   "subject": "leading-only minus control-variate skip difference at L=5 (six molecular systems)",
+   "docs": "J2B_FACTOR_B.md vs REVIEW_FINDINGS.md",
+   "detail": "J2B_FACTOR_B.md's L=5 column (lines 150-155) and its srank table (lines 181-190) give +0.021 disjoint, +0.036 same, -0.005 overlapping, +0.078 ethanol, +0.060 aspirin, +0.059 azobenzene. REVIEW_FINDINGS.md lines 134-135 name exactly those six as 'the previous' values and give the current ones. results/records/j9a_leading_only_ci_global_L5.json: disjoint +0.0392, overlapping -0.0102, aspirin +0.0333, azobenzene +0.0688, ethanol +0.0971, same +0.0334. Notably the L=4 and L=6 columns of J2B's same table reproduce the L4/L6 records exactly (+0.0516/-0.0126/+0.1030/+0.1402/+0.1584/+0.0676 and +0.0139/-0.0028/+0.0421/+0.0512/+0.0472/+0.0145), so only the L=5 column is stale. Two consequences: J2B line 158's range 'by +0.021 to +0.158' and line 193's '+0.021 to +0.582' both have a lower endpoint that no longer exists (+0.039), and line 161's claim that 'the advantage shrinks monotonically with budget on every system' fails for aspirin under the records (+0.1030 -> +0.0333 -> +0.0421).",
+   "severity": "major",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "REAL \u2014 same quantity, two values, correction not propagated (and the true scope is larger than the audit states).\n\nWhat I ran, in /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady with TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 and /n/holylabs/hekstra_lab/Everyone/ianpoon/envs/fs-cpu/bin/python:\n\n  experiments/j9a_leading_only_ci.py --lanes 4|5|6 --score global --n-boot 400 --out <scratchpad>/rerun_L{4,5,6}.json\n\n(outputs sent to the scratchpad, never over results/records/. `delta` is deterministic given the split manifest and the frozen probe seeds \u2014 n_boot only affects CI width \u2014 so 400 resamples suffice to re-derive the point estimates.)\n\n1. Same estimand. Both documents report the identical thing: leading-only minus control-variate SKIP FRACTION, L=5 total lanes for both estimators (lo_r0=4 vs cv_r0=2/cv_K=4), global acquisition statistic, alpha=0.05, target-p=0.05, CV averaged over its 10 frozen probe seeds, six molecular systems, produced by experiments/j9a_leading_only_ci.py. No difference in score, budget, subset or estimator. The ONLY difference is which split manifest the script read.\n\n2. My L=5 re-run under the shipped manifests/splits/*__contiguous_block.json reproduces results/records/j9a_leading_only_ci_global_L5.json exactly: disjoint +0.039, overlapping -0.010, aspirin +0.033, azobenzene +0.069, ethanol +0.097, same +0.033 (CIs +0.028/+0.049, -0.015/-0.005, +0.017/+0.050, +0.054/+0.087, +0.079/+0.116, +0.024/+0.043, matching the record's 10k-resample CIs). That is precisely REVIEW_FINDINGS.md line 134's \"current\" list. J2B_FACTOR_B.md lines 150-155 give +0.021 / -0.005 / +0.060 / +0.059 / +0.078 / +0.036, which is precisely REVIEW_FINDINGS.md line 135's list labelled \"the previous\". So REVIEW_FINDINGS itself names J2B's values as superseded.\n\n3. Not a legitimate \"two different splits\" defence. The old split was diagnosed as a bug (permutation depended only on seed, so all 20 manifests shared one assignment and cal was a single contiguous ~19% run), fixed by mixing a blake2b hash of the system name into the seed, and the corrected manifests are the shipped ones (manifests/splits mtimes 2026-08-15 21:59). J1_SPLIT_REPAIR.md states the shipped hashes are the regenerated ones. J2B presents its table as current headline evidence with no \"predates the split repair\" note. results/CONSISTENCY_AUDIT.md lines 57-60 independently lists exactly this as \"Not yet fixed\" (\"J2B's leading-only-minus-control-variate figures at L=5 predate the current j9a_leading_only_ci_global_L5.json ... +0.021 where the record now gives +0.039\").\n\n4. The audit's supporting premise is itself wrong, and the problem is BIGGER than reported. It says L=4 and L=6 are fine because they reproduce the L4/L6 records exactly. They do match those records, but those records are themselves pre-repair: j9a_..._L4.json and _L6.json are dated 2026-08-15 12:24/12:25, before the manifests were regenerated (21:59); only _L5.json (20:45) carries post-repair values. My re-runs under the shipped manifests give L=4: +0.082 / -0.011 / +0.148 / +0.145 / +0.129 / +0.068 and L=6: +0.029 / -0.004 / +0.049 / +0.040 / +0.054 / +0.011 (order disjoint, overlapping, aspirin, azobenzene, ethanol, same) \u2014 none matching either the stored records or J2B. So the entire three-column J2B table is pre-repair, and two record files are stale too. results/records/j9b_split_draw_variability_L5.json (mtime 20:37) likewise stores the OLD canonical deltas (0.0362 same, 0.0601 aspirin, 0.0591 azobenzene), so J2B's split-draw table at lines 259-266 is stale in the same way.\n\n5. Two details in the audit's consequence list are slightly off, but the consequences hold. (a) J2B line 158 actually reads \"by +0.014 to +0.158\", not \"+0.021 to +0.158\"; its lower endpoint is the L=6 value. It is still wrong under a consistent re-run, which spans +0.011 to +0.148. (b) Line 193's new lower endpoint is aspirin's +0.033, not +0.039 (the minimum over the seven flatter systems). (c) The monotonicity failure at line 161 is real and does NOT depend on mixing record vintages: under a fully self-consistent re-run aspirin goes +0.148 -> +0.033 -> +0.049, still non-monotone.",
+    "fix": "Fix J2B_FACTOR_B.md, and regenerate two records while doing it \u2014 do not patch only the L=5 column, because the L=4/L=6 records are pre-repair as well.\n\nStep 0 (records): re-run and overwrite the two stale records at full precision:\n  experiments/j9a_leading_only_ci.py --lanes 4 --score global --n-boot 10000\n  experiments/j9a_leading_only_ci.py --lanes 6 --score global --n-boot 10000\n(L=5 is already current.) Optionally re-run experiments/j9b_split_draw_variability.py, whose canonical column is also pre-repair.\n\nresults/J2B_FACTOR_B.md lines 150-155 \u2014 rebuild all three columns from the regenerated records. Point estimates (verified re-run):\n  L=4: 3BPA disjoint +0.082 | 3BPA same +0.068 | 3BPA overlapping -0.011 | ethanol +0.129 | aspirin +0.148 | azobenzene +0.145\n  L=5: 3BPA disjoint +0.039 [+0.028, +0.050] | 3BPA same +0.033 [+0.024, +0.043] | 3BPA overlapping -0.010 [-0.016, -0.005] | ethanol +0.097 [+0.080, +0.115] | aspirin +0.033 [+0.017, +0.050] | azobenzene +0.069 [+0.053, +0.085]  (L=5 CIs quoted from the current record)\n  L=6: 3BPA disjoint +0.029 | 3BPA same +0.011 | 3BPA overlapping -0.004 | ethanol +0.054 | aspirin +0.049 | azobenzene +0.040\n(take the L=4/L=6 CIs from the 10,000-resample regeneration in step 0)\n\nLine 158: \"by +0.014 to +0.158\" -> \"by +0.011 to +0.148\".\n\nLine 161: delete or qualify \"The advantage shrinks monotonically with budget on every system\" \u2014 it fails on rMD17 aspirin (+0.148 -> +0.033 -> +0.049). Replace with e.g. \"The advantage shrinks with budget on five of six systems, aspirin excepted, as both converge to the exact basis at L=8.\"\n\nLines 181-190 (srank table, \"LO - CV skip (5 lanes, global)\" column): 3BPA overlapping -0.005 -> -0.010; rMD17 azobenzene +0.059 -> +0.069; rMD17 aspirin +0.060 -> +0.033; 3BPA disjoint +0.021 -> +0.039; rMD17 ethanol +0.078 -> +0.097; 3BPA same +0.036 -> +0.033. The four water rows (+0.582, +0.336, -0.006, -0.009) have no surviving record per CONSISTENCY_AUDIT.md and must be regenerated or marked unsourced. Sign structure and the srank ~2.5 separation are unchanged.\n\nLine 193: \"by +0.021 to +0.582\" -> \"by +0.033 to +0.582\" (aspirin is now the smallest of the seven), conditional on the water figure being re-derived.\n\nLines 259-266 (split-draw table): its \"canonical\" column (+0.021, -0.005, +0.036, +0.078, +0.060, +0.059) is the same pre-repair set \u2014 either re-run j9b or add a note that this table is computed against the pre-repair canonical draw.\n\nAlso add near line 145 a \"> Regenerated after the J1 split repair.\" blockquote in the house style, recording that the earlier table was computed under the manifests whose permutation depended only on the seed.\n\nREVIEW_FINDINGS.md needs no change: lines 134-135 already state the current values and correctly label J2B's as \"the previous\"."
+   }
+  },
+  {
+   "subject": "gain of exact global over the BEST free signal (six molecular systems)",
+   "docs": "J5_WATER.md vs J2A_ORACLE_PANEL.md and STAGE1_GO_NO_GO.md",
+   "detail": "J5_WATER.md line 85: 'the committee beat the best free signal by +0.088 to +0.230'. J2A_ORACLE_PANEL.md lines 125-128 draw the distinction explicitly -- pairwise gaps span +0.067 to +0.230, while 'the gain over the best free signal per system ... is smaller, +0.067 to +0.182' -- and STAGE1_GO_NO_GO.md lines 105-113 record correcting precisely this mislabelling ('This previously read \"+0.088 to +0.230\" ... which is the range of the pairwise gaps'). Recomputed from results/records/j2a_oracle_panel.jsonl (error_score e_max, auroc_top05, exact_global minus max over energy_std/force_norm present): ethanol +0.067, aspirin +0.093, disjoint +0.136, same +0.146, azobenzene +0.169, overlapping +0.182 -- range +0.067 to +0.182. J5_WATER attaches the 'best free signal' label to the range of the significant pairwise gaps, which is the exact error the other two documents were corrected for, and it inflates the molecular baseline that J5_WATER's water-is-harsher argument is contrasted against.",
+   "severity": "major",
+   "verdict": {
+    "reasoning": "I could not refute it; the two documents measure the same quantity on the same basis.\n\nWhat I ran: replicated `tools/paper_numbers.py:free_gain_range` (which uses `_panel(rows, escore=\"e_max\", metric=\"auroc_top05\")`) over `results/records/j2a_oracle_panel.jsonl`, grouping by cache_tag and taking exact_global minus max(energy_std, force_norm):\n- rmd17-disjoint_ethanol: 0.7373 - 0.6699 (force_norm) = +0.067\n- rmd17-disjoint_aspirin: 0.7597 - 0.6669 (energy_std) = +0.093\n- disjoint_test_1200K: 0.7731 - 0.6373 (force_norm) = +0.136\n- same_test_1200K: 0.8476 - 0.7016 (force_norm) = +0.146\n- rmd17-disjoint_azobenzene: 0.8303 - 0.6618 (energy_std) = +0.169\n- overlapping_test_1200K: 0.7879 - 0.6063 (force_norm) = +0.182\nBest-free range = +0.067 to +0.182. Full pairwise range (10 comparisons) = +0.067 to +0.230. Restricting to the 9 significant pairwise deltas in `results/records/j2a_free_signal_ci.json` (only ethanol/force_norm delta 0.0674, CI [-0.0299, +0.1647] is non-significant) gives exactly +0.0876 to +0.2302 \u2014 i.e. \"+0.088 to +0.230\" is the range of the significant PAIRWISE gaps.\n\nRuled out the usual false-alarm explanations:\n- Error score and metric identical (e_max, auroc_top05) on both sides; J5_WATER's own water table matches `results/records/j5_water_factorA_ci.json` at the same setting.\n- System subset identical: the same six cache_tags (3 3BPA committees + 3 rMD17 molecules).\n- Estimator identical (exact global, M=8).\n- Free-signal basis is the decisive check: water's gaps in `j5_water_factorA_ci.json` are `gap_vs_force_norm` (+0.012, +0.023, +0.033, +0.069), and for water force_norm (0.620-0.947) dominates energy_std (0.418-0.495), so water's numbers ARE best-free gaps. The sentence is an explicit best-free-vs-best-free contrast, so the molecular half must be +0.067 to +0.182. The pairwise reading does not rescue it: on a pairwise basis water would have to include its energy_std gaps (~+0.15 to +0.55, since energy_std is at/below chance there), which would invert the water-is-harsher argument.\n\nCorroboration that the J5_WATER text is stale rather than a second measurement: REVIEW_FINDINGS.md:97 logs the exact claim '\"+0.088 to +0.230 over the best free signal\" -> +0.067 to +0.182; the quoted range is the pairwise gaps | corrected'; STAGE1_GO_NO_GO.md:109-113 carries the correction blockquote; J2A_ORACLE_PANEL.md:125-128 states the distinction; and paper/macros.tex:11-12 already defines \\fsFreeGainLo{0.067} / \\fsFreeGainHi{0.182}. J5_WATER.md carries no correction blockquote covering line 85 \u2014 the propagation was missed. The stale range also inflates the molecular baseline that J5_WATER's water-is-harsher contrast is drawn against.",
+    "refuted": false,
+    "fix": "In /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J5_WATER.md:\n\nLine 85 currently reads:\n  \"the best free signal by +0.088 to +0.230 (significant in 9 of 10 comparisons).\"\nChange to:\n  \"the best free signal by +0.067 to +0.182 (the pairwise advantage against each free signal separately is significant in 9 of 10 comparisons).\"\ni.e. lines 84-85 become:\n  \"This is materially harsher than the molecular systems, where the committee beat\n  the best free signal by +0.067 to +0.182 (the pairwise advantage against each\n  free signal separately is significant in 9 of 10 comparisons).\"\nKeeping the \"9 of 10\" but relabelling it as pairwise matches J2A_ORACLE_PANEL.md:125-128 and the STAGE1_GO_NO_GO.md:109-113 correction note.\n\nAlso fix the same stale range at J5_WATER.md line 168:\n  '1. The \"force UQ earns its backward passes\" claim (Stage 1, +0.088 to +0.230 on'\n  -> '1. The \"force UQ earns its backward passes\" claim (Stage 1, +0.067 to +0.182 on'\n\nOptionally add a \"> Corrected.\" blockquote after line 86 recording that the previous \"+0.088 to +0.230\" was the range of the significant pairwise gaps, mirroring the note already in STAGE1_GO_NO_GO.md, so the correction is not lost again."
+   }
+  },
+  {
+   "subject": "free-signal pairwise significance count",
+   "docs": "STAGE1_GO_NO_GO.md vs J2A_ORACLE_PANEL.md and J5_WATER.md",
+   "detail": "STAGE1_GO_NO_GO.md lines 112-113: 'The 8/10 significance count refers to the pairwise comparisons and is retained as such.' J2A_ORACLE_PANEL.md line 126 says 'significant in 9 of 10' with a correction blockquote (lines 132-143) explaining that the old CI records had no generating script or seed, were regenerated, and aspirin's force_norm now resolves above zero 'making it 9 of 10'; J5_WATER.md line 85 also says 9 of 10. results/records/j2a_free_signal_ci.json['vs_free']: 10 comparisons, 9 with significant=true (the single exception is ethanol force_norm, delta +0.0674). STAGE1 explicitly retains the superseded count.",
+   "severity": "major",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "The contradiction is real: STAGE1_GO_NO_GO.md carries the superseded 8/10 count for the exact same quantity that J2A_ORACLE_PANEL.md, J5_WATER.md, and the record all now give as 9/10.\n\nWHAT I RAN\n\n1. Loaded the record and the derivation tool:\n   python -c \"import sys; sys.path.insert(0,'tools'); import paper_numbers as pn; print(pn.free_sig_count(), pn.free_sig_total())\"\n   -> 9 10\n   tools/paper_numbers.py:89 defines fsFreeSig as literally\n   sum(c[\"significant\"] for c in load(\"j2a_free_signal_ci.json\")[\"vs_free\"]) and line 93 the total as len(...). So the paper's own macro-derived number for this claim is 9 of 10.\n\n2. Enumerated results/records/j2a_free_signal_ci.json['vs_free'] directly:\n   n=10, significant=9, pairwise deltas span +0.0674 to +0.2302.\n   Sole non-significant row: rmd17-disjoint_ethanol / force_norm, delta +0.0674, CI [-0.0299, +0.1647].\n   Verified the flag is exactly the rule ci_lo > 0 (all 10 rows agree).\n\n3. Enumerated the superseded copy results/records/superseded/j2a_free_signal_ci.json['vs_free']:\n   n=10, significant=8. Non-significant: ethanol force_norm [-0.0108, +0.1921] AND aspirin force_norm [-0.0031, +0.2056].\n   Deltas are identical to the current record row-for-row; only interval bounds moved. So 8/10 vs 9/10 is the same estimand measured before and after the seeded regeneration, not two different estimands.\n\n4. Read the three documents at the cited lines.\n   STAGE1_GO_NO_GO.md:109-113 (blockquote): '...This previously read \"+0.088 to +0.230 ... significant in 8/10\", which is the range of the *pairwise* gaps against each free signal taken separately. ... The 8/10 significance count refers to the pairwise comparisons and is retained as such.'\n   J2A_ORACLE_PANEL.md:126: 'the *pairwise* advantage (against each free signal separately) is **significant in 9 of 10** comparisons'.\n   J5_WATER.md:85: 'significant in 9 of 10 comparisons'.\n\nWHY THE STANDARD FALSE-ALARM DEFENCES DO NOT APPLY\n\n- Same quantity, explicitly. STAGE1's own blockquote defines its count as the pairwise gaps \"against each free signal taken separately\" -- word for word the construction J2A calls \"against each free signal separately\". Both are the 10 rows of vs_free. There is no different split, error score, system subset, or estimator budget separating them: the regeneration changed only the bootstrap seed/reproducibility (deltas and block lengths are identical), and both records use the same block scheme.\n- Not a stale-but-inert quotation. STAGE1 line 110 quoting the old text is legitimate (it is flagged as \"previously read\"). The defect is lines 112-113, which make an affirmative present-tense claim that the 8/10 count \"is retained as such\" -- i.e. it asserts 8/10 is still correct, which the record contradicts.\n- Not a frozen historical snapshot. STAGE1 is a maintained document: it already carries a later cross-document correction (\"**Later scoped by J6B.**\" blockquote at line 24). It receives propagated corrections; this one simply missed.\n- The only other \"8 of 10\" in the repo, J6C_SIZE_NORMALISATION.md:245, IS a genuinely different quantity and I ruled it out by reading the table above it: 10 *systems*, one row each, testing size-normalised marginal AUROC of the committee over ||f-bar||, including water-PIMD and naive-committee rows that do not exist in vs_free at all.\n\nCORROBORATION\nresults/CONSISTENCY_AUDIT.md \"Fixed in this pass\" names J2A_ORACLE_PANEL.md (\"8/10 -> 9/10\") and J5_WATER.md (\"free-signal count 8/10 -> 9/10\") and does NOT name STAGE1_GO_NO_GO.md. results/records/superseded/README.md independently states \"The free-signal count moved 8 of 10 -> 9 of 10\". File mtimes agree: STAGE1 00:12, regenerated record and J2A 01:50, J5_WATER 02:50 -- STAGE1 predates the fix pass.\n\nINCIDENTAL (not the audited contradiction, no action implied by this finding): J5_WATER:85's range \"+0.088 to +0.230\" is the span over the significant rows while J2A:126's \"+0.067 to +0.230\" is the span over all 10; both are correct under the current record (min over significant rows is ethanol energy_std +0.0876; min over all rows is ethanol force_norm +0.0674).",
+    "fix": "File: results/STAGE1_GO_NO_GO.md, final sentence of the \"Corrected after review\" blockquote (lines 112-113).\n\nChange:\n> and it is smaller: +0.067 (ethanol) to +0.182 (3BPA overlapping). The 8/10\n> significance count refers to the pairwise comparisons and is retained as such.\n\nTo:\n> and it is smaller: +0.067 (ethanol) to +0.182 (3BPA overlapping). The\n> significance count refers to the pairwise comparisons and is now **9/10**: the\n> CI records were regenerated with a recorded seed (100,000 resamples,\n> `experiments/j2a_confidence_intervals.py`) and aspirin's `force_norm` interval\n> resolves above zero (+0.112, CI [+0.008, +0.216]), leaving ethanol's\n> `force_norm` (+0.067, CI [-0.030, +0.165]) as the only exception. See\n> `J2A_ORACLE_PANEL.md` and `results/records/superseded/README.md`.\n\nLeave line 110 unchanged -- it is correctly marked as quoting the superseded text. The neighbouring \"24/24 ... 19/24 significantly\" at STAGE1 line 21 needs no change; the regeneration did not move it."
+   }
+  },
+  {
+   "subject": "J8 water pre-registered verdict score",
+   "docs": "J8_WATER_VERDICT.md vs REVIEW_FINDINGS.md and J8_MATCHED_PAIR.md",
+   "detail": "J8_WATER_VERDICT.md line 26 headlines '4 / 4 confirmed'. REVIEW_FINDINGS.md lines 204-206 states 'With both halves scored the water verdict is 3/4, not 4/4 -- P3's quantitative half fails (transition ratio 1/64 against a pre-registered [1/33, 1/16])', the scorer having tested only one of each of P3's and P4's two conditions. J8_MATCHED_PAIR.md line 43 scores the matched Blackwell pair 2/4 under the frozen v2 protocol and 3/4 under v3. results/records/verdicts.json records score '2/4' for 'J8 water systems prediction (matched Blackwell pair)' with P3 and P4 false; j8_verdict_blackwell_v2.json shows P3 failing on transition_batch_ratio_vs_3bpa = 0.015625 against threshold [0.03, 0.0625]. No surviving record scores 4/4 except j8_water_verdict_MIG.json, produced by the superseded single-condition scorer. Separately, the timings behind the 4/4 have no surviving record at all -- the document's own banner says the A100 water file was destroyed by the filename collision.",
+   "severity": "major",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "REAL, though the audit's framing is partly overstated.\n\nWHAT I RAN\n1. Reconstructed the A100 water run behind the \"4 / 4\" headline. Its JSONL was destroyed by the filename collision, but the job stdout survives at slurm/logs/j8w_39410902.out (\"wrote 60 records to results/records/j8_lane_bench_water.jsonl\" \u2014 the hardcoded path that caused the collision). I parsed its 60 (B, L, impl, median_ms, IQR) cells into lane-bench-schema JSONL, and did the same for the matched A100 3BPA reference from slurm/logs/j8_39408005.out (40 cells).\n2. Verified the reconstruction IS the run the document reports: running the scorer's own fit over it reproduces J8_WATER_VERDICT.md's \"Fitted cost model, water\" table digit for digit \u2014 serial (a,b) = (48.34,17.26), (45.98,17.74), (42.82,18.86), (37.52,25.40), (62.60,47.98), (108.84,94.27); batched (a,b) = (58.17,1.33), (55.61,2.49), (43.44,11.23), (43.74,25.34), (67.27,49.76), (113.01,99.56) \u2014 plus P1's 49.76 ms/lane, P2's 1.63x and transition batch B=1. Same quantity, same run.\n3. Scored it with the CURRENT both-halves scorer against the FROZEN PRE-REGISTERED protocol:\n   experiments/j8_water_verdict.py --water <reconstructed A100 water> --reference <reconstructed A100 3BPA> --protocol protocols/j8_water_prediction_v2_frozen.yaml\n   Result: VERDICT 3/4 predictions confirmed (5/6 individual criteria).\n     P1 PASS (batched_slope@16 = 49.76 gt 1)\n     P2 PASS (total_speedup@16 = 1.63 ge 1.4)\n     P3 FAIL \u2014 transition_batch = 1 le 4 PASS, but transition_batch_ratio_vs_3bpa = 0.015625 (1/64) NOT between [0.030, 0.0625] (1/33 to 1/16) FAIL\n     P4 PASS both halves (serial_fit_r2_min 0.9878 ge 0.95; serial_slope_min 17.26 gt 10.9)\n4. Cross-checked the other A100-era water run, the MIG slice the document says \"gave the same verdict\": from j8_water_verdict_MIG.json, transition_batch = 1 \u2192 ratio 1/64 \u2192 P3's quantitative half fails; serial_slope_min = 11.5226 gt 10.9 and serial r2_min = 0.9938 ge 0.95 \u2192 P4 passes; batched slope@16 = 149.59 \u2192 P1 passes; speedup_B16 = 1.6277 \u2192 P2 passes. Also 3/4.\n\nSo every surviving source for the headline scores 3/4 under the pre-registered thresholds. The 4/4 is reachable only through the superseded scorer, which tested one of each of P3's and P4's two conditions \u2014 exactly what protocols/j8_water_prediction_v2_frozen.yaml's header and the rewritten j8_water_verdict.py docstring record. v2 changes NO prediction and NO threshold relative to v1's prose, so 3/4 is the pre-registered verdict for this run, not a re-specification of it. The document's own P3 row also quotes only the first half of P3's pre-registered statement (\"transition occurs at B <= 4\"), dropping the \"i.e. at roughly 1/16 to 1/33 of 3BPA's transition batch\" clause that fails.\n\nThis is the project's known failure mode: the correction was made in REVIEW_FINDINGS.md (lines 204-206) and independently confirmed in results/records/consistency_audit.json (its P3 entry states \"the doc omits P3's second, quantitative half (ratio vs 3BPA = 1/64), which fails -- this is why the later matched-pair scoring is 2/4 and 3/4 rather than 4/4\"), and was never propagated back into J8_WATER_VERDICT.md. The suspension banner at the top of that document scopes itself explicitly to \"the specific milliseconds, slopes and speedups\", so it does not cover or retract the verdict headline.\n\nTWO PARTS OF THE AUDIT'S FRAMING THAT ARE NOT SUPPORTED (report these alongside):\n- J8_MATCHED_PAIR.md's 2/4 is NOT the same quantity as the 4/4 or the 3/4. It is a different device (RTX PRO 6000 Blackwell, 188 SMs, corrected 8-lane construction), where P4 additionally fails only because v2's 10.9 ms/lane threshold is an A100 3BPA constant and Blackwell's 3BPA serial slope is 5.10-5.78. On A100 that same criterion passes at 17.26. 2/4 vs 3/4 is two runs, not two values of one number. The only genuine same-quantity conflict is 4/4 vs 3/4.\n- \"The timings behind the 4/4 have no surviving record at all\" is too strong. The JSONL under results/records/ is gone (a real R3 provenance violation), but slurm/logs/j8w_39410902.out survives and every timing in the document re-derives from it exactly, as my reconstruction shows. The correct statement is \"log-only, not in results/records/\", not \"unbacked\".\n\nSEPARATE, ALREADY-RECORDED DEFECT IN THE SAME SENTENCE: the run is called \"clean\", but it fails its own pre-registered admissibility gate \u2014 my run reported 19/60 cells (31.7%) above v2's max_relative_iqr = 0.03, which under v3's per-cell rule also exceeds max_excluded_cell_fraction = 0.10. (The scorer only emits this as a NOTE under v2 because v2 has no cap key, but the gate itself is v2's.) The \"IQRs 0.6-1.3 ms i.e. under 1% of medians\" claim in the same sentence is likewise contradicted by the log (relative IQR 0.11%-10.71%, worst cell B=8 L=1 serial at 10.7%).",
+    "fix": "Edit results/J8_WATER_VERDICT.md.\n\n1. Line 26 \u2014 replace the headline. Currently:\n   `**4 / 4 confirmed**, on a clean whole **A100-SXM4-80GB with MIG disabled**`\n   Change to:\n   `**3 / 4 confirmed** (5/6 individual criteria), on a whole **A100-SXM4-80GB with MIG disabled**`\n   and drop \"clean\" (the run has 19/60 cells above the pre-registered 3% relative-IQR gate; the \"IQRs 0.6-1.3 ms ... under 1% of medians\" clause later on line 27-28 should be restated as \"relative IQR 0.11-10.7%, median 1.3%; 19 of 60 cells exceed the pre-registered 3% gate\").\n\n2. Line 40 \u2014 the P3 row. Currently:\n   `| **P3** | transition occurs at B \u2264 4 | first B with slope > 1 is **B = 1** | **PASS** |`\n   Change to:\n   `| **P3** | transition at B \u2264 4 **and** at 1/33\u20131/16 of 3BPA's transition batch | B = 1, ratio **1/64** (0.0156) vs pre-registered [1/33, 1/16] | **FAIL** (first half passes, second fails) |`\n\n3. Add a correction blockquote immediately under the table (after line 41), e.g.:\n   `> **Corrected: this was headlined 4 / 4 and is 3 / 4.** The original scorer tested only one of each of P3's and P4's two pre-registered conditions. Rescored with the both-halves scorer against the frozen pre-registered protocol (`protocols/j8_water_prediction_v2_frozen.yaml`, which changes no prediction and no threshold), this run gives 3/4: P3's quantitative half fails at a transition ratio of 1/64 against [1/33, 1/16]. The mechanism is stronger than predicted; the magnitude prediction was wrong. See REVIEW_FINDINGS.md and the P3 entry in results/records/consistency_audit.json. The MIG-slice run on line 33 also rescores to 3/4, not 4/4.`\n\n4. Line 33-34's \"An earlier MIG-slice run gave the same verdict\" stays true (it is also 3/4) but should say \"the same 3/4 verdict\" explicitly so the two do not drift again.\n\nAlso worth doing, since no record backs the headline: write the rescored verdict to results/records/ (e.g. `j8_verdict_A100_v2_rescored.json`) from the reconstructed run, note in it that its source is slurm/logs/j8w_39410902.out rather than a JSONL record, and add a row to results/records/verdicts.json for \"J8 water systems prediction (A100, v2 frozen)\" with score \"3/4\" and P3 false \u2014 at present verdicts.json carries only the Blackwell 2/4, so the A100 verdict lives nowhere in the record set.\n\nNo change is needed in REVIEW_FINDINGS.md or J8_MATCHED_PAIR.md \u2014 both are correct as written, and the 2/4 there is a different device, not a competing value for this number."
+   }
+  },
+  {
+   "subject": "calibration block span after the split-seed fix",
+   "docs": "J1_SPLIT_REPAIR.md and REVIEW_FINDINGS.md vs the shipped manifests",
+   "detail": "J1_SPLIT_REPAIR.md line 95 ('calibration spans 39-58% in two runs per system') and REVIEW_FINDINGS.md line 131 ('calibration now spans 39-58% in 2 runs per system') both assert the anti-confound defect was fixed. Recomputed (max(cal)-min(cal)+1)/n and the number of contiguous cal runs over all 14 shipped manifests/splits/*__contiguous_block.json: the six headline systems give 39.2% (3BPA disjoint), 49.7% (overlapping), 49.6% (same), 49.4% (ethanol), 29.4% (aspirin) and 19.6% (azobenzene); over all 14 the range is 18.8%-89.4%. Neither the range nor the 'two runs' holds: rmd17-disjoint_azobenzene's calibration is a SINGLE contiguous run, indices 702-897 with no gaps, spanning 19.6% -- numerically identical to the '~19% in one contiguous run' pathology the correction claims to have removed. water-naive_pimd_T300K is likewise a single run at 18.8%. The claim that the defect was fixed is contradicted by the manifests on 2 of 14 systems, one of them a headline system.",
+   "severity": "major",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "CANNOT REFUTE \u2014 the contradiction is real, and I confirmed it is worse than the audit states.\n\nWHAT I RAN (python = /n/holylabs/hekstra_lab/Everyone/ianpoon/envs/fs-cpu/bin/python):\n\n1. Recomputed the audit's quantity over all 14 `manifests/splits/*__contiguous_block.json`: span = (max(cal)\u2212min(cal)+1)/n and the number of maximal contiguous runs in the sorted `roles.cal` list. Reproduced the audit exactly:\n   3bpa-naive-same 59.7%/2, 3bpa-naive 79.7%/2, disjoint 39.2%/2, overlapping 49.7%/2, same 49.6%/2, ethanol 49.4%/2, aspirin 29.4%/2, azobenzene 19.6%/**1** (indices 702\u2013897), water-disjoint_md 58.4%/2, water-disjoint_pimd 59.4%/2, water-naive_md 89.4%/2, water-naive_pimd 18.8%/**1** (indices 353\u2013446), water-overlapping_md 29.4%/2, water-overlapping_pimd 28.8%/2.\n   Range over 14: 18.8\u201389.4%. Range over the six headline systems: 19.6\u201349.7%. Neither is 39\u201358%; only 5 of 14 systems fall inside [39,58].\n\n2. Ruled out the \"two documents measuring different things\" escape three ways.\n   (a) SAME OBJECT: I regenerated all 14 blocked splits from the current `src/forcesketch_journal/data/splits.py:contiguous_block_split` with SPLIT_SEED=20260901 and each manifest's own n/guard. All 14 `content_sha256` values match the shipped manifests bit for bit. So the shipped manifests are the post-fix ones.\n   (b) SAME TABLE: the six sha256 prefixes in J1_SPLIT_REPAIR.md's own table (lines 101\u2013106) \u2014 0068305d4e7f, dfd9bea8242d, 2cb7eff0771f, 91f4a6b9f5f3, b9c320f2b20a, f4ff0a291428 \u2014 match the shipped manifests exactly, as do all six n/design/cal/test/dropped rows. The correction sentence at line 95 says \"the split sizes and hashes in the table below are the regenerated ones\", so the sentence and the manifests are pinned to the same objects. There is no other split, seed, or generation to appeal to.\n   (c) NO ALTERNATIVE METRIC: I swept candidate readings of \"span\" over all three roles and all systems \u2014 index span, run count, role fraction, deciles touched, inter-run gap, cal centroid \u2014 for all 14, the 6 headline, and the 8 non-water systems. Nothing produces a 39\u201358% range. `cal_span` is the only quantity that is a span of calibration, and no subset with a natural definition has endpoints 39 and 58 ([39.2, 58.4] would require exactly {disjoint, overlapping, same, ethanol, water-disjoint_md}).\n\n3. Reconstructed the pre-fix (seed-only) permutation: labels = [test, design, test, test, test, test, test, cal, cal, design], i.e. cal blocks (7,8), adjacent \u2014 the documented ~19% one-run pathology. Post-fix cal blocks per system: (5,8) disjoint, (4,8) overlapping/same, (1,5) ethanol, (6,8) aspirin, **(7,8) azobenzene**, **(7,8) water-naive_pimd**, etc.\n   Then I rebuilt azobenzene and water-naive_pimd under BOTH the pre-fix and post-fix seeding and compared the calibration index arrays: `np.array_equal` is **True** for both. The seed fix left those two calibration sets **bit-identical to the pre-fix pathological sets** (azobenzene 702\u2013897, n_cal 196; water-naive_pimd 353\u2013446, n_cal 94). azobenzene is a headline system.\n\n4. The project's own record already flags it: `results/records/consistency_audit.json` carries an entry {doc: J1_SPLIT_REPAIR.md, quote: \"calibration spans 39\u201358% in two runs per system\", status: \"wrong\"} with essentially this evidence. It is one of the 13 \"wrong\" claims that CONSISTENCY_AUDIT.md attributes to J1_SPLIT_REPAIR.md and has not been fixed in either document.\n\nSAME QUANTITY, TWO VALUES: \"fraction of trajectory spanned by the calibration blocks, and the number of contiguous calibration runs, in the shipped blocked manifests\" is asserted as \"39\u201358% in two runs per system\" and is in fact 18.8\u201389.4% with a single run on 2 of 14. Same manifests, same scheme, same seed, same hashes.\n\nWHAT SURVIVES (should be preserved when fixing): the fix did cure the *other* half of the defect. All 14 systems now receive 14 distinct block assignments (11 distinct cal-block pairs), so cross-system agreement is genuinely independent rather than correlated \u2014 that part of the correction, and the re-run headline ablation, are unaffected. What fails is the numeric range and the universal \"two runs\": mixing the system name randomises the assignment, it does not *constrain* the two cal blocks to be non-adjacent, and adjacency is a ~20% per-system event, so 2 of 14 landing adjacent is exactly what the fix predicts. The prose overclaims by reporting a range that was never checked against all the manifests.",
+    "fix": "Two documents carry the identical wrong sentence; both need the same correction, and neither should be fixed without also keeping the half of the claim that is true.\n\n1) /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J1_SPLIT_REPAIR.md, line 95.\nReplace: \"with a hash of the system name; calibration spans 39\u201358% in two runs per system,\"\nWith: \"with a hash of the system name, which gives all fourteen systems distinct block assignments \u2014 so cross-system agreement is now independent evidence. But mixing the seed *randomises* the assignment, it does not constrain the two calibration blocks to be non-adjacent, and adjacency is a ~20% per-system event. Calibration spans 18.8\u201389.4% across the fourteen systems (39.2 / 49.7 / 49.6 / 49.4 / 29.4 / 19.6% on the six headline systems in table order) in two runs on 12 of 14. On the other two it is still a single contiguous run: rmd17-disjoint_azobenzene (indices 702\u2013897, 19.6%) and water-naive_pimd_T300K (indices 353\u2013446, 18.8%) \u2014 whose calibration sets are in fact bit-identical to their pre-fix ones. The anti-confound rationale therefore still fails on azobenzene, a headline system; constraining the draw (reject adjacent cal blocks) rather than reseeding it is the actual fix,\"\n\n2) /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/REVIEW_FINDINGS.md, line 131.\nReplace: \"calibration now spans 39\u201358% in 2 runs per system.\"\nWith: \"all 14 systems now get distinct assignments, but the reseeding only randomises the draw \u2014 calibration spans 18.8\u201389.4% and is still a single contiguous run on 2 of 14 (rmd17-disjoint_azobenzene 19.6% and water-naive_pimd_T300K 18.8%, both bit-identical to their pre-fix calibration sets), so this finding is fixed only in its cross-system-correlation half.\"\nAlso downgrade the \"VERIFIED AND FIXED\" label on line 124 to \"VERIFIED \u2014 PARTIALLY FIXED\".\n\n3) Optional but worth it: /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/src/forcesketch_journal/data/splits.py, the comment at lines 90\u201395 reads as though the sysseed mix removes the adjacency pathology. Add a line noting it does not, and that `contiguous_block_split` should either reject permutations with adjacent same-role blocks or record the realised cal span in the manifest so the claim is derivable rather than typed.\n\n4) The corresponding entry in results/records/consistency_audit.json already has status \"wrong\"; flip it to fixed only after both documents are edited."
+   }
+  },
+  {
+   "subject": "matched-pair run conditions (water vs 3BPA on Blackwell)",
+   "docs": "J8_MATCHED_PAIR.md vs the j8 lane-bench records (and CONSISTENCY_AUDIT.md)",
+   "detail": "J8_MATCHED_PAIR.md lines 3-5 claim water and 3BPA were measured 'on the same device, under the same run conditions'. The two records disagree on the conditions: j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl has warmup=100, iters=200, slurm_job_id 39483448 on all 40 cells, while j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl has warmup=25, iters=50, slurm_job_id 39472564 on all 60 cells -- two separate jobs at different times with a 4x difference in warmup and timed iterations. Same device and same 188-SM part is true; 'same run conditions' is not. CONSISTENCY_AUDIT.md flags this as 'the one that most deserves attention', and the matched-pair framing (the collapse onto edge count) is the systems result that rests on the equivalence. All the document's fitted numbers do reproduce from the records (3BPA serial slopes 5.10/5.39/5.41/5.78, speedups 1.094/1.096/1.451/1.830; water slopes 5.76/5.72/9.72/20.73/42.43/86.85, speedups 1.845/1.826/1.843/1.880/1.891/1.894).",
+   "severity": "major",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "REAL \u2014 I could not refute it. The records contradict the document's provenance claim exactly as reported.\n\nWHAT I RAN\n\n1. Read `/n/lab_storage/.../forcesketchJournalReady/results/J8_MATCHED_PAIR.md`. Lines 3-5: \"water and 3BPA measured on the **same device**, under the **same run conditions**, both with the corrected 8-lane construction, both passing admissibility.\" No `> Corrected` / `> Superseded` blockquote anywhere in the file (`grep -n \"^>\"` returns nothing), so nothing supersedes it in-document.\n\n2. Enumerated every provenance field on every cell of all four j8 lane-bench records with a python script (fs-cpu env). Result, uniform across all cells of each file:\n   - `j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl` (3BPA): 40 cells, `warmup=100`, `iters=200`, `slurm_job_id=39483448`\n   - `j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl`: 60 cells, `warmup=25`, `iters=50`, `slurm_job_id=39472564`\n   The H200 pair has the identical split (40 cells w=100/i=200 job 39482836; 60 cells w=25/i=50 job 39479617), so it is a systematic protocol difference between the 3BPA and water benches, not a one-off.\n\n3. Checked the \"same\" half, which holds: device_name, `sm_count=188`, cc 12.0, `is_mig=false`, partition `gpu_requeue`, torch 2.13.0+cu129 / CUDA 12.9, float32, M=8, fuser off, lane grid {1,2,3,4,8} are identical. Both slurm logs (`slurm/logs/j8_39483448.out`, `slurm/logs/j8w_39472564.out`) report node `holygpu7c2131`. File mtimes put water at 21:16:37 and 3BPA at 21:28:32 the same evening \u2014 same node, ~12 min apart, two separate jobs.\n\n4. Re-derived every fitted number myself (own `np.polyfit` over the median_ms vs lanes points, and the scorer's min(T8)/min(T4) speedup). All reproduce: 3BPA serial slopes 5.104/5.386/5.406/5.780, speedups 1.0944/1.0963/1.4506/1.8304; water serial slopes 5.756/5.720/9.717/20.730/42.432/86.848, speedups 1.8447/1.8256/1.8431/1.8802/1.8910/1.8939; max rel IQR 1.54% (3BPA) / 0.97% (water). So the arithmetic is sound \u2014 the defect is purely the equivalence claim.\n\nWHY THE STANDARD FALSE-ALARM EXPLANATIONS DO NOT APPLY\n\n- \"Different estimator budget explains it\" is normally the exonerating cause; here the differing estimator budget IS the disputed fact, not an explanation for a numeric gap.\n- \"Run conditions could just mean hardware\" fails on the project's own definition: `slurm/j8_matched_pair.sbatch`, written by the same author, says verbatim \"The matched-pair claim is that water and 3BPA were measured on the same device under the same conditions; running them as separate jobs cannot guarantee that, and a co-tenant on the node doubled absolute times once already,\" and re-runs both systems in one `--exclusive` job at identical `--iters 100 --warmup 50`. By the author's own operational reading, separate jobs at 4x-different budgets do not satisfy the claim.\n- \"A newer matched run makes it true now\" fails: that rerun has not landed. It would write `*_pair.jsonl`; no such file exists in `results/records/`.\n- This is also a genuine document-vs-document contradiction, not just document-vs-record: `CONSISTENCY_AUDIT.md:80-85` states \"Same run conditions is **not**\" and lists it under \"Not yet fixed\" / \"The one that most deserves attention\", while `J8_MATCHED_PAIR.md:3-5` still asserts it. The correction was made in the audit and never propagated back \u2014 exactly the failure mode the project warns about.\n\nONE ADDITIONAL DEFECT IN THE SAME SENTENCE: `require_exclusive_node: true` appears in both `protocols/j8_water_prediction.yaml:122` and `protocols/j8_water_prediction_v2_frozen.yaml:96`, but the string never appears in `experiments/j8_water_verdict.py` \u2014 the scorer never checks it, and both runs were on the non-exclusive `gpu_requeue` partition. So \"both passing admissibility\" means \"passing the rules the scorer happens to implement,\" not the protocol as written.\n\nMITIGATION I FOUND AND SHOULD BE STATED HONESTLY (it does not rescue the sentence): the shorter budget did not visibly leave water unsettled \u2014 water is the *tighter* run (max rel IQR 0.97% vs 3BPA's 1.54%; median median-vs-min drift 0.338% vs 0.649%). The qualitative collapse-onto-edge-count conclusion is not in danger. But it is not cosmetic either: P4 compares water's serial slope 5.72 against 3BPA's median 5.396 \u2014 a 6% margin on *absolute* ms/lane read across two different jobs on a shared-tenancy partition, and the two records' one-shot nvidia-smi probes caught the GPU in very different clock states (3BPA 630 MHz SM / 12481 MHz mem / 49.84 W; water 180 MHz / 405 MHz / 33.42 W).",
+    "fix": "Edit `/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_MATCHED_PAIR.md`, lines 3-5 (the opening paragraph), and add a correction blockquote directly beneath.\n\nReplace lines 3-5:\n\n  \"The first fully clean systems result: water and 3BPA measured on the **same\n  device**, under the **same run conditions**, both with the corrected 8-lane\n  construction, both passing admissibility.\"\n\nwith:\n\n  \"Water and 3BPA measured on the **same device and the same physical node**\n  (`holygpu7c2131`, RTX PRO 6000 Blackwell, 188 SMs, non-MIG), both with the\n  corrected 8-lane construction, both passing the admissibility rules the scorer\n  implements. The two systems were **not** run under identical conditions: they\n  are separate jobs (3BPA `39483448` at `warmup=100, iters=200`; water `39472564`\n  at `warmup=25, iters=50`), ~12 minutes apart on the non-exclusive\n  `gpu_requeue` partition.\"\n\nThen insert, immediately after that paragraph:\n\n  \"> Corrected: the original text claimed 'the same run conditions'. The records\n  > show a 4x difference in warmup and timed iterations across two separate jobs.\n  > The estimator budgets do not appear to have damaged the fits \u2014 water is the\n  > tighter run (max rel IQR 0.97% vs 3BPA's 1.54%) and every slope and speedup\n  > below reproduces from the records \u2014 but P4's 6% margin (5.72 vs 5.396) is a\n  > comparison of absolute ms/lane across two jobs and should not be leaned on\n  > until `slurm/j8_matched_pair.sbatch` lands. That script runs both systems in\n  > one `--exclusive` job at `--iters 100 --warmup 50`; when its\n  > `*_pair.jsonl` records exist, rebuild this document on them rather than\n  > patching further.\"\n\nTwo smaller claims in the same header block are also contradicted by the same records and should be fixed in the same pass (both already flagged in CONSISTENCY_AUDIT.md group 2):\n- Line 10: \"serial fits R\u00b2 = 0.9999\u20131.000\" -> the 3BPA B=1 serial fit is R\u00b2 = 0.9968, so the true range is **0.9968\u20131.000**.\n- Lines 8-9: \"lane signature `(T8\u2212T1)/(T4\u2212T1)` = 2.33 on both\" -> at the smallest B the value is 2.31 for water but 2.48 for 3BPA; state the two values separately or name the aggregation that yields 2.33.\n\nNo change is needed to `CONSISTENCY_AUDIT.md` \u2014 it already carries the correct account at lines 80-85; the fix is propagating it into `J8_MATCHED_PAIR.md`."
+   }
+  },
+  {
+   "subject": "guard-band dropped-frame range",
+   "docs": "J1_SPLIT_REPAIR.md (prose vs its own table) and STAGE1_GO_NO_GO.md",
+   "detail": "J1_SPLIT_REPAIR.md line 79 says blocked splits 'cost 16-64 dropped frames' and STAGE1_GO_NO_GO.md line 128 repeats 'they cost 16-64 frames'. The split table in J1 itself (lines 101-106) lists dropped counts 96, 48, 56, 30, 36, 16, and results/records/j1_splits.json confirms per-system blocked n_dropped of 96 (disjoint), 48 (overlapping), 56 (same), 30 (ethanol), 36 (aspirin), 16 (azobenzene) -- a range of 16-96, and 16-96 across all 14 systems. 16-64 is the pre-seed-fix range; the table beneath the sentence was regenerated and the sentence was not.",
+   "severity": "minor",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "Confirmed real, not a two-different-things false alarm.\n\nWHAT I RAN:\n(1) Read J1_SPLIT_REPAIR.md:79 (\"it is the defensible default and costs 16-64 dropped frames\") and STAGE1_GO_NO_GO.md:128 (\"Blocked splits are adopted anyway, since they cost 16-64 frames\").\n(2) Extracted blocked.n_dropped for all 14 systems from results/records/j1_splits.json: 30, 42, 96, 48, 36, 16, 30, 56, 48, 24, 36, 30, 36, 30 -> range 16-96. The six systems appearing in J1's own table (lines 101-106) give 96, 48, 56, 30, 36, 16 -> also 16-96.\n(3) Cross-checked the 14 shipped manifests manifests/splits/*contiguous_block.json: n_dropped equals len(dropped) in every file, range 16-96, and content_sha256 prefixes match the J1 table exactly (0068305d4e7f, dfd9bea8242d, 2cb7eff0771f, 91f4a6b9f5f3, b9c320f2b20a, f4ff0a291428). So the table and the record and the manifests all agree with each other and disagree with the prose.\n(4) Re-implemented the guard-drop logic of contiguous_block_split (src/forcesketch_journal/data/splits.py:71-113) independently, with SPLIT_SEED=20260901 from experiments/j1_build_splits.py and each system's recorded n and guard_frames. It reproduced all 14 current n_dropped values exactly, so I am deriving the number rather than trusting the record.\n(5) Re-ran that same computation with the PRE-FIX permutation (np.random.default_rng(seed).permutation(10), i.e. without the blake2b system-name mix that the \"Corrected after review\" blockquote at J1:89-96 describes introducing). That yields 64, 24, 32, 24, 24, 16 for the six table systems -> range exactly 16-64, and 16-64 across all 14.\n\nWHY IT IS NOT A DIFFERENT-QUANTITY FALSE ALARM:\nStep (5) is decisive. 16-64 is precisely the range produced by the superseded seed scheme, which is what the audit alleged. The value 64 does not occur in any current n_dropped. No alternative reading rescues it: no system subset of the current splits has maximum 64 (dropping the two largest systems takes the max to 48, never 64); the per-boundary drop width is 2*guard, which spans only 4-16; guard_frames themselves span 2-8. Both sentences describe the same quantity in the same context -- frames discarded by guard bands under the adopted contiguous_block scheme, in a sentence conceding blocking's cost while arguing leakage is a non-issue -- so this is one quantity carrying two values, not two different measurements. J1's prose contradicts the regenerated table five lines below it in its own document; the seed fix reached the table, the manifests and the record but not the sentence, and STAGE1 quotes the stale sentence.\n\nADJACENT STALENESS FROM THE SAME ROOT CAUSE: STAGE1_GO_NO_GO.md:126 still gives the blocked-vs-random mean absolute difference as 0.017, which J1's own regeneration blockquote (lines 65-75) and results/records/j1_split_comparison.json supersede with 0.027; line 127's unqualified \"not materially leaky\" should likewise be softened to J1's post-correction wording.",
+    "fix": "Two edits, both changing the stale pre-seed-fix range 16-64 to the shipped 16-96:\n\n1. /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J1_SPLIT_REPAIR.md line 79: change \"it is the defensible default and costs 16-64 dropped frames\" to \"it is the defensible default and costs 16-96 dropped frames\".\n\n2. /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/STAGE1_GO_NO_GO.md line 128: change \"Blocked splits are adopted anyway, since they cost 16-64 frames.\" to \"Blocked splits are adopted anyway, since they cost 16-96 frames.\"\n\nRecommended in the same pass (same root cause, unpropagated J1 correction): STAGE1_GO_NO_GO.md line 126, change \"differ by 0.017 mean absolute\" to \"differ by 0.027 mean absolute\", and soften line 127 from the unqualified \"The workshop's random-frame split was not materially leaky.\" to J1's post-correction claim, e.g. \"There is no consistent leakage signature, though per-system differences reach 0.05.\""
+   }
+  },
+  {
+   "subject": "serial-fit R2 range for the matched pair",
+   "docs": "J8_MATCHED_PAIR.md vs the Blackwell lane-bench records",
+   "detail": "J8_MATCHED_PAIR.md line 10 states 'serial fits R2 = 0.9999-1.000' as an integrity check. Refitting every serial cell in both Blackwell records (5 lane points each, status ok) gives R2 = 0.9968 at 3BPA B=1, then 1.0000/1.0000/1.0000 for 3BPA B=4/16/64 and 1.0000/1.0000/0.9999/1.0000/1.0000/1.0000 for water B=1..32. The minimum is 0.9968, outside the quoted range. (The value 0.999932 in j8_verdict_blackwell_v2.json is serial_fit_r2_min for the WATER record only, which is presumably where 0.9999 came from -- it does not cover the 3BPA half of the pair the sentence claims to describe.)",
+   "severity": "minor",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "I could not refute it; the two numbers really are the same quantity, and the document's value is wrong.\n\nWhat I ran:\n\n1. Read /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_MATCHED_PAIR.md in full. Lines 8-10 are a single \"Integrity:\" sentence about the matched PAIR, and its other two clauses are explicitly two-system: \"max relative IQR 1.54% (3BPA) and 0.97% (water); lane signature (T8-T1)/(T4-T1) = 2.33 on both, confirming 8 genuine lanes; serial fits R2 = 0.9999-1.000.\" grep for \"Corrected\"/\"Superseded\" in that file returns nothing, so line 10 is live text with no later correction. The sentence is unambiguously scoped to both halves of the pair.\n\n2. Copied the exact estimator out of experiments/j8_water_verdict.py (fit(): least squares T(L) = a + b*L over sorted unique (lanes, median_ms) with status == \"ok\"; R2 = 1 - SSres/SStot) and reran it over every cell of both Blackwell lane-bench records using /n/holylabs/hekstra_lab/Everyone/ianpoon/envs/fs-cpu/bin/python.\n   - j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl (3BPA, 40 rows, all status ok, lanes {1,2,3,4,8}, B in {1,4,16,64}) serial R2: B=1 -> 0.996793, B=4 -> 0.999995, B=16 -> 0.999997, B=64 -> 0.999999.\n   - j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl (60 rows, all ok, B in {1,2,4,8,16,32}) serial R2: 0.999982, 0.999986, 0.999932, 0.999994, 0.999999, 1.000000.\n   Minimum over the pair = 0.996793 at 3BPA B=1. Minimum over water alone = 0.999932, which reproduces serial_fit_r2_min = 0.999932100441317 in j8_verdict_blackwell_v2.json to all printed digits. The audit's account of the provenance is therefore correct: 0.9999 is the water-only minimum, and the scorer never computes a 3BPA serial R2 at all -- metrics() derives serial_fit_r2_min from W (the water rows); the matched 3BPA run is consulted only for the v3-derived serial slope (median 5.3960) and transition batch.\n\n3. Tried hard to find a \"genuinely different thing\" that rescues the quoted range. Every reasonable variant of the 3BPA B=1 serial fit stays orders of magnitude away from 0.9999: median_ms over all 5 lanes 0.99679; min_ms instead of median_ms 0.99728; drop L=3 (lanes 1,2,4,8) 0.99813; drop L=1 (lanes 2,3,4,8) 0.99561. There is no lane subset, timing statistic, batch subset, or protocol version under which the pair's serial fits bottom out at 0.9999.\n\n4. Independent corroboration inside the repo: results/records/consistency_audit.json claims[204] is {doc: \"J8_MATCHED_PAIR.md\", quote: \"serial fits R2 = 0.9999-1.000\", status: \"wrong\", evidence: \"Water serial fits are 0.999932-1.000000 (in range), but the 3BPA B=1 serial fit is R2 = 0.99679 ... Correct combined range is 0.9968-1.000.\"}, and results/CONSISTENCY_AUDIT.md line 69 already lists it under \"Not yet fixed -> Overstated ranges\". So this is a known, never-propagated overstatement rather than a new false alarm.\n\nSeverity: cosmetic, not conclusion-changing. The 3BPA B=1 cell is the run's noisiest -- it also carries the 1.54% max relative IQR and an off-pattern lane signature of 2.478 versus 2.30-2.34 in every other cell -- and its fit is still R2 = 0.9968. No prediction reads 3BPA serial R2; P4's \"serial_fit_r2_min >= 0.95\" criterion is evaluated on water and passes at 0.99993. But as written the sentence asserts a range for the pair that one member of the pair falls outside, so the contradiction is real.",
+    "fix": "In /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_MATCHED_PAIR.md, line 10 (the closing clause of the \"Integrity:\" sentence beginning on line 8), replace\n\n  R\u00b2 = 0.9999\u20131.000.\n\nwith the corrected combined range\n\n  R\u00b2 = 0.9968\u20131.000 (the 0.9968 is 3BPA at B = 1, the run's noisiest cell; every other serial fit is \u2265 0.9999).\n\nor, to match the per-system form of the IQR clause immediately before it,\n\n  serial fits R\u00b2 = 0.9968\u20131.000 (3BPA) and 0.9999\u20131.000 (water).\n\nNothing else needs changing: serial_fit_r2_min = 0.999932 in results/records/j8_verdict_blackwell_v2.json (and v3) is correct as a water-only metric and is exactly what the P4 R\u00b2 criterion scores. results/CONSISTENCY_AUDIT.md line 69 currently lists this under \"Not yet fixed -> Overstated ranges\"; once line 10 is corrected, move that item to the \"Fixed in this pass\" list rather than deleting it."
+   }
+  },
+  {
+   "subject": "MPtraj committee-disagreement AUROC range",
+   "docs": "J6B_FOUNDATION_ACQUISITION.md (prose vs its own table)",
+   "detail": "J6B_FOUNDATION_ACQUISITION.md line 49 summarises 'Committee disagreement ranks reference-force error at AUROC 0.80-0.84'. The table directly above it (lines 41-44) lists exact global at 0.798/0.769/0.793/0.759 and leading-only at 0.791/0.763/0.786/0.753, all below 0.80. results/records/j6b_foundation_verdict.json['factor_a'] confirms: exact_global spans 0.7594-0.7978, exact_maxcomp 0.8045-0.8219, exact_maxatom 0.8061-0.8356, leading_only 0.7527-0.7906. The true span of the committee signals is 0.753-0.836; the quoted range excludes eight of the sixteen committee cells in the document's own table.",
+   "severity": "minor",
+   "verdict": {
+    "reasoning": "Not refuted \u2014 the contradiction is real and is internal to one document (prose vs the table directly above it), with no scope difference to explain it.\n\nRe-derivation from results/records/j6b_foundation_verdict.json['factor_a'] (fs-cpu python):\n- exact_global: 0.7978 / 0.7686 / 0.7927 / 0.7594 (e_max / e_rmse / e_maxcomp / e_q95)\n- exact_maxcomp: 0.8212 / 0.8078 / 0.8219 / 0.8045\n- exact_maxatom: 0.8356 / 0.8194 / 0.8243 / 0.8061\n- leading_only: 0.7906 / 0.7627 / 0.7856 / 0.7527\nSpan of all 16 committee cells = 0.7527\u20130.8356. Cells strictly below 0.80 = 8 of 16 (all four exact-global, all four leading-only). This matches the table printed at J6B_FOUNDATION_ACQUISITION.md lines 41\u201344 to three decimals, so the table is correct and the prose at line 49 is the error.\n\nThe only subset of the record that yields \"0.80\u20130.84\" is exact_maxcomp \u222a exact_maxatom (0.8045\u20130.8356). Every wider scoping fails: exact committee including global = 0.7594\u20130.8356; the e_max column alone across all four committee rows = 0.791\u20130.836; all 16 cells = 0.753\u20130.836. The sentence carries no scope qualifier and the sentence immediately after it (\"the random null sits at 0.499\") reads off the same table, so it is summarising the whole committee block.\n\nRuled out the usual false-alarm explanations: same pool (the sentence itself says \"across 136,923 crystals\", identical to n_structures in the record), same scan, same four error scores, same committee. I also checked the post-hoc estimators in the same record in case the prose was quoting a different one: size_stratified_auroc_e_max gives global 0.794 / maxcomp 0.798 / leading-only 0.779, and force_stratified gives 0.63\u20130.66 \u2014 neither produces a 0.80\u20130.84 band.\n\nCorroboration from the project's own machinery: repo-wide grep finds the range in only two places, the offending line and results/CONSISTENCY_AUDIT.md:68, which already lists it under \"Not yet fixed \u2192 Overstated ranges\" (\"J6B's '0.80\u20130.84' against cells spanning 0.759\u20130.836\"). The machine-readable record results/records/consistency_audit.json claim 369 registers the identical finding with evidence \"0.80\u20130.84 holds only for max-atom and max-component. The document's own headline elsewhere quotes exact global = 0.798.\" tools/paper_numbers.py exports fsMPtrajGlobal from this same record as 0.798, and the document's Q5 section quotes \"exact global 0.798\" \u2014 so the prose range excludes the very statistic the paper's central recommendation is about.\n\nOne nuance worth noting for the fix: the audit message states the span as 0.753\u20130.836 (including the leading-only gate, which is an estimator of committee disagreement rather than exact committee disagreement), while the project's own audit doc states 0.759\u20130.836 (exact committee rows only). Either way the quoted floor of 0.80 is wrong; the fix should state the exact-committee span and mention the gate separately.",
+    "refuted": false,
+    "fix": "File: forcesketchJournalReady/results/J6B_FOUNDATION_ACQUISITION.md, line 49 (the sentence beginning \"Committee disagreement ranks reference-force error at AUROC 0.80\u20130.84 across\").\n\nReplace the range with one that covers the table it summarises. Suggested replacement for lines 49\u201350:\n\n\"Exact committee disagreement ranks reference-force error at AUROC 0.76\u20130.84 across\n136,923 crystals spanning 89 elements (0.759\u20130.836 over four statistics x four\nerror scores; the max-atom and max-component statistics span 0.80\u20130.84, the\nextensive global statistic 0.759\u20130.798, and the leading-only gate 0.753\u20130.791),\nwith a frozen trunk it never trained.\"\n\nKeep the rest of the paragraph (\"The random null sits at 0.499 ... Factor A is not a property of small organic molecules.\") unchanged \u2014 the null and the Q1 PASS verdict are unaffected, since every committee cell is far above 0.499.\n\nAlso update results/CONSISTENCY_AUDIT.md line 68 to move J6B's \"0.80\u20130.84\" out of the \"Not yet fixed / Overstated ranges\" list once the edit is made, and mark claim 369 in results/records/consistency_audit.json as resolved."
+   }
+  },
+  {
+   "subject": "per-edge cost constant, water vs 3BPA",
+   "docs": "J8_WATER_VERDICT.md (internal arithmetic)",
+   "detail": "J8_WATER_VERDICT.md lines 93-97 give water at ~0.0196 ms per (edge/SM) per lane and 3BPA at ~0.026 at a comparable edge count, then concludes 'the slope constant is system-dependent within a factor of ~3'. 0.026 / 0.0196 = 1.33, so the two numbers in the same sentence support a factor of ~1.3, not ~3. The qualitative point (the threshold transfers but the slope constant does not) survives; the stated magnitude does not follow from the quoted values.",
+   "severity": "minor",
+   "verdict": {
+    "refuted": false,
+    "reasoning": "Could not refute; the contradiction is real and is not a \"two documents measuring different things\" false alarm \u2014 it is arithmetic internal to one sentence, and the repo's own audit record already flags it as wrong without the fix having been propagated into the document.\n\nWHAT I RAN\n- Read results/J8_WATER_VERDICT.md lines 57-97 (fitted cost-model table + the disputed sentence).\n- Re-derived both constants from the document's own printed batched slopes using SM=108 (A100-SXM4-80GB; SM count confirmed from results/records/j0b_guard_NVIDIA_A100-SXM4-80GB_torch2.13.0+cu129.json and from the sm_count field of the A100 lane-bench rows):\n  water  11.23*108/68600  = 0.017678\n         25.34*108/137200 = 0.019948\n         49.76*108/274400 = 0.019584\n         99.56*108/548800 = 0.019592   -> median 0.019589 -> \"0.0196\"; spread 0.019948/0.017678 = 1.128 -> \"1.13x\"\n  3BPA   8.08*108/33280   = 0.026221   -> \"0.026\"\n  Both quoted values reproduce exactly, so the audit is quoting the right numbers.\n  Ratio = 0.026221 / 0.019589 = 1.339.\n- Independently re-fit T(L) = a + b*L by least squares over (lanes, median_ms) for every surviving lane-bench record with the fs-cpu python: results/records/j8_lane_bench_NVIDIA_H200.jsonl, j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl, j8_lane_bench_water_NVIDIA_H200.jsonl, j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl, j8_water_verdict_source_MIG.jsonl, superseded/j8_lane_bench_water_Blackwell.jsonl, and contaminated/j8_lane_bench{,_water}_NVIDIA_A100-SXM4-80GB_cotenant_gpu_requeue.jsonl (the only surviving A100-80GB, 108-SM pair). Computed k = slope * SM / total_edges for every (system, B) cell to look for any pairing that yields ~3.\n- Grepped results/, paper/main.tex, paper/macros.tex and gpt_plan.md for \"0.0196\", \"0.026\", \"edge/SM\", \"slope constant\", \"system-dependent\", \"factor of ~3\".\n\nWHY IT CANNOT BE REFUTED\n1. The SM normalisation cancels. Both constants are measured on the SAME GPU (A100-SXM4-80GB, 108 SMs), so the 108 divides out of the ratio entirely. There is no normalisation convention, SM count, or edge-count convention that can turn 1.34 into 3.\n2. The pending re-run does not rescue it. results/records/review_candidates.json:152 projects the corrected (true 8-lane) constants as 0.0231 / 0.0306, ratio 1.325. My own fits of the surviving A100 records give water plateau k = 0.02343 / 0.02307 / 0.02306 (B=8/16/32, i.e. ~0.0231, matching that projection) against 3BPA B=64 k = 0.02078, ratio 0.90. Every derivation lands between 0.9x and 1.34x; none lands near 3x. So this is an arithmetic/wording defect that survives the re-run, not a number awaiting regeneration.\n3. The only pairing that reaches ~3 uses a value the sentence does not quote and that contradicts the value it does quote: 3BPA at 33,280 edges (k = 0.0262) against water at the MATCHED 34,300 edges, i.e. B=2, k = 2.49*108/34300 = 0.00784, giving 3.34x. That is arguably what \"at a comparable edge count\" was reaching for, but the sentence's stated water constant is explicitly the B=4..32 plateau (0.0196), not the B=2 value, and B=2 sits at the ~10^4-edge threshold rather than \"above the threshold\" as the sentence requires. Under the surviving A100 record that same matched-edge pairing gives only 0.02078/0.01156 = 1.80x anyway.\n4. Not a cross-document mismatch and not a superseded-vs-current artifact: the constants appear in exactly one place in the repo (J8_WATER_VERDICT.md:93-97). paper/main.tex and paper/macros.tex do not reference them.\n5. The repo's own audit already agrees. results/records/consistency_audit.json contains an entry {doc: J8_WATER_VERDICT.md, quote: \"the slope constant is system-dependent within a factor of ~3\", status: \"wrong\", evidence: \"0.026217/0.019589 = 1.34x, not ~3x ...\"}. That correction was never propagated back into the document: line 96 is still live prose, with no strikethrough and no \"> Corrected\" blockquote, and results/CONSISTENCY_AUDIT.md does not mention it either.\n6. The suspension banner at the top of the file does not already cover this. It suspends \"the specific milliseconds, slopes and speedups\" while explicitly preserving the qualitative conclusions including \"the ~10^4-edge threshold\". The \"~3\" is a derived cross-system ratio presented as a surviving qualitative characterisation, and it is wrong on its face regardless of the re-run.\n\nThe audit's own hedge is correct: the qualitative claim (the ~10^4-edge threshold transfers; the per-edge slope constant does not) is fully supported by the records. Only the stated magnitude fails.",
+    "fix": "File: /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_WATER_VERDICT.md, lines 95-97.\n\nCurrent text (lines 93-97):\n  The marginal per-edge cost above the threshold is *not* universal: normalising by\n  SM count, water settles at \u22480.0196 ms per (edge/SM) per lane across B = 4\u202632\n  (spread 1.13\u00d7), while 3BPA at a comparable edge count gives \u22480.026. So the\n  threshold transfers; the slope constant is system-dependent within a factor of\n  ~3. Reported as such rather than fitted into a single law.\n\nReplace the trailing clause on lines 95-97 so the magnitude matches the two quoted values (both on the same 108-SM A100, so the SM normalisation cancels and the ratio is 0.026221/0.019589 = 1.34):\n\n  The marginal per-edge cost above the threshold is *not* universal: normalising by\n  SM count, water settles at \u22480.0196 ms per (edge/SM) per lane across B = 4\u202632\n  (spread 1.13\u00d7), while 3BPA at B = 64 (33,280 edges) gives \u22480.026 \u2014 both on the\n  same 108-SM A100, so the normalisation cancels in the comparison. So the\n  threshold transfers; the slope constant is system-dependent by a factor of\n  **~1.3**. Reported as such rather than fitted into a single law.\n\n  > **Corrected.** This sentence previously read \"system-dependent within a factor\n  > of ~3\". The two constants it quotes give 0.026221 / 0.019589 = **1.34\u00d7**. A\n  > factor near 3 arises only under a pairing the text never stated \u2014 3BPA at\n  > 33,280 edges (0.0262) against water at the *matched* 34,300 edges (B = 2,\n  > 0.00784), = 3.34\u00d7 \u2014 which contradicts the B = 4\u202632 plateau the same sentence\n  > quotes and sits at, not above, the ~10\u2074-edge threshold. The correction is\n  > independent of the timing suspension above: under the corrected 8-lane fits the\n  > constants become 0.0231 / 0.0306 (ratio 1.33), and under the surviving A100\n  > record (`results/records/contaminated/j8_lane_bench{,_water}_NVIDIA_A100-SXM4-80GB_cotenant_gpu_requeue.jsonl`)\n  > they are 0.0231 / 0.0208 (ratio 0.90). The qualitative claim \u2014 the threshold\n  > transfers, the slope constant does not \u2014 is unaffected.\n\nAlso mark the corresponding entry in results/records/consistency_audit.json (subject \"system-dependence factor of the per-edge cost constant\", status \"wrong\") as resolved/propagated, since the finding was recorded there but never applied to the document. No other file needs changing: grep confirms 0.0196/0.026 and \"factor of ~3\" appear nowhere else in results/, paper/main.tex, paper/macros.tex or gpt_plan.md."
+   }
+  }
+ ]
+}

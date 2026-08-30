@@ -1,0 +1,107 @@
+{
+ "protocol_version": 2,
+ "records": "j8_lane_bench_water_NVIDIA_A100-SXM4-80GB_pair.jsonl",
+ "device": "NVIDIA A100-SXM4-80GB",
+ "sm_count": 108,
+ "admissible": true,
+ "admissibility_failures": [],
+ "metrics": {
+  "batched_slope": {
+   "1": 2.4595352264299777,
+   "2": 7.030779988798377,
+   "4": 14.996377285212686,
+   "8": 29.67777075832837,
+   "16": 58.83240030889642,
+   "32": 117.1532749019257
+  },
+  "total_speedup": {
+   "1": 1.5265890888424676,
+   "2": 1.710916182972311,
+   "4": 1.8182908722952087,
+   "8": 1.86613546900747,
+   "16": 1.879530139302942,
+   "32": 1.8822072476431482
+  },
+  "transition_batch": 1,
+  "transition_batch_ratio_vs_3bpa": 0.015625,
+  "serial_slope_min": 13.245621269696379,
+  "serial_fit_r2_min": 0.9999389946373228
+ },
+ "predictions": {
+  "P1": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "batched_slope",
+     "at_batch": 16,
+     "op": "gt",
+     "threshold": 1.0,
+     "value": 58.83240030889642,
+     "passed": true
+    }
+   ],
+   "falsification_clause": true
+  },
+  "P2": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "total_speedup",
+     "at_batch": 16,
+     "op": "ge",
+     "threshold": 1.4,
+     "value": 1.879530139302942,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P3": {
+   "passed": false,
+   "criteria": [
+    {
+     "metric": "transition_batch",
+     "at_batch": null,
+     "op": "le",
+     "threshold": 4,
+     "value": 1,
+     "passed": true
+    },
+    {
+     "metric": "transition_batch_ratio_vs_3bpa",
+     "at_batch": null,
+     "op": "between",
+     "threshold": [
+      0.03,
+      0.0625
+     ],
+     "value": 0.015625,
+     "passed": false
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P4": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "serial_fit_r2_min",
+     "at_batch": null,
+     "op": "ge",
+     "threshold": 0.95,
+     "value": 0.9999389946373228,
+     "passed": true
+    },
+    {
+     "metric": "serial_slope_min",
+     "at_batch": null,
+     "op": "gt",
+     "threshold": 10.9,
+     "value": 13.245621269696379,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  }
+ }
+}

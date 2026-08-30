@@ -1,0 +1,107 @@
+{
+ "protocol_version": 2,
+ "records": "j8_lane_bench_water_NVIDIA_H200_pair.jsonl",
+ "device": "NVIDIA H200",
+ "sm_count": 132,
+ "admissible": true,
+ "admissibility_failures": [],
+ "metrics": {
+  "batched_slope": {
+   "1": 0.5648192771493584,
+   "2": 1.9763490467855374,
+   "4": 5.773463647659511,
+   "8": 12.492063019373647,
+   "16": 24.551867080061403,
+   "32": 48.578703605965394
+  },
+  "total_speedup": {
+   "1": 1.0902350103861467,
+   "2": 1.4517736866514848,
+   "4": 1.7022785531396603,
+   "8": 1.8008376891852196,
+   "16": 1.8518517972062438,
+   "32": 1.8665017851803245
+  },
+  "transition_batch": 2,
+  "transition_batch_ratio_vs_3bpa": 0.03125,
+  "serial_slope_min": 11.724311299519997,
+  "serial_fit_r2_min": 0.9999703210572074
+ },
+ "predictions": {
+  "P1": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "batched_slope",
+     "at_batch": 16,
+     "op": "gt",
+     "threshold": 1.0,
+     "value": 24.551867080061403,
+     "passed": true
+    }
+   ],
+   "falsification_clause": true
+  },
+  "P2": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "total_speedup",
+     "at_batch": 16,
+     "op": "ge",
+     "threshold": 1.4,
+     "value": 1.8518517972062438,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P3": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "transition_batch",
+     "at_batch": null,
+     "op": "le",
+     "threshold": 4,
+     "value": 2,
+     "passed": true
+    },
+    {
+     "metric": "transition_batch_ratio_vs_3bpa",
+     "at_batch": null,
+     "op": "between",
+     "threshold": [
+      0.03,
+      0.0625
+     ],
+     "value": 0.03125,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P4": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "serial_fit_r2_min",
+     "at_batch": null,
+     "op": "ge",
+     "threshold": 0.95,
+     "value": 0.9999703210572074,
+     "passed": true
+    },
+    {
+     "metric": "serial_slope_min",
+     "at_batch": null,
+     "op": "gt",
+     "threshold": 10.9,
+     "value": 11.724311299519997,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  }
+ }
+}

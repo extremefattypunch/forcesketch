@@ -1,0 +1,24 @@
+% Journal wrapper. `achemso` (the ACS/JCTC class) is NOT installed in this
+% TeX Live 2018 tree, so the manuscript builds on `article` with a preamble that
+% approximates the submission layout. At submission, swapping to JCTC is a
+% two-line change and nothing else in main.tex needs touching:
+%
+%   \documentclass[journal=jctcce,manuscript=article]{achemso}
+%   \author{...}\affiliation{...}      % replace the \authorblock below
+%
+% Everything numeric comes from macros.tex, which tools/paper_numbers.py derives
+% from records; tools/audit.py fails if any macro stops reproducing.
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+% titlesec is not in this TeX tree; article's default section headings are used.
+\setlength{\parskip}{0.25em}
+\newcommand{\authorblock}[2]{\begin{center}{\large #1}\\[0.3em]{\small\itshape #2}\end{center}}
+\newcommand{\note}[1]{\textcolor{gray}{\small[#1]}}
