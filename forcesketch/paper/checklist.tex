@@ -1,4 +1,4 @@
-\section*{SIMBIOCHEM Submission Checklist}
+\section*{Submission Checklist}
 
 \begin{enumerate}
 
@@ -19,11 +19,11 @@
 \item {\bf Research integrity \& originality}
     \item[] Question: Do you confirm that this is an original submission --- not a duplicate or lightly tweaked resubmission, nor one of multiple versions of the same work submitted to this workshop --- and that you comply with research-integrity guidelines?
     \item[] Answer: \answerYes{}
-    \item[] Justification: This is original, previously unsubmitted work, submitted once to this workshop. It builds on a published multi-head-committee method, which is cited, and uses that work's publicly released checkpoints and data splits; those artifacts are identified by content hash in the supplement so the provenance is checkable.
+    \item[] Justification: This is original work, submitted once to this workshop, and it is not a duplicate or lightly tweaked resubmission. It is a single-version submission here; it may be concurrently under review at another non-archival workshop, which this venue's call for papers explicitly permits, and we disclose that rather than leave it implicit. It builds on a published multi-head-committee method, which is cited, and uses that work's publicly released checkpoints and data splits; those artifacts are identified by content hash in the artifact's freeze manifest so the provenance is checkable.
 
 \item {\bf Reproducibility} \emph{(optional)}
     \item[] Question: Where applicable, does the paper provide enough information (data, code, settings) to reproduce the main results?
     \item[] Answer: \answerYes{}
-    \item[] Justification: All datasets and model checkpoints are public and are pinned by SHA-256 in the supplement manifest, together with the environment lockfile, the exact library commit, and the ten probe seeds, which were frozen before the final evaluation and none of which were discarded. The reported confidence intervals are paired bootstraps over structures with $10^4$ resamples. The estimator library, experiment scripts, frozen configuration and every raw result record are available as an anonymised artifact at \url{\fsCodeUrl}; see the data and code availability statement.
+    \item[] Justification: All datasets and model checkpoints are public and are pinned by SHA-256 in the artifact's freeze manifest, together with the environment lockfile, the exact library commit, and the ten probe seeds, which were frozen before the final evaluation and none of which were discarded. The reported confidence intervals are paired bootstraps over structures with $10^4$ resamples. The estimator library, experiment scripts, frozen configuration and every raw result record are available as an anonymised artifact at \url{\fsCodeUrl}; see the data and code availability statement.
 
 \end{enumerate}

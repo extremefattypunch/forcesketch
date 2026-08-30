@@ -1,10 +1,18 @@
 \documentclass{article}
 
-% SIMBIOCHEM II @ NeurIPS 2026 -- double-blind, non-archival workshop.
-% The `final' and `preprint' options are deliberately omitted, per the call:
-% submissions must be anonymous or they are desk-rejected.
-\usepackage[dblblindworkshop]{neurips_2026}
-\workshoptitle{2nd SIMBIOCHEM Workshop at NeurIPS 2026}
+% Official NeurIPS 2026 style, loaded with NO options. This is deliberate and
+% venue-neutral, so one PDF can go to more than one workshop:
+%   * `final' and `preprint' are omitted, which the call for papers requires --
+%     \if@anonymous defaults TRUE, so the anonymous author block still applies;
+%   * `dblblindworkshop' is also omitted. In this style file \if@workshop is read
+%     in exactly one place (neurips_2026.sty:401), the footer notice, and gates
+%     nothing else -- not anonymity. With it, the footer names one workshop;
+%     without it, the footer reads "Submitted to 40th Conference on Neural
+%     Information Processing Systems (NeurIPS 2026). Do not distribute."
+% SIMBIOCHEM II asks only that `final' and `preprint' be omitted, does not
+% require its name in the footer, and is non-archival and explicitly welcomes
+% work "currently under review elsewhere".
+\usepackage{neurips_2026}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
