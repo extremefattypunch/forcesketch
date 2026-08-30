@@ -168,6 +168,50 @@ def pairwise_seeds(
     )
 
 
+def head_subsample_exact_mean_seeds(
+    *, M: int, K: int, batch_size: int, seed: int | None,
+    device="cpu", dtype=torch.float32, per_structure: bool = True,
+) -> SeedBundle:
+    r"""Head subsampling that USES the exact mean force it pays a lane for.
+
+    `head_subsample_seeds` spends a mean lane under `with_mean_lane=True` but then
+    estimates with the sample variance among the K drawn heads, throwing that mean
+    away. That understates the baseline, and comparing against it flatters
+    ForceSketch -- the same asymmetry this project objects to elsewhere. The fair
+    estimator at the same budget is
+
+        v_hat_d = M / (K (M-1)) * sum_{i in S} (F_di - Fbar_d)^2 ,
+
+    which is unbiased under uniform sampling without replacement, because
+    E sum_{i in S} (F_di - Fbar_d)^2 = (K/M) sum_m (F_dm - Fbar_d)^2 = (K/M)(M-1) v_d.
+
+    Note this is just a QUADRATIC sketch with centered one-hot probes: with
+    w_i = P e_i = e_i - (1/M) 1 we get F w_i = f_i - Fbar exactly, so the existing
+    machinery applies unchanged and only the scale differs.
+    """
+    if K < 1:
+        raise ValueError(f"K must be >= 1, got {K}")
+    if K > M:
+        raise ValueError(f"cannot draw {K} distinct heads from M={M}")
+    g = make_generator(seed, "head_subsample_exact_mean", K, batch_size)
+    n = _n_draws(batch_size, per_structure)
+
+    idx = torch.stack([torch.randperm(M, generator=g)[:K] for _ in range(n)], dim=1)  # [K, n]
+    w = torch.zeros(K, n, M, dtype=CONSTRUCT_DTYPE)
+    w.scatter_(2, idx.unsqueeze(-1), 1.0)
+    w -= 1.0 / M                      # centre each one-hot: w_i = P e_i
+    return SeedBundle(
+        seeds=_finish(w, batch_size, per_structure, dtype, device),
+        method="head_subsample_exact_mean", K=K, M=M,
+        estimator_kind="quadratic",
+        variance_scale=M / (K * (M - 1)),
+        std_correction=1.0,
+        lane_budget=LaneBudget(uq_lanes=K, mean_lanes=1, exact_mean_force=True),
+        per_structure=per_structure, rng_seed=seed,
+        head_indices=idx,
+    )
+
+
 def head_subsample_seeds(
     *, M: int, K: int, batch_size: int, seed: int | None,
     device="cpu", dtype=torch.float32, per_structure: bool = True,

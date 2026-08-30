@@ -10,6 +10,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
+\usepackage{doi}          % renders the bibliography's doi field as a hyperlink
 \usepackage{booktabs}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -23,8 +24,15 @@
 % analysis/tables.py. Do not write a literal result into this file.
 \input{macros}
 
-\title{ForceSketch: Randomized Head-Space VJPs\\
-for Screening Force Uncertainty in Multi-Head Molecular Potentials}
+% Anonymous artifact link. MUST be an anonymised host while under double-blind
+% review -- a github.com/<username> URL identifies the author and the call for
+% papers lists that as grounds for desk rejection. scripts/09_freeze.py refuses
+% to freeze while this still reads PLACEHOLDER.
+\newcommand{\fsCodeUrl}{https://anonymous.4open.science/r/PLACEHOLDER}
+
+\title{Force sketching in MD:\\
+Can we replace multi-head committees with screening\\
+methods for faster force uncertainty compute?}
 
 % Left deliberately empty: neurips_2026.sty typesets the anonymous author block
 % itself whenever the `final' option is absent, and ignores whatever is here.
@@ -35,60 +43,62 @@ for Screening Force Uncertainty in Multi-Head Molecular Potentials}
 \maketitle
 
 \begin{abstract}
-Multi-head committees make ensemble \emph{energy} uncertainty nearly free for machine-learned
-interatomic potentials: one forward pass yields all $M$ head energies. Force uncertainty is not,
-since a single backward pass cannot produce the per-head forces --- exact disagreement needs the
-full $(M{-}1)$-dimensional centered head subspace. We ask whether $K\ll M{-}1$ randomized or
-orthogonal head-space vector--Jacobian products can stand in, using unbiased Gaussian and Haar
-estimators with exact finite-$K$ corrections, on a pretrained eight-head MACE committee across 3BPA
-and three rMD17 molecules. The answer is negative for \emph{replacement} and positive for
-\emph{screening}. At $K\le4$ no estimator recovers the exact top-5\% uncertainty set under either
-reading of the acquisition rule: recall is $\fsMaxRecallKFourLo$--$\fsMaxRecallKFourHi$ under the
-max-component rule we take as primary, and \fsHaarRecallKFour{} \fsHaarRecallKFourCI{} under the
-statistically easier global one. Extending the budget to $K{=}6$ of $7$ still reaches only
-$\fsMaxRecallKSixLo$--$\fsMaxRecallKSixHi$. But a calibrated gate over a low-rank head-space control
-variate skips $\fsGateCVSkipLo$--$\fsGateCVSkipHi$ of exact evaluations while retaining
-$\fsGateCVRecallLo$--$\fsGateCVRecallHi$ of high-uncertainty configurations, dominating a free
-energy-disagreement gate and head subsampling at matched budget in
-\fsGateCVDominates{} of \fsGateCVComparisons{} comparisons. The wall-clock benefit is sharply
-regime-dependent: against a \emph{batched} exact baseline, reducing directions is worth
-$\fsBestTotalKThreeBSixteen\times$ at batch size 16 but only $\fsBestTotalKThreeBOne\times$ at batch
-size 1, where batched reverse mode already amortizes cotangent lanes and the gate becomes a net
-slowdown. The decision-quality result is robust; the speed result is not.
+Machine-learned interatomic potentials simulate molecules at a small fraction of the cost of quantum
+chemistry, but they are only useful if they can tell us when they are guessing. The standard way to
+ask is to train a \emph{committee} of predictors and measure how much they disagree. A
+\emph{multi-head} committee makes this almost free for energies: $M$ prediction heads share one
+network body, so a single forward pass through the network returns all $M$ energy estimates at once.
+Forces are not free. A force is the derivative of the energy with respect to the atomic positions,
+and recovering each head's forces takes its own backward pass through that network --- so force
+disagreement, the quantity that actually decides which structures a simulation should stop and
+verify, costs roughly $M$ times more than energy disagreement.
+
+We ask whether a handful of cheap random probes can estimate that disagreement without computing all
+$M$ sets of forces, using a pretrained eight-head committee on four molecular systems. The answer is
+no for \emph{replacement} and yes for \emph{screening}. Even given six of the seven probes the exact
+computation would use, the best estimator identifies only
+\fsMaxRecallKSixLoPct--\fsMaxRecallKSixHiPct\% of the genuinely most uncertain structures, so an
+approximate score cannot stand in for the exact one. But a calibrated filter built from that same
+score safely skips \fsGateCVSkipLoPct--\fsGateCVSkipHiPct\% of the expensive computations while
+still catching \fsGateCVRecallLoPct--\fsGateCVRecallHiPct\% of the uncertain structures, and beats
+cheaper
+alternatives in \fsGateCVDominates{} of \fsGateCVComparisons{} comparisons. Whether this saves
+wall-clock time turns out to depend on how the model is run: filtering is worth
+$\fsBestTotalKThreeBSixteen\times$ when structures are processed in batches, but only
+$\fsBestTotalKThreeBOne\times$ one at a time, where it becomes a net slowdown. The decision-quality
+result is robust; the speed result is not.
 \end{abstract}
 
 \section{Introduction}
 Uncertainty quantification is what makes learned interatomic potentials usable beyond their training
 distribution: it drives active learning, flags extrapolation during molecular dynamics, and decides
-when a reference calculation is required. Committee disagreement remains the most widely used
-estimator~\citep{behler2015,podryabinkin2017,carrete2023}, and multi-head committees~\citep{beck2025mhc}, with
-shallow ensembles more broadly~\citep{kellner2024}, make it dramatically cheaper by attaching
-$M$ readout heads to one shared message-passing trunk, so that all $M$ energies come from a single
-forward pass.
+when an expensive reference calculation is required. Committee disagreement remains the most widely
+used estimator~\citep{behler2015,podryabinkin2017,carrete2023}, and multi-head
+committees~\citep{beck2025mhc} --- shallow ensembles more broadly~\citep{kellner2024} --- make it
+dramatically cheaper by attaching $M$ readout heads to one shared message-passing trunk, so all $M$
+energies come from a single forward pass.
 
-That amortization does not extend to forces. As the multi-head committee work states directly,
-``a single backward pass can not yield the forces for all the heads, and thus their standard
-deviation \ldots\ the standard deviation requires multiple reverse passes through the computational
-graph.'' Forces are the quantity that matters for MD and for most acquisition rules, so the
-expensive half of committee UQ is exactly the half the shared trunk fails to amortize.
+That amortization does not extend to forces. As the multi-head committee work states directly, ``a
+single backward pass can not yield the forces for all the heads \ldots\ the standard deviation
+requires multiple reverse passes through the computational graph.'' Forces are what MD and most
+acquisition rules actually consume, so the expensive half of committee uncertainty is exactly the
+half the shared trunk fails to amortize.
 
-Downstream, however, one rarely needs every member force. Acquisition needs a \emph{ranking};
-a safety gate needs a \emph{threshold decision}; error analysis needs the most uncertain
-\emph{atom}. This motivates estimating the force-variance statistic directly rather than
-reconstructing the member forces that define it. We call this ForceSketch: replace the exact
-$(M{-}1)$-direction centered head basis with $K$ randomized or orthogonal head-space directions,
-each costing one reverse pass.
+Downstream, though, one rarely needs every member force: acquisition needs a \emph{ranking}, a safety
+gate needs a \emph{threshold decision}, error analysis needs the most uncertain \emph{atom}. That
+motivates estimating the force-variance statistic directly rather than reconstructing the member
+forces defining it. We call this ForceSketch: replace the exact $(M{-}1)$-direction centered head
+basis with $K$ randomized or orthogonal directions, each still costing one reverse pass.
 
 \paragraph{Contributions.}
-First, we formulate multi-head force disagreement as a statistic of the centered energy Jacobian
-with respect to atomic coordinates, and show the exact computation needs only the centered
-$(M{-}1)$-dimensional head subspace. Second, we give unbiased Gaussian, Haar-orthogonal,
-Rademacher and pairwise estimators, with closed-form finite-$K$ corrections for the componentwise
-force standard deviation; we correct a removable singularity in the Haar constant and verify every
-estimator by Monte Carlo. Third, we report a \emph{negative} result that we believe is the useful
-one: at $K\le4$ none of these estimators preserves the exact top-5\% acquisition set, on any of four
-molecular systems. Fourth, we show what does work --- an empirically calibrated screening gate
-with a low-rank control variate --- and quantify both its decision quality and its wall-clock saving.
+We formulate multi-head force disagreement as a statistic of the centered energy Jacobian and show
+the exact computation needs only the centered $(M{-}1)$-dimensional head subspace; we give unbiased
+Gaussian, Haar-orthogonal, Rademacher and pairwise estimators with closed-form finite-$K$
+corrections, correcting a removable singularity in the Haar constant. We then report a
+\emph{negative} result we believe is the useful one --- at $K\le4$ none of these preserves the exact
+top-5\% acquisition set, on any of four systems --- and show what does work: an empirically
+calibrated screening gate over a low-rank control variate, whose decision quality and wall-clock
+saving we quantify separately, because only the first survives.
 
 \begin{figure}[t]
 \centering
@@ -104,22 +114,64 @@ time depends on the autodiff regime (Section~\ref{sec:regime}).}
 
 \section{Problem formulation}
 \label{sec:problem}
-For Cartesian coordinates $x\in\mathbb{R}^{D}$, $D=3N$, a multi-head committee defines energies
-$e(x)=[E_1(x),\dots,E_M(x)]^{\mathsf T}$ and head forces $f_m=-\nabla_x E_m$, collected as
-$F(x)\in\mathbb{R}^{D\times M}$. With the centering projector $P = I - \tfrac{1}{M}\mathbf{1}\mathbf{1}^{\mathsf T}$,
-the per-coordinate disagreement is
-\begin{equation}
-v_d \;=\; \frac{1}{M-1}\sum_{m}\bigl(F_{dm}-\bar F_d\bigr)^2 \;=\; \frac{1}{M-1}\bigl\|e_d^{\mathsf T}FP\bigr\|_2^2 ,
-\qquad S \;=\; \sum_d v_d \;=\; \frac{\|FP\|_F^2}{M-1},
-\end{equation}
-with atom-level scores $u_a^{\mathrm{RMS}}=\sqrt{\tfrac13\sum_\alpha v_{a\alpha}}$ and
-$u_a^{\mathrm{MHC}}=\tfrac13\sum_\alpha\sqrt{v_{a\alpha}}$.
+\paragraph{Setup and notation.}
+A structure of $N$ atoms has Cartesian coordinates $x\in\mathbb{R}^{D}$ with $D=3N$. We index a
+single coordinate by $d\in\{1,\dots,D\}$, an atom by $a\in\{1,\dots,N\}$, and the three Cartesian
+components of one atom by $\gamma\in\{1,2,3\}$, so the pair $(a,\gamma)$ names the same thing as $d$.
+The committee has $M$ \emph{heads}: $M$ small readout networks attached to one shared
+message-passing trunk. Because they share the trunk, a single forward pass returns all $M$ head
+energies at once, as the vector
+$E(x)=[E_1(x),\dots,E_M(x)]^{\mathsf T}\in\mathbb{R}^{M}$. Head $m$'s force field is the negative
+energy gradient $f_m=-\nabla_x E_m\in\mathbb{R}^{D}$, and we collect the $M$ of them as the columns
+of
+\begin{equation*}
+F(x)\;=\;[\,f_1\;\cdots\;f_M\,]\;\in\;\mathbb{R}^{D\times M},
+\qquad\text{so } F_{dm} \text{ is head } m\text{'s force along coordinate } d .
+\end{equation*}
+Write $\bar F_d=\tfrac1M\sum_{m=1}^{M}F_{dm}$ for the committee-mean force on coordinate $d$ --- the
+force the simulation actually uses.
 
-Let $Q\in\mathbb{R}^{M\times(M-1)}$ satisfy $Q^{\mathsf T}Q=I$, $Q^{\mathsf T}\mathbf 1=0$,
-$QQ^{\mathsf T}=P$. Each column gives one reverse pass, $g_j=-\nabla_x(q_j^{\mathsf T}e)=Fq_j$, and
-$v_d=\tfrac{1}{M-1}\sum_j g_{j,d}^2$. The mean force is one further seed, $s_0=\tfrac1M\mathbf 1$.
-Exact force UQ therefore costs $M$ reverse lanes in total. \emph{Our question is whether downstream
-uncertainty decisions require all $M-1$ centered directions.}
+\paragraph{Two disagreement scores, at two scales.}
+Uncertainty is how much the heads disagree. On a \emph{single coordinate} that is their sample
+variance; summing over coordinates gives one number for the \emph{whole structure}:
+\begin{equation}
+\underbrace{v_d}_{\text{per coordinate}}\;=\;\frac{1}{M-1}\sum_{m=1}^{M}\bigl(F_{dm}-\bar F_d\bigr)^2 ,
+\qquad
+\underbrace{S}_{\text{per structure}}\;=\;\sum_{d=1}^{D} v_d\;=\;\frac{\lVert FP\rVert_F^2}{M-1} .
+\end{equation}
+Here $\mathbf 1\in\mathbb{R}^{M}$ is the all-ones vector,
+$P=I_M-\tfrac{1}{M}\mathbf 1\mathbf 1^{\mathsf T}$ is the projector that subtracts the head mean
+(\emph{centering}), and $\lVert\cdot\rVert_F$ is the Frobenius norm. Centering is what turns raw
+predictions into disagreement: $FP$ holds each head's deviation from the consensus, and $v_d$ is
+just the squared length of its $d$-th row, $v_d=\lVert (FP)_{d,:}\rVert_2^2/(M-1)$. Pooling the
+three components of one atom gives the two atom-level scores used in the literature,
+$u_a^{\mathrm{RMS}}=\bigl(\tfrac13\sum_{\gamma}v_{a\gamma}\bigr)^{1/2}$ and
+$u_a^{\mathrm{MHC}}=\tfrac13\sum_{\gamma}\sqrt{v_{a\gamma}}$, where $v_{a\gamma}$ is $v_d$ for the
+coordinate $d=(a,\gamma)$. Section~\ref{sec:setup} says which of these the acquisition rule ranks by.
+
+\paragraph{Why energies are cheap and forces are not.}
+The $M$ energies cost one forward pass because the heads share a trunk. Forces are gradients, and
+reverse-mode differentiation returns the gradient of \emph{one scalar} per backward pass. Feeding it
+the mean energy yields the mean force, not the spread; feeding it each $E_m$ in turn yields all $M$
+force fields but costs $M$ backward passes. We call one backward pass a \emph{lane}.
+
+The saving grace is that $S$ depends on $F$ only through the centered matrix $FP$, whose columns sum
+to zero and therefore span at most $M-1$ dimensions. Let $Q\in\mathbb{R}^{M\times(M-1)}$ have
+orthonormal columns $q_1,\dots,q_{M-1}$ spanning exactly that centered subspace:
+\begin{equation*}
+Q^{\mathsf T}Q=I_{M-1},\qquad Q^{\mathsf T}\mathbf 1=0,\qquad QQ^{\mathsf T}=P .
+\end{equation*}
+Each column is one lane's worth of work. Differentiating the scalar $q_j^{\mathsf T}E$ --- a fixed
+weighted combination of the head energies --- costs a single backward pass and returns
+\begin{equation}
+g_j\;=\;-\nabla_x\bigl(q_j^{\mathsf T}E\bigr)\;=\;Fq_j\;\in\;\mathbb{R}^{D},
+\qquad\text{and}\qquad
+v_d\;=\;\frac{1}{M-1}\sum_{j=1}^{M-1} g_{j,d}^{\,2} .
+\end{equation}
+So the exact variance needs $M-1$ lanes, plus one more along the uniform direction
+$\tfrac1M\mathbf 1$ for the mean force the simulation needs anyway: $M$ lanes in total, matching the
+naive per-head loop. \emph{Our question is whether downstream uncertainty decisions really need all
+$M-1$ centered lanes.}
 
 \section{Method}
 \label{sec:method}
@@ -132,17 +184,42 @@ products have also been used to cheapen \emph{training}~\citep{bakong2026vjp}, b
 backward pass inside the network; we instead compress the \emph{output-head query space} at
 inference, leaving each reverse pass exact and reducing how many are needed to estimate an existing
 committee statistic.
-Draw $z_k\sim\mathcal N(0,I_M)$ and center, $w_k=Pz_k$; one reverse pass gives $g_k=Fw_k$ and
-$\widehat v_d = \tfrac{1}{K(M-1)}\sum_k g_{k,d}^2$ is unbiased. Alternatively sample a Haar-random
-orthonormal $K$-frame $W=QO$ inside the centered space; then
-$\widehat v^{\mathrm{Haar}}_d = \tfrac1K\sum_k G_{dk}^2$ is unbiased and \emph{exact} at $K=M-1$.
-Writing $r=M-1$, the two have relative standard deviations $\sqrt{2/K}$ and
-$\sqrt{2(r-K)/(K(r+2))}$, so orthogonalization reduces estimator variance by exactly
-$(r-K)/(r+2)$ --- a factor of $4/9$ at $K{=}3$, $M{=}8$. This is free, and it is the single largest
-methodological lever we find.
+The idea is to stop asking for all $M-1$ centered directions and instead \emph{probe} the centered
+subspace with $K\ll M-1$ random ones, then rescale. Each probe still costs exactly one lane, so the
+question is how much of the disagreement $K$ probes recover.
+
+Concretely, draw $z_k\sim\mathcal N(0,I_M)$ and center it, $w_k=Pz_k$; one lane returns
+$g_k=Fw_k\in\mathbb{R}^{D}$, and
+\begin{equation}
+\widehat v_d \;=\; \frac{1}{K(M-1)}\sum_{k=1}^{K} g_{k,d}^{\,2}
+\end{equation}
+is an unbiased estimator of $v_d$ --- on average it gives the right answer, though any single draw
+does not. The intuition is the standard one behind randomized trace estimation: a random probe sees
+each direction of the subspace equally in expectation, so the average of $K$ probes estimates the
+total energy in all $M-1$ of them.
+
+Random probes can overlap, wasting budget. Sampling them \emph{orthogonally} instead removes that
+waste. Let $O\in\mathbb{R}^{(M-1)\times K}$ have orthonormal columns drawn Haar-uniformly (that is,
+uniformly over all $K$-dimensional orientations, obtained in practice by orthonormalizing a Gaussian
+matrix), and set $W=QO\in\mathbb{R}^{M\times K}$: a random orthonormal $K$-frame lying inside the
+centered subspace. Collecting the $K$ lanes it costs into
+$G=FW\in\mathbb{R}^{D\times K}$ --- so $G_{dk}$ is the response of coordinate $d$ to probe $k$ ---
+gives
+\begin{equation}
+\widehat v^{\mathrm{Haar}}_d \;=\; \frac{1}{K}\sum_{k=1}^{K} G_{dk}^{\,2},
+\end{equation}
+which is unbiased and becomes \emph{exact} at $K=M-1$, where the frame is a full basis of the
+centered subspace. Writing $r=M-1$ for its dimension, the two estimators have relative standard
+deviations $\sqrt{2/K}$ and $\sqrt{2(r-K)/(K(r+2))}$, so orthogonalization multiplies the estimator
+variance by exactly $(r-K)/(r+2)$ --- a factor of $4/9$ at $K{=}3$, $M{=}8$. It costs nothing extra,
+and it is the single largest methodological lever we find.
 
 \paragraph{Finite-$K$ corrections.}
-$\sqrt{\widehat v_d}$ is biased low. For Gaussian probes $K\widehat v_d/v_d\sim\chi^2_K$ and the
+Reporting a standard deviation means taking a square root, and the square root of an unbiased
+variance estimate is \emph{not} an unbiased standard-deviation estimate: $\sqrt{\cdot}$ is concave,
+so $\sqrt{\widehat v_d}$ is biased low, the more so the fewer probes we spend. The fix is a
+multiplicative constant depending only on $K$ (and, for orthogonal probes, on $r$).
+For Gaussian probes $K\widehat v_d/v_d\sim\chi^2_K$ and the
 correction is $c_K=\sqrt{2/K}\,\Gamma(\tfrac{K+1}{2})/\Gamma(\tfrac K2)$. For Haar probes the
 analogous constant is conventionally written with Beta functions, which is singular at $K=r$
 (it evaluates $B(K/2,0)$). Cancelling the shared $\Gamma(\tfrac{r-K}{2})$ gives a form that is
@@ -154,33 +231,46 @@ c^{\mathrm{Haar}}_{K,r}\;=\;\sqrt{\tfrac{r}{K}}\;
 \qquad c^{\mathrm{Haar}}_{K,r}\to c_K \ \text{ as } r\to\infty .
 \end{equation}
 We verify unbiasedness of $\sqrt{\widehat v}/c$ to within Monte-Carlo error at $4\times10^5$ draws.
+These closed forms cover the Gaussian and Haar estimators; the control variate below mixes exact and
+sketched directions and has no such constant, so we apply the residual frame's Haar correction,
+which is an approximation. It does not affect the screening results, because $c_\alpha$ is itself a
+multiplicative calibration and absorbs any constant scale error exactly.
 
 \paragraph{Low-rank control variate.}
-Split $P = Q_{r_0}Q_{r_0}^{\mathsf T} + R$, where $Q_{r_0}$ holds the $r_0$ leading eigenvectors of
-the \emph{design}-split average $\bar A=\tfrac1n\sum_i PF_i^{\mathsf T}F_iP$, fitted separately for
+Split $P = Q_{r_0}Q_{r_0}^{\mathsf T} + R$, where $Q_{r_0}\in\mathbb{R}^{M\times r_0}$ has
+orthonormal columns inside the centered subspace and $R$ is the projector onto what is left of it,
+the \emph{residual} subspace of dimension $r-r_0$. The columns of $Q_{r_0}$ are the $r_0$ leading
+eigenvectors of the \emph{design}-split average $\bar A=\tfrac1n\sum_i PF_i^{\mathsf T}F_iP$ --- an
+$M\times M$ matrix in \emph{head} space, whose top eigenvector is the weighting of heads along which
+this committee disagrees most consistently. It is fitted separately for
 each system on structures disjoint from both the calibration and the test splits
 (Section~\ref{sec:setup}). Fitting it on the calibration split instead would invalidate the conformal
 guarantee below, since split conformal requires the score function --- learned basis included --- to
-be frozen before the calibration ratios are formed. Evaluate those $r_0$
-directions exactly and sketch only the residual with $K'=K-r_0$ Haar directions:
+be frozen before the calibration ratios are formed. The idea is to spend a few lanes where the disagreement actually concentrates, and probe only what
+is left over. Evaluate those $r_0$ leading directions exactly, costing $g_j=Fq_j$ for the columns
+$q_j$ of $Q_{r_0}$, and sketch only the residual with $K'=K-r_0$ Haar probes drawn inside $R$'s
+range, collected as $G\in\mathbb{R}^{D\times K'}$ exactly as before but with the frame now living in
+the residual subspace:
 \begin{equation}
-\widehat v_d \;=\; \frac{1}{r}\Bigl[\textstyle\sum_{j\le r_0} g_{j,d}^2 \;+\; \frac{r-r_0}{K'}\sum_{k} G_{k,d}^2\Bigr],
+\widehat v_d \;=\; \frac{1}{r}\Bigl[\textstyle\sum_{j\le r_0} g_{j,d}^{\,2} \;+\; \frac{r-r_0}{K'}\sum_{k=1}^{K'} G_{dk}^{\,2}\Bigr],
 \end{equation}
 which remains unbiased. We stress the motivation is the \emph{opposite} of the intuitive one: a
 concentrated spectrum does not explain why small $K$ works, it is what \emph{breaks} a random sketch,
 because the sketch either captures the dominant directions or misses them.
 
 \paragraph{Screening rather than replacement.}
-Given a cheap $\widehat S$, take the split-conformal order statistic~\citep{vovk2005,crc}: on a
-calibration split disjoint from both the design and test splits, form the ratios
-$r_i=S(x_i)/(\widehat S(x_i)+\epsilon)$ and set $c_\alpha$ to the
-$\lceil (n+1)(1-\alpha)\rceil$-th order statistic. Define $U(x)=c_\alpha\widehat S(x)$; for an exact
-high-uncertainty threshold $\tau$, skip the exact computation when $U(x)<\tau$ and fall back
-otherwise. Under exchangeability this gives \emph{marginal} coverage
-$\mathbb P\!\left[S(x)\le U(x)\right]\ge 1-\alpha$ on the test split. We claim no more than that: it
-is not a conditional guarantee, and not an out-of-distribution one --- 3BPA at 1200\,K calibrated
-against 300\,K-trained behaviour is precisely such a shift, and we report the observed coverage
-there rather than assume it.
+If the sketch cannot \emph{replace} the exact score, it can still say when the exact score is
+certainly small. Conformal prediction~\citep{vovk2005,crc} turns any score, however crude, into a
+calibrated bound using held-out data alone. On a calibration split of $n$ structures disjoint from
+design and test, form the ratios $\eta_i=S(x_i)/(\widehat S(x_i)+\epsilon)$, the factor by which
+the cheap score underestimates the exact one --- and let $c_\alpha$ be their
+$\lceil (n+1)(1-\alpha)\rceil$-th order statistic, large enough to cover all but an $\alpha$
+fraction of them. Then $U(x)=c_\alpha\widehat S(x)$ sits above $S(x)$ at least $1-\alpha$ of the
+time, so $U(x)<\tau$ \emph{certifies} that the exact score is below the high-uncertainty threshold
+$\tau$ too: skip when $U(x)<\tau$, fall back otherwise. Formally this is \emph{marginal} coverage,
+$\mathbb P[S(x)\le U(x)]\ge 1-\alpha$, under exchangeability --- not a conditional guarantee and not
+an out-of-distribution one. 3BPA at 1200\,K calibrated against 300\,K behaviour is exactly such a
+shift, so we report the observed coverage there rather than assume it.
 
 \section{Experimental setup}
 \label{sec:setup}
@@ -189,55 +279,56 @@ layers, 32 channels, $\ell_{\max}=1$, $r_{\mathrm{cut}}=6$\,\AA. We evaluate the
 head-distribution variants (\emph{disjoint}, \emph{overlapping}, \emph{same}) on 3BPA~\citep{botnet3bpa} at 1200\,K
 (2139 structures, extrapolative relative to the 300\,K training set) and the joint ten-molecule
 rMD17~\citep{rmd17} committee on ethanol (9 atoms), aspirin (21) and azobenzene (24), 1000 held-out structures each.
-All estimator evaluation is in float64. This is not fastidiousness: with a signal-to-disagreement ratio
-$\kappa\approx36$ on this committee, a float32 ``exact'' reference carries $\sim\!3\times10^{-5}$
-relative error, larger than the $10^{-5}$ tolerance at which we verify full-rank exactness.
-Ten random seeds are frozen before testing and none is discarded; all confidence
-intervals are paired bootstraps~\citep{efron} over structures with \fsNBoot{} resamples. Timing uses PyTorch~\citep{pytorch} CUDA events with
-per-iteration measurement on an RTX 5070 Laptop GPU; the measured lane cost is
-$T(L)=\fsCostIntercept + \fsCostSlope\,L$\,ms. Correctness is checked in float64; deployment timing
-is float32, on a single GPU.
+Estimator evaluation is in float64 and this is not fastidiousness: the mean force exceeds the
+disagreement by a factor $\kappa\approx36$ here, so a float32 ``exact'' reference carries more
+relative error than the $10^{-5}$ tolerance at which we verify full-rank exactness. Deployment
+timing is float32, on one RTX 5070 Laptop GPU, with PyTorch~\citep{pytorch} CUDA events measured per
+iteration; the fitted lane cost is $T(L)=\fsCostIntercept + \fsCostSlope\,L$\,ms. Ten random seeds
+are frozen before testing and none discarded; all intervals are paired
+bootstraps~\citep{efron} over structures with \fsNBoot{} resamples.
 
 \paragraph{The acquisition decision, stated exactly.}
 \label{par:acq}
-Every fidelity and screening number below concerns one decision: from a pool of held-out structures,
-select the most force-uncertain fraction for exact reference computation. Following
-\citet{beck2025mhc}, structures are ranked by the maximum disagreement of their force components. We
-evaluate that extreme-value rule in both of its defensible forms --- maximum over components and
-maximum over atoms --- and additionally report the global sum as an easier diagnostic statistic:
+Every number below concerns one decision: from a pool of held-out structures, select the most
+force-uncertain fraction for exact reference computation. Following \citet{beck2025mhc}, structures
+are ranked by the maximum disagreement of their force components; we evaluate that extreme-value
+rule in both of its defensible forms --- maximum over components, maximum over atoms --- and report
+the global sum as an easier diagnostic statistic:
 \begin{equation}
-u^{\max\text{-comp}}(x)=\max_{d}\widehat\sigma_d,\qquad
-u^{\max\text{-atom}}(x)=\max_{a}\widehat u_a^{\mathrm{MHC}},\qquad
-S(x)=\sum_{d}\widehat v_d ,
+\widehat u^{\max\text{-comp}}(x)=\max_{d}\widehat\sigma_d,\qquad
+\widehat u^{\max\text{-atom}}(x)=\max_{a}\widehat u_a^{\mathrm{MHC}},\qquad
+\widehat S(x)=\sum_{d}\widehat v_d .
 \end{equation}
-where $\widehat\sigma_d=\sqrt{\widehat v_d}/c$ is the finite-$K$-corrected componentwise standard
-deviation and $u_a^{\mathrm{MHC}}$ is as defined in Section~\ref{sec:problem}. We take
-$u^{\max\text{-comp}}$ as primary, being the most literal reading; $u^{\max\text{-atom}}$ is reported
-alongside it in the supplement, and the global $S$ is a secondary quantity that is statistically
-\emph{easier}: $S$ sums $3N$ coordinates and therefore concentrates, whereas both maxima are
-extreme-value statistics of a noisy $\widehat\sigma$.
+A hat always denotes the sketched estimate of the corresponding exact quantity: the exact scores are
+the same three expressions with $v_d$ and $\sigma_d=\sqrt{v_d}$ in place of $\widehat v_d$ and
+$\widehat\sigma_d$, so the exact $S$ here is exactly the $S$ of Eq.~(1). The correction $c$ is
+$c_K$ for Gaussian probes and $c^{\mathrm{Haar}}_{K,r}$ for orthogonal ones
+(Section~\ref{sec:method}); $u_a^{\mathrm{MHC}}$ is as in Section~\ref{sec:problem}. We take
+$u^{\max\text{-comp}}$ as primary, being the most literal reading, report $u^{\max\text{-atom}}$
+alongside it in the artifact, and treat $S$ as the statistically \emph{easier} secondary: a sum over
+$3N$ coordinates concentrates, whereas both maxima are extreme-value statistics of a noisy
+$\widehat\sigma$.
 
-The two experiments select their positives differently, and we do not conflate them.
+The two experiments select positives differently and we do not conflate them.
 Section~\ref{sec:fidelity} measures \textbf{top-5\% recall}: the $5\%$ of evaluated structures with
-the largest \emph{exact} score, ties resolved inclusively, so the selected set may slightly exceed
-$5\%$. Section~\ref{sec:screening} instead applies a \emph{fixed} threshold, as a deployed gate must:
-$\tau$ is the $95$th percentile of the exact score on the design split, and a test structure is
-high-uncertainty when its exact score is at least $\tau$. Because $\tau$ is transferred from another
-split, the realised test prevalence is $\fsTestPrevalenceLo$--$\fsTestPrevalenceHi$ rather than
-exactly $0.05$. Each metric is computed \emph{per seed and then averaged} over the ten frozen
-seeds: the deployed budget is $K$ lanes, not $10K$, and averaging the ten sketches before scoring
-would be a different, much more accurate estimator than the one we claim.
+the largest \emph{exact} score, ties resolved inclusively, so the set may slightly exceed $5\%$.
+Section~\ref{sec:screening} applies a \emph{fixed} threshold instead, as a deployed gate must:
+$\tau$ is the $95$th percentile of the exact score on the design split, and a test structure counts
+as high-uncertainty when its exact score is at least $\tau$ --- so the realised test prevalence is
+$\fsTestPrevalenceLo$--$\fsTestPrevalenceHi$, not exactly $0.05$. Every metric is computed
+\emph{per seed and then averaged} over the ten frozen seeds: the deployed budget is $K$ lanes, not
+$10K$, and averaging the sketches before scoring would be a different, far more accurate estimator
+than the one we claim.
 
 \paragraph{Splits.}
 Each system is partitioned once, under a frozen permutation, into three disjoint splits: a
-\emph{design} split ($20\%$) on which the control-variate basis $Q_{r_0}$ and the threshold $\tau$
-are fitted; a \emph{calibration} split ($20\%$) on which the conformal constant $c_\alpha$ alone is
-fitted; and a \emph{test} split ($60\%$), touched once. That is
-$\fsNDesignThreeBPA/\fsNCalThreeBPA/\fsNTestThreeBPA$ structures for 3BPA and
-$\fsNDesignEthanol/\fsNCalEthanol/\fsNTestEthanol$ for each rMD17 molecule. The separation is not
+\emph{design} split ($20\%$) fitting the control-variate basis $Q_{r_0}$ and the threshold $\tau$; a
+\emph{calibration} split ($20\%$) fitting the conformal constant $c_\alpha$ alone; and a \emph{test}
+split ($60\%$), touched once --- $\fsNDesignThreeBPA/\fsNCalThreeBPA/\fsNTestThreeBPA$ structures for
+3BPA and $\fsNDesignEthanol/\fsNCalEthanol/\fsNTestEthanol$ per rMD17 molecule. The separation is not
 cosmetic: split-conformal coverage requires the score function to be frozen independently of the
-calibration observations, so a basis fitted on the calibration structures would void the guarantee.
-The code asserts all three pairwise disjointness conditions and that the splits partition the set.
+calibration observations, so a basis fitted on calibration structures would void the guarantee. The
+code asserts all three pairwise disjointness conditions and that the splits partition the set.
 
 \section{Results}
 
@@ -254,21 +345,20 @@ $\fsMaxSpearmanKFourLo$--$\fsMaxSpearmanKFourHi$ at $K{=}4$), which is the recur
 sketch that orders structures tolerably still fails to identify \emph{which} ones land in the
 extreme tail. On the easier global statistic the same estimator reaches \fsHaarRecallKThree{}
 \fsHaarRecallKThreeCI{} and \fsHaarRecallKFour{} \fsHaarRecallKFourCI{} at $K{=}3,4$ on 3BPA ---
-roughly ten points higher, and still far from substitution quality. Intervals are 95\% paired
+roughly ten points higher, and still far from substitution quality; Appendix~\ref{app:ktradeoff}
+plots that easier view against $K$ alongside the latency curve. Intervals are 95\% paired
 bootstraps over structures (\fsNBoot{} resamples) on the seed-averaged statistic; seed-to-seed
 standard deviations are $\fsSeedSdLo$--$\fsSeedSdHi$ and are recorded separately.
 
 \paragraph{Why the extreme-value rule is harder.}
-The finite-$K$ corrections of Section~\ref{sec:method} make each $\widehat\sigma_d$ unbiased
-\emph{marginally}, which is not the same as making $\max_d\widehat\sigma_d$ unbiased: the maximum of
-$3N$ noisy estimates is biased upward, and that bias grows with the estimator's noise. We measure it
-directly. Averaged over structures, $u^{\max\text{-comp}}$ is inflated by a factor
+Making each $\widehat\sigma_d$ unbiased \emph{marginally} is not the same as making
+$\max_d\widehat\sigma_d$ unbiased: a maximum over $3N$ noisy estimates is biased upward, and the
+bias grows with the estimator's noise. Measured directly, $u^{\max\text{-comp}}$ is inflated by
 $\fsMaxBiasKOneLo$--$\fsMaxBiasKOneHi$ at $K{=}1$, falling to
-$\fsMaxBiasKFourLo$--$\fsMaxBiasKFourHi$ at $K{=}4$ and to \fsMaxBiasExact{} at the full centered
-basis, where the estimator is exact and the bias must vanish --- which it does, a useful check on
-the whole pipeline. This is a real obstacle to \emph{replacement}, and, as
-Section~\ref{sec:screening} shows, not one to screening: the bias is monotone in the estimator's
-noise level, so a scale-calibrated gate absorbs it into $c_\alpha$.
+$\fsMaxBiasKFourLo$--$\fsMaxBiasKFourHi$ at $K{=}4$ and to \fsMaxBiasExact{} at the full basis,
+where the estimator is exact and the bias must vanish --- a useful check on the pipeline. This
+obstructs \emph{replacement} but not screening (Section~\ref{sec:screening}): the bias is monotone
+in the estimator's noise, so a scale-calibrated gate absorbs it into $c_\alpha$.
 
 Orthogonalizing the probes is the largest single lever in the method. The estimator comparisons that
 follow are on the global statistic, where the paired-bootstrap machinery of Section~\ref{sec:setup}
@@ -290,85 +380,54 @@ $\fsTopEigRatioLo$--$\fsTopEigRatioHi\times$ the isotropic leading share.
 That is exactly the regime in which a random $K$-dimensional projection pays a variance penalty, and
 it is why projecting out the leading directions (the control variate) recovers so much.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.92\textwidth]{figures/fig3_k_tradeoff.png}
-\caption{Accuracy and cost against $K$, ranked by the global statistic $S$. Latency curves coincide
-for every method at equal lane count under the serial implementation; batched reverse mode flattens
-them (Section~\ref{sec:regime}). Ranking saturates well before tail selection: Haar clears Spearman
-$\rho=0.85$ at $K{=}4$ while its top-5\% recall is still $\fsHaarRecallKFour$. Error bars are the
-standard deviation across the ten frozen seeds.}
-\label{fig:ktradeoff}
-\end{figure}
 
 \paragraph{Does sketching beat simply using fewer heads?} It depends on whether an exact mean force
 is required, and the two framings give opposite answers, so Appendix~\ref{app:headsub} reports both
 rather than settling the comparison by definition.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.45\textwidth]{figures/fig_maxcomp_recall.png}
+\hfill
+\includegraphics[width=0.49\textwidth]{figures/fig5_gate_pareto.png}
+\caption{Both panels use the \emph{primary} max-component rule. Left, the negative result: top-5\%
+recall against the sketch budget $K$ for the best estimator, on all four systems. Recall rises
+steadily but does not reach the $0.90$ replacement line at any budget short of the exact basis at
+$K{=}7$; error bars are the standard deviation across the ten frozen seeds. Right, the positive one:
+the screening decision for all four gates at matched lane budget. Up-and-right is better on both
+axes, so Pareto dominance is read directly. The control variate (red) sits above and to the right of
+every other gate on every system but one --- on ethanol the free energy gate reaches recall \fsGateEnergyRecallEthanol{}
+while skipping barely a third of evaluations. Bars are $95\%$ paired bootstrap intervals; recall is
+the noisier axis because the positive sets hold only tens of structures.}
+\label{fig:pareto}
+\end{figure}
+
 \subsection{Does reducing directions reduce GPU time?}
 \label{sec:regime}
 Only in some regimes, and the honest answer required first making the strongest baseline available.
+Batched reverse mode --- vectorizing the backward over cotangents while reusing one forward graph ---
+is the baseline fairness demands, and on this stack it fails from the third call onwards, which
+disguises the cause. Appendix~\ref{app:tensorexpr} diagnoses it and Appendix~\ref{app:compile} shows
+that compilation does not compose with it; without the fix we would have compared against a Python
+loop and overstated every speedup below.
 
-\paragraph{Making the batched baseline available.}
-Batched reverse mode vectorizes the backward over cotangents while reusing one forward graph, and is
-the baseline fairness demands. It fails on this stack --- but only from the third call onwards, which
-disguises the cause: the TensorExpr fuser fuses the \emph{reverse} graph of e3nn's~\citep{e3nn}
-scripted spherical harmonics into a kernel requiring a raw data pointer, which a batched cotangent
-does not have. Disabling that fuser before the first forward fixes it, with 50/50 consecutive calls
-agreeing with the serial path to $3\times10^{-15}$; Appendix~\ref{app:tensorexpr} gives the full
-diagnosis and a reproduction recipe. Without it we would have compared against a Python loop.
+Two ratios answer different questions and we never conflate them. With $T(L)$ the latency of an
+$L$-lane reverse pass, the \emph{incremental UQ} speedup $[T(M)-T(1)]/[T(1{+}K)-T(1)]$ is the cost
+of uncertainty once the mean force is paid for, while the \emph{total force-plus-UQ} speedup
+$T(M)/T(1{+}K)$ includes it. We lead with the total, because the incremental ratio is unstable at
+small batch precisely when $T(1{+}K)\approx T(1)$ --- which is the effect this section is about.
 
-\paragraph{Two speedups, never conflated.}
-We report both quantities the protocol distinguishes, since they answer different questions. With
-$T(L)$ the latency of an $L$-lane reverse pass, $M$ the committee size and $K$ the sketch budget,
-\begin{equation}
-\text{incremental UQ}=\frac{T(M)-T(1)}{T(1{+}K)-T(1)},
-\qquad
-\text{total force+UQ}=\frac{T(M)}{T(1{+}K)} ,
-\end{equation}
-the first being the cost of uncertainty once the mean force is paid for, the second including it.
-Every figure below states which one it plots, at which batch size, against which implementation.
-Note the incremental ratio is unstable at small batch precisely because $T(1{+}K)\approx T(1)$ there,
-which is the effect this section is about; we therefore lead with the total.
-
-\paragraph{With that baseline, the benefit is regime-dependent.}
-Batched reverse mode is dramatically better at small batch: at $B{=}1$ it takes
-$\fsBatchedFlatLaneOne$\,ms for one lane and $\fsBatchedFlatLaneEight$\,ms for eight --- nearly
-\emph{flat} in the lane count, so additional cotangents are almost free. ForceSketch's total
-force-plus-UQ speedup at $K{=}3$ therefore collapses to $\fsBestTotalKThreeBOne\times$ at $B{=}1$,
-against $\fsSerialTotalKThreeBOne\times$ if one compares only to a serial loop. At $B{=}16$ the batched path scales with
-$L$ again and the speedup recovers to $\fsBestTotalKThreeBSixteen\times$; by
-$B{=}\fsBatchedLosesBatch{}$ the batched path is slower than the serial loop at \emph{every} lane
-count we measured ($\fsBatchedRatioLost\times$ at $L{=}8$), so the serial loop becomes the strongest
-baseline again and the speedup is $\fsSerialTotalKThreeBSixtyFour\times$. Incremental UQ speedups
-are $\fsBestIncrKThreeBOne\times$ and $\fsBestIncrKThreeBSixteen\times$ at $B{=}1$ and $B{=}16$,
-but that statistic is unstable at small batch precisely because $T(L{=}1{+}K)\approx T(L{=}1)$ there. Appendix~\ref{app:kernels} profiles where the GPU time goes.
-
-\begin{center}\small
-\input{table_latency}
-\end{center}
-\vspace{-0.4em}
-{\small Median latency in ms, fp32, one RTX 5070 Laptop GPU, CUDA events with one event pair
-per iteration; \textbf{bold} marks the faster implementation at that $(B,L)$.}
-
-\paragraph{Partial compilation.}
-For completeness we also compiled the model. \texttt{torch.compile}~\citep{torchcompile} succeeds only partially here ---
-Dynamo builds a sequence-length guard on e3nn's \texttt{Irrep} and calls \texttt{len()} on it, which
-e3nn raises \texttt{NotImplementedError} for by design, so untraceable regions must fall back to
-eager. With that, compilation is correct to $\fsCompileRelErr$ and gives
-$\fsCompileSpeedupLo$--$\fsCompileSpeedupHi\times$ at $B{=}16$. The absolute saving grows linearly in
-$L$, so AOTAutograd is producing a cheaper backward rather than merely a faster forward.
-
-The obvious next question is whether the two accelerations \emph{compose}: compiled-plus-batched
-would then be the baseline fairness demands. They do not. With the TensorExpr fuser already disabled,
-compiling the model and then taking a batched VJP reproduces the identical
-\texttt{Cannot access data pointer of Tensor that doesn't have storage} failure, at both $B{=}1$ and
-$B{=}16$ --- AOTAutograd's compiled backward is no more able to accept a storage-free
-\texttt{BatchedTensor} than the fused TorchScript one was. We therefore report the eager batched
-path as primary because it is the fastest \emph{correct} baseline available on this stack, not
-merely the most convenient one, and note that compilation alone would shift these numbers by at most
-a few percent in the same direction for every method, leaving the crossover of
-Section~\ref{sec:regime} unchanged.
+That effect is large. Batched reverse mode is nearly \emph{flat} in the lane count at $B{=}1$
+($\fsBatchedFlatLaneOne$\,ms for one lane, $\fsBatchedFlatLaneEight$\,ms for eight), so extra
+cotangents are almost free and the total speedup at $K{=}3$ collapses to
+$\fsBestTotalKThreeBOne\times$ --- against $\fsSerialTotalKThreeBOne\times$ if one compares only to a
+serial loop. At $B{=}16$ the batched path scales with $L$ again and the speedup recovers to
+$\fsBestTotalKThreeBSixteen\times$; by $B{=}\fsBatchedLosesBatch{}$ it is slower than the serial loop
+at \emph{every} lane count measured ($\fsBatchedRatioLost\times$ at $L{=}8$), so serial becomes the
+strongest baseline again and the speedup is $\fsSerialTotalKThreeBSixtyFour\times$. Incremental
+speedups are $\fsBestIncrKThreeBOne\times$ and $\fsBestIncrKThreeBSixteen\times$ at $B{=}1$ and
+$B{=}16$. Appendix~\ref{app:latency} tabulates the latencies behind these ratios and
+Appendix~\ref{app:kernels} profiles where the GPU time goes.
 
 \subsection{Can approximate screening avoid exact computation?}
 \label{sec:screening}
@@ -400,30 +459,28 @@ $c_\alpha$ is a multiplicative calibration constant, so any bias that is monoton
 noise is absorbed rather than propagated.
 
 \paragraph{What a screened evaluation costs.}
-The gate spends $1{+}K$ lanes on every structure --- one mean-force lane, which molecular dynamics
-needs whether or not uncertainty is computed, plus $K$ uncertainty lanes. On fallback it does
-\emph{not} recompute the exact path from scratch: the $K$ directions it already evaluated are
-linearly independent inside the $r$-dimensional centered subspace, and an orthonormal frame spanning
-them is a linear recombination of vectors already in hand, so completing the exact basis costs only
-$r{-}K$ further reverse passes. With $p$ the fallback fraction, the gate costs
-$T_{\mathrm{screen}}=T(1{+}K)+p\,T(r{-}K)$ against $T_{\mathrm{exact}}=T(M)$: at $K{=}4$, $M{=}8$
-that is $T(5)+p\,T(\fsFallbackLanesSketch)$, while the free energy gate, evaluating no centered
-direction, pays $T(1)+p\,T(\fsFallbackLanesEnergy)$. Every gate is charged this way; crediting the
-reuse to the control variate alone would manufacture much of its advantage. $T(\cdot)$ is the
-measured median at $B{=}16$ under whichever implementation is faster at that lane count
-(Section~\ref{sec:regime}); the fallback is charged a fresh forward pass rather than a retained graph,
-which is conservative; and the quoted figure is the \emph{total} force-plus-UQ speedup.
+Every gate spends $1{+}K$ lanes per structure: one mean-force lane, which MD needs regardless, plus
+$K$ uncertainty lanes. On fallback it does \emph{not} restart: the $K$ directions already evaluated
+are linearly independent inside the $r$-dimensional centered subspace, and an orthonormal frame
+spanning them is a recombination of vectors already in hand, so completing the exact basis costs
+only $r{-}K$ further passes. With $p$ the fallback fraction,
+$T_{\mathrm{screen}}=T(1{+}K)+p\,T(r{-}K)$ against $T_{\mathrm{exact}}=T(M)$ --- at $K{=}4$, $M{=}8$,
+$T(5)+p\,T(\fsFallbackLanesSketch)$, while the free energy gate, evaluating no centered direction,
+pays $T(1)+p\,T(\fsFallbackLanesEnergy)$. Crediting that reuse to the control variate alone would
+manufacture much of its advantage, so every gate is charged this way. $T(\cdot)$ is the measured
+median at $B{=}16$ under whichever implementation is faster at that lane count
+(Section~\ref{sec:regime}); fallback is charged a fresh forward rather than a retained graph, which
+is conservative; and the quoted figure is the \emph{total} force-plus-UQ speedup.
 
 \paragraph{Is the gate doing the work, or is ForceSketch?}
 A calibrated gate is a generic wrapper --- any score correlated with exact force disagreement can be
-calibrated the same way --- so the claim only stands if this gate beats the cheaper gates a reader
-will reach for. We build three at matched reverse-lane budget, with identical splits, calibration and
-threshold. The first is \emph{free}: all $M$ head energies come from the single forward pass the
-model already runs, so their disagreement costs zero \emph{uncertainty} lanes --- it still pays the
-mean-force lane, as every gate does. The second is head subsampling
-using the \emph{exact} mean force that ForceSketch already pays a lane for,
-$\hat v_d=\frac{M}{K(M-1)}\sum_{i\in\mathcal S}(F_{di}-\bar F_d)^2$, which is unbiased under uniform
-sampling and markedly lower-variance than the sample variance among the drawn heads.
+calibrated the same way --- so the claim only stands if this gate beats the cheaper ones a reader
+will reach for. We build three at matched lane budget with identical splits, calibration and
+threshold. The first is \emph{free}: the $M$ head energies come from the forward pass the model
+already runs, costing zero \emph{uncertainty} lanes. The second is head subsampling using the
+\emph{exact} mean force ForceSketch already pays a lane for,
+$\hat v_d=\frac{M}{K(M-1)}\sum_{i\in\mathcal S}(F_{di}-\bar F_d)^2$, unbiased under uniform sampling
+and markedly lower-variance than the sample variance among the drawn heads.
 
 \begin{center}\small
 \begin{tabular}{lrrrr}
@@ -438,63 +495,26 @@ Haar sketch & $5$ & \fsGateHaarSkipLo--\fsGateHaarSkipHi & \fsGateHaarRecallLo--
 \end{tabular}
 \end{center}
 
-Ranges are across the four systems; per-system values with $95\%$ intervals are in the supplement.
-The control variate \emph{Pareto-dominates} --- strictly more evaluations skipped \emph{and}
-strictly higher recall, not a trade --- in \fsGateCVDominates{} of the \fsGateCVComparisons{}
-gate-by-system comparisons, including every comparison against the two sketch baselines. The single
-exception is worth stating plainly: on ethanol the free energy gate attains perfect recall
-(\fsGateEnergyRecallEthanol) against the control variate's \fsGateCVRecallEthanol, though it skips
-only \fsGateEnergySkipEthanol{} of evaluations against \fsGateCVSkipEthanol. Elsewhere the free
-gate is the informative failure: it is cheap but coarse, skipping \fsGateEnergySkipThreeBPA{} on
-3BPA, and its recall collapses to \fsGateEnergyRecallAzobenzene{}
-\fsGateEnergyRecallAzobenzeneCI{} on azobenzene, so it cannot be trusted as a safety screen ---
-energy disagreement is a genuinely different signal from force disagreement, not a cheap proxy for
-it. Head subsampling with the exact mean is statistically almost indistinguishable from the Haar
-sketch at the same budget, as their nearly equal estimator variances predict; what separates the
-control variate from both is exploiting the concentration in the head-space spectrum rather than
-probing it obliviously. Under the fallback accounting above, every sketch gate is a net speedup at
-$B{=}16$; the control variate's margin over them comes from decision quality --- it skips far more
-while missing fewer --- rather than from any cost advantage, since all three spend identical lanes.
+Ranges are across the four systems; per-system values with $95\%$ intervals are in the artifact.
+The control variate \emph{Pareto-dominates} --- strictly more skipped \emph{and} strictly higher
+recall, not a trade --- in \fsGateCVDominates{} of the \fsGateCVComparisons{} gate-by-system
+comparisons, including every one against the two sketch baselines. The exception is worth stating
+plainly: on ethanol the free energy gate attains perfect recall (\fsGateEnergyRecallEthanol{}) against
+the control variate's \fsGateCVRecallEthanol, while skipping only \fsGateEnergySkipEthanol{} of
+evaluations against \fsGateCVSkipEthanol. Elsewhere that free gate is the informative failure: cheap
+but coarse, skipping \fsGateEnergySkipThreeBPA{} on 3BPA and collapsing to
+\fsGateEnergyRecallAzobenzene{} \fsGateEnergyRecallAzobenzeneCI{} recall on azobenzene, so it cannot
+be trusted as a safety screen --- energy disagreement is a genuinely different signal from force
+disagreement, not a cheap proxy for it. Head subsampling with the exact mean is statistically almost
+indistinguishable from the Haar sketch at equal budget, as their nearly equal estimator variances
+predict; what separates the control variate from both is exploiting the concentration in the
+head-space spectrum rather than probing it obliviously. All three spend identical lanes and all are
+net speedups at $B{=}16$, so that margin is decision quality, not cost.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.45\textwidth]{figures/fig_maxcomp_recall.png}
-\hfill
-\includegraphics[width=0.49\textwidth]{figures/fig5_gate_pareto.png}
-\caption{Both panels use the \emph{primary} max-component rule. Left, the negative result: top-5\%
-recall against the sketch budget $K$ for the best estimator, on all four systems. Recall rises
-steadily but does not reach the $0.90$ replacement line at any budget short of the exact basis at
-$K{=}7$; error bars are the standard deviation across the ten frozen seeds. Right, the positive one:
-the screening decision for all four gates at matched lane budget. Up-and-right is better on both
-axes, so Pareto dominance is read directly. The control variate (red) sits above and to the right of
-every other gate on every system but one --- on ethanol the free energy gate reaches recall \fsGateEnergyRecallEthanol
-while skipping barely a third of evaluations. Bars are $95\%$ paired bootstrap intervals; recall is
-the noisier axis because the positive sets hold only tens of structures.}
-\label{fig:pareto}
-\end{figure}
 
-\section{Limitations}
+\section{Conclusion and limitations}
 \label{sec:limitations}
-\textbf{The systems benefit is regime-dependent, and absent at $B{=}1$}, where batched reverse mode
-makes extra cotangent lanes nearly free: the total speedup falls to $\fsBestTotalKThreeBOne\times$
-and the gate becomes a net slowdown ($\fsBestGateSpeedupBOne\times$). Single-structure MD is
-precisely where this method does not pay for itself on this hardware. The batched advantage is
-bounded above too --- $\fsBatchedWinBOne\times$ at $B{=}1$, $\fsBatchedWinBSixteen\times$ at
-$B{=}16$, and slower than serial at every lane count by $B{=}\fsBatchedLosesBatch$ --- a crossover
-reported as measured on one 8\,GB card, without a claimed mechanism, on the one GPU we have.
-\textbf{We preserve a proxy, not a demonstrated outcome.} The gate is shown to retain the structures
-an exact committee would have flagged; we run no active-learning loop and measure no reference-force
-error, so we claim no improvement in downstream model quality or DFT-query efficiency.
-\textbf{Other limitations:} \texttt{torch.func} is unavailable, since MACE calls
-\texttt{requires\_grad\_()} inside \texttt{forward} and a globally installed no-op shim returns
-all-zero gradients rather than raising --- a trap worth naming; the estimator is approximate for
-$K<M-1$; committee disagreement is only a proxy for error; calibration is marginal and under
-exchangeability, not out of distribution; $M{=}8$ bounds the maximum saving; rMD17 spans only
-9--24 atoms, so molecule size is a weak axis; and cuEquivariance is unavailable for this readout,
-so all baselines are e3nn-only.
-
-\section{Conclusion}
-Exact multi-head force uncertainty cannot be replaced by a handful of randomized head-space VJPs at
+Exact multi-head force uncertainty cannot be replaced by a handful of randomized head-space probes at
 the fidelity acquisition requires. Across the full budget $K=1\ldots M{-}1$, the best sketch reaches
 only $\fsMaxRecallKFourLo$--$\fsMaxRecallKFourHi$ top-5\% recall at $K{=}4$ and
 $\fsMaxRecallKSixLo$--$\fsMaxRecallKSixHi$ even at $K{=}6$ of $7$ under the max-component rule:
@@ -507,14 +527,36 @@ $\fsGateCVSkipLo$--$\fsGateCVSkipHi$ of exact force-UQ computations while retain
 $\fsGateCVRecallLo$--$\fsGateCVRecallHi$ of high-uncertainty structures on every system, beating a
 free energy gate and head subsampling at matched budget in \fsGateCVDominates{} of
 \fsGateCVComparisons{} comparisons. That result is a property of the estimator, not the
-implementation --- but whether it saves \emph{time} is separate, and the honest answer is: only in
-batch. Once batched reverse mode is available, extra cotangent lanes are nearly free at $B{=}1$ and
-both the sketch and the gate stop paying for themselves. The method suits batched active-learning
-sweeps, not single-structure MD steps. That regime boundary, and the fact that orthogonalizing the
-probes costs nothing and buys more than any other estimator choice, are the useful contributions.
+implementation.
+
+\paragraph{Limitations.}
+Whether it saves \emph{time} is separate, and the honest answer is: only in batch. Once batched
+reverse mode is available, extra cotangent lanes are nearly free at $B{=}1$, the total speedup falls
+to $\fsBestTotalKThreeBOne\times$ and the gate becomes a net slowdown
+($\fsBestGateSpeedupBOne\times$); single-structure MD is precisely where this does not pay for
+itself. The batched advantage is bounded above too ($\fsBatchedWinBOne\times$ at $B{=}1$,
+$\fsBatchedWinBSixteen\times$ at $B{=}16$, slower than serial by $B{=}\fsBatchedLosesBatch$), a
+crossover measured on one 8\,GB card without a claimed mechanism. We also preserve a \emph{proxy},
+not a demonstrated outcome: we run no active-learning loop and measure no reference-force error, so
+we claim no gain in model quality or DFT-query efficiency. Further: \texttt{torch.func} is
+unavailable here; committee disagreement is only a proxy for error; calibration is marginal and
+under exchangeability, not out of distribution; $M{=}8$ bounds the maximum saving; and rMD17 spans
+only 9--24 atoms, so molecule size is a weak axis. The method therefore suits batched
+active-learning sweeps, not single-structure MD steps --- and that boundary, with the fact that
+orthogonalizing the probes costs nothing and buys more than any other estimator choice, is what we
+think is worth taking away.
+
+\section*{Data and code availability}
+All datasets and model checkpoints used here are public and are pinned by SHA-256 in the artifact's
+freeze manifest: the 3BPA~\citep{botnet3bpa} and rMD17~\citep{rmd17} datasets, and the pretrained
+multi-head committees released with~\citet{beck2025mhc} (Zenodo record 17829635). The estimator
+library, every experiment script, the analysis code, the ten frozen random seeds and every raw
+result record behind the numbers in this paper are available at
+\url{\fsCodeUrl}. Everything downstream of the cached head-force matrix is offline linear algebra
+and reproduces without a GPU; only the timing experiments require one.
 
 \bibliographystyle{plainnat}
-\input{bibliography}
+\bibliography{references}
 
 \appendix
 
@@ -538,6 +580,53 @@ because it is a trap any e3nn-based UQ work will hit, and because without it we 
 against a Python loop, which spec-level fairness forbids.
 
 
+\section{Accuracy and cost on the global statistic}
+\label{app:ktradeoff}
+Figure~\ref{fig:pareto} (left) plots recall against $K$ under the primary max-component rule. For
+completeness the same trade-off on the easier global statistic $S$, together with the latency curve,
+is below; it is the secondary view, and is uniformly more optimistic.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig3_k_tradeoff.png}
+\caption{Accuracy and cost against $K$, ranked by the global statistic $S$. Latency curves coincide
+for every method at equal lane count under the serial implementation; batched reverse mode flattens
+them (Section~\ref{sec:regime}). Ranking saturates well before tail selection: Haar clears Spearman
+$\rho=0.85$ at $K{=}4$ while its top-5\% recall is still $\fsHaarRecallKFour$. Error bars are the
+standard deviation across the ten frozen seeds.}
+\label{fig:ktradeoff}
+\end{figure}
+
+\section{Measured serial and batched latency}
+\label{app:latency}
+\begin{center}\small
+\input{table_latency}
+\end{center}
+\vspace{-0.4em}
+{\small Median latency in ms, fp32, one RTX 5070 Laptop GPU, CUDA events with one event pair per
+iteration; \textbf{bold} marks the faster implementation at that $(B,L)$. These are the measurements
+behind every speedup quoted in Section~\ref{sec:regime}.}
+
+\section{Compilation, and why it does not compose}
+\label{app:compile}
+For completeness we also compiled the model. \texttt{torch.compile}~\citep{torchcompile} succeeds only partially here ---
+Dynamo builds a sequence-length guard on e3nn's \texttt{Irrep} and calls \texttt{len()} on it, which
+e3nn raises \texttt{NotImplementedError} for by design, so untraceable regions must fall back to
+eager. With that, compilation is correct to $\fsCompileRelErr$ and gives
+$\fsCompileSpeedupLo$--$\fsCompileSpeedupHi\times$ at $B{=}16$. The absolute saving grows linearly in
+$L$, so AOTAutograd is producing a cheaper backward rather than merely a faster forward.
+
+The obvious next question is whether the two accelerations \emph{compose}: compiled-plus-batched
+would then be the baseline fairness demands. They do not. With the TensorExpr fuser already disabled,
+compiling the model and then taking a batched VJP reproduces the identical
+\texttt{Cannot access data pointer of Tensor that doesn't have storage} failure, at both $B{=}1$ and
+$B{=}16$ --- AOTAutograd's compiled backward is no more able to accept a storage-free
+\texttt{BatchedTensor} than the fused TorchScript one was. We therefore report the eager batched
+path as primary because it is the fastest \emph{correct} baseline available on this stack, not
+merely the most convenient one, and note that compilation alone would shift these numbers by at most
+a few percent in the same direction for every method, leaving the crossover of
+Section~\ref{sec:regime} unchanged.
+
 \section{Where the GPU time goes}
 \label{app:kernels}
 A kernel-level profile of the serial path explains why removing lanes helps at all when it does: the
@@ -552,17 +641,31 @@ two are substitutive at small batch.
 
 \section{Sketching versus using fewer heads}
 \label{app:headsub}
-At equal total reverse lanes \emph{with} an exact mean force, Haar at $K{=}3$ beats head subsampling
-at $K{=}3$ plus a mean lane by $\fsDeltaVsHeadSub$ \fsDeltaVsHeadSubCI{} in top-5\% recall on the
-global statistic (paired bootstrap on identical resamples). That ordering is significant on 3BPA,
-ethanol and azobenzene, and consistent in sign but \emph{not} significant on aspirin
-($\fsDeltaVsHeadSubAspirin$, CI \fsDeltaVsHeadSubAspirinCI). Conversely, head subsampling at $K{=}4$
-with no mean lane spends the same four lanes and scores significantly \emph{higher}
-($\fsDeltaVsHeadSubNoMeanThreeBPA$, CI \fsDeltaVsHeadSubNoMeanThreeBPACI{} for Haar) --- but it
-cannot produce the mean force molecular dynamics requires. Reporting a single framing would have
-settled this comparison by definition rather than by measurement. Note this is an estimator-fidelity
-comparison; the corresponding \emph{screening} comparison, where head subsampling is one of the
-gates, is in Section~\ref{sec:screening}.
+At equal total lanes, does a random sketch beat simply computing a few of the head forces exactly?
+The comparison hinges on which head-subsampling estimator is used, and the fair one is not the
+obvious one. Bare head subsampling takes the sample variance among the $K$ drawn heads. But at
+matched budget it also pays a mean-force lane, and can therefore use the \emph{exact} mean:
+\begin{equation*}
+\widehat v^{\,\text{sub}}_d \;=\; \frac{M}{K(M-1)}\sum_{i\in\mathcal S}\bigl(F_{di}-\bar F_d\bigr)^2 ,
+\end{equation*}
+unbiased under uniform sampling without replacement and markedly lower-variance than the sample
+variance, because it does not spend degrees of freedom re-estimating a mean already in hand.
+
+Against that fair baseline the ordering \emph{reverses}. Haar at $K{=}3$ scores
+$\fsDeltaVsHeadSub$ \fsDeltaVsHeadSubCI{} against exact-mean head subsampling at $K{=}3$ on 3BPA and
+$\fsDeltaVsHeadSubAspirin$ \fsDeltaVsHeadSubAspirinCI{} on aspirin --- both significantly
+\emph{negative}, i.e.\ head subsampling wins --- and the difference is not significant on ethanol or
+azobenzene. An earlier version of this comparison scored the baseline with the sample variance while
+still charging it the mean lane, and reported Haar ahead; that was an artifact of hobbling the
+baseline, and we report the corrected result instead. Head subsampling at $K{=}4$ with no mean lane
+also beats Haar at equal lanes ($\fsDeltaVsHeadSubNoMeanThreeBPA$
+\fsDeltaVsHeadSubNoMeanThreeBPACI{} on 3BPA), but cannot produce the mean force MD requires.
+
+The paper's estimator-design claims do not rest on this comparison. Orthogonalization over Gaussian
+probes ($\fsDeltaOrtho$ \fsDeltaOrthoCI{}, significant on all four systems) and the control variate
+over Haar ($\fsDeltaCV$ \fsDeltaCVCI{}) are unaffected, and it is the control variate --- not the
+oblivious sketch --- that wins the screening comparison of Section~\ref{sec:screening}, where
+exact-mean head subsampling is included as a gate baseline in its fair form.
 
 \input{checklist.tex}
 

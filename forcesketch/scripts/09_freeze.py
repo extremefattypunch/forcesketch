@@ -127,12 +127,28 @@ def main() -> int:
                 m = needle.search(rendered)
                 if m and not _ALLOWED.search(m.group(0)):
                     problems.append(f"ANONYMITY: rendered PDF contains {m.group(0)!r}")
+            # A macro at end of line swallows the newline, so "\\fsFoo\nwhile"
+            # renders as "1.000while". Invisible in the source, obvious in the PDF.
+            glued = re.findall(r"[0-9]\.[0-9]{2,3}[a-zA-Z]{2,}", rendered)
+            for g in sorted(set(glued)):
+                problems.append(f"RENDER: macro ate a space -- {g!r} in the PDF")
             if "Anonymous Author" not in rendered:
                 problems.append("ANONYMITY: rendered PDF lacks the anonymous author block")
-            # identifying links are called out explicitly by the call for papers
-            for m in re.findall(r"https?://[^\s)]+", rendered):
-                if not any(h in m for h in ("arxiv.org", "doi.org", "zenodo.org")):
-                    problems.append(f"ANONYMITY: rendered PDF links to {m}")
+            # Identifying links are called out explicitly by the call for papers.
+            # The allowlist lives in configs/anonymity.yaml so there is ONE policy,
+            # not one here and a different one in the supplement builder.
+            # pdftotext wraps long URLs across lines, so join them before matching
+            # -- otherwise every wrapped link looks like an unknown host.
+            joined = re.sub(r"[\s\u00ad]+", "", rendered)
+            for m in re.findall(r"https?://[^\s)\]}]+", joined):
+                if not _ALLOWED.search(m):
+                    problems.append(f"ANONYMITY: rendered PDF links to {m[:80]}")
+            # A placeholder artifact URL is worse than none: it looks like a real
+            # link and 404s for the reviewer who follows it.
+            if "PLACEHOLDER" in rendered:
+                problems.append(
+                    "ARTIFACT: \\fsCodeUrl is still the PLACEHOLDER. Publish the "
+                    "artifact and set the real anonymised URL in paper/main.tex.")
         except (subprocess.CalledProcessError, FileNotFoundError):
             problems.append("ANONYMITY: pdftotext unavailable -- cannot verify the rendered build")
 

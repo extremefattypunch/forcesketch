@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -75,6 +76,10 @@ def scan(text: str, needles: list, allowed: re.Pattern) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="supplement_anonymous.zip")
+    ap.add_argument("--format", choices=["zip", "dir"], default="zip",
+                    help="'dir' writes a clean, standalone directory ready to become "
+                         "its own git repository -- for venues that take an artifact "
+                         "URL rather than a supplementary upload")
     ap.add_argument("--force", action="store_true",
                     help="write the archive even if the anonymity scan fails")
     args = ap.parse_args()
@@ -114,6 +119,26 @@ def main() -> int:
             return 1
 
     out = Path(args.out)
+    if args.format == "dir":
+        # A standalone tree, not a nested one: this becomes the repository root,
+        # so paths must work with no "forcesketch/" prefix in front of them.
+        if out.exists():
+            shutil.rmtree(out)
+        for f, blob in payload.items():
+            dest = out / f
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(blob) if isinstance(blob, str) else dest.write_bytes(blob)
+        (out / "README.md").write_text(README)
+        (out / ".gitignore").write_text(
+            "__pycache__/\n*.py[cod]\n.pytest_cache/\ndata/\nmodels/\n"
+            "results/profile/\n*.nsys-rep\n*.ncu-rep\n")
+        n_files = sum(1 for _ in out.rglob("*") if _.is_file())
+        mb = sum(f.stat().st_size for f in out.rglob("*") if f.is_file()) / 1e6
+        print(f"anonymity scan clean over {len(payload)} files "
+              f"({sum(1 for v in payload.values() if isinstance(v, str))} scanned)")
+        print(f"wrote {out}/ ({n_files} files, {mb:.1f} MB)")
+        return 0
+
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         for f, blob in payload.items():
             arc = str(Path("forcesketch") / f)

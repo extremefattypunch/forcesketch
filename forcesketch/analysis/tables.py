@@ -174,6 +174,15 @@ def emit_macros(out: Path) -> dict:
         macros.append(_macro(name, s))
         vals[name] = value
 
+    def put_pct(name, value):
+        """Percent form of a fraction, for the lay-readable abstract.
+
+        The abstract is written for readers new to molecular potentials, who read
+        "84%" far more easily than "0.836". Emitted as a macro like everything
+        else so the two forms cannot drift apart.
+        """
+        put(name, round(100 * value), "{:d}")
+
     put("fsCostIntercept", a, "{:.2f}")
     put("fsCostSlope", b, "{:.2f}")
 
@@ -250,7 +259,7 @@ def emit_macros(out: Path) -> dict:
         for rec in recs:
             if rec["experiment_id"] != "04_bootstrap_diff":
                 continue
-            if "head_subsample K=3 +mean" in rec["comparison"]:
+            if "+exact mean" in rec["comparison"]:
                 nm = "fsDeltaVsHeadSub"
             elif "gaussian" in rec["comparison"]:
                 nm = "fsDeltaOrtho"
@@ -367,6 +376,10 @@ def emit_macros(out: Path) -> dict:
                 if b and cv["frac_exact_skipped"] > b[0]["frac_exact_skipped"] \
                         and cv["high_uq_recall"] > b[0]["high_uq_recall"]:
                     ndom += 1
+        for nm in ("fsGateCVSkipLo", "fsGateCVSkipHi",
+                   "fsGateCVRecallLo", "fsGateCVRecallHi"):
+            if nm in vals:
+                put_pct(nm + "Pct", vals[nm])
         put("fsGateCVDominates", str(ndom))
         put("fsGateCVComparisons", str(len(SYS) * (len(SHORT) - 1)))
 
@@ -394,6 +407,10 @@ def emit_macros(out: Path) -> dict:
             if rows:
                 put(f"fsMaxBiasK{WORD[K]}Lo", min(r["rank_bias_ratio"] for r in rows), "{:.2f}")
                 put(f"fsMaxBiasK{WORD[K]}Hi", max(r["rank_bias_ratio"] for r in rows), "{:.2f}")
+        for nm in ("fsMaxRecallKSixLo", "fsMaxRecallKSixHi",
+                   "fsMaxRecallKFourLo", "fsMaxRecallKFourHi"):
+            if nm in vals:
+                put_pct(nm + "Pct", vals[nm])
         # the exactness check: Haar at K=r is the exact basis, so bias must be 1
         rows = [g[("haar", 7)] for g in per_sys if ("haar", 7) in g]
         if rows:
@@ -458,7 +475,7 @@ def emit_macros(out: Path) -> dict:
             continue
         for rec in load_jsonl(f):
             c = rec.get("comparison", "")
-            if "head_subsample K=3 +mean" in c:
+            if "+exact mean" in c:
                 nm = f"fsDeltaVsHeadSub{short}"
             elif "head_subsample K=4" in c:
                 nm = f"fsDeltaVsHeadSubNoMean{short}"

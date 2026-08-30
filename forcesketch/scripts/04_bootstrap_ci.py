@@ -32,8 +32,11 @@ from forcesketch.utils.reproducibility import git_commit
 CONFIGS = [
     ("haar", 1, 0, {}), ("haar", 2, 0, {}), ("haar", 3, 0, {}), ("haar", 4, 0, {}),
     ("gaussian", 3, 0, {}), ("rademacher", 3, 0, {}), ("pairwise", 3, 0, {}),
-    ("head_subsample", 3, 0, {"with_mean_lane": True}),
-    ("head_subsample", 4, 0, {"with_mean_lane": True}),
+    # The "+mean lane" arm must USE the mean force it is charged for, otherwise
+    # the comparison is against a deliberately hobbled baseline. See
+    # sketches/generators.py::head_subsample_exact_mean_seeds.
+    ("head_subsample_exact_mean", 3, 0, {}),
+    ("head_subsample_exact_mean", 4, 0, {}),
     ("head_subsample", 4, 0, {}),
     ("control_variate", 3, 1, {}), ("control_variate", 4, 2, {}),
 ]
@@ -103,8 +106,8 @@ def main() -> int:
     print("\nSS49 paired differences (same structure resamples; CI excluding 0 = real)")
     print("-" * 84)
     comparisons = [
-        ("haar K=3 vs head_subsample K=3 +mean  (equal 4 total lanes, exact mean)",
-         ("haar", 3, 0, False), ("head_subsample", 3, 0, True)),
+        ("haar K=3 vs head_subsample K=3 +exact mean (equal 4 total lanes)",
+         ("haar", 3, 0, False), ("head_subsample_exact_mean", 3, 0, False)),
         ("haar K=3 vs head_subsample K=4        (equal 4 total lanes, NO exact mean)",
          ("haar", 3, 0, False), ("head_subsample", 4, 0, False)),
         ("haar K=3 vs gaussian K=3              (orthogonalization gain)",

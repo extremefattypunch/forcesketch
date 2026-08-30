@@ -1,7 +1,7 @@
 {
-  "frozen": true,
-  "git_commit": "933e75e4a217d6d5f931834e5084d9808f8e986e",
-  "git_dirty": false,
+  "frozen": false,
+  "git_commit": "25a54ada3fe20b07fabed5fb02f7572bbc48cbaa",
+  "git_dirty": true,
   "n_bootstrap_resamples": 10000,
   "seeds": {
     "schema_version": 1,
@@ -211,19 +211,19 @@
     },
     "04_bootstrap_disjoint_test_1200K.jsonl": {
       "records": 16,
-      "sha256": "5e201c88289cbf880bacedc32742ce8d9cf2cea2a20ddc81120a1353eb70fd3c"
+      "sha256": "8b3e6385a8bc0c1097d8c5bfb2f022b9251849f5deb73066574ba0e29eeaf937"
     },
     "04_bootstrap_rmd17-disjoint_aspirin.jsonl": {
       "records": 16,
-      "sha256": "d41c2539c5ca387690234b04fab2cd609370e51f9aae15eba9ecabbf2f5ab9d3"
+      "sha256": "7a24ee787587f81aaa19887158a993f829c28e15aa4ef5344018d838151f5e6e"
     },
     "04_bootstrap_rmd17-disjoint_azobenzene.jsonl": {
       "records": 16,
-      "sha256": "96992d7bf84f6ef58e7090334bdb976b5b9d26d79fd503e755ab078d05d774f7"
+      "sha256": "316a5b685f6ed698bcb83a56f6989ab5c164b122060348464a209d8cd57aaa41"
     },
     "04_bootstrap_rmd17-disjoint_ethanol.jsonl": {
       "records": 16,
-      "sha256": "640f9f2af26a42aa6994ab20d79c7cb6d0c1ab4f7fcebd14862e833d392d0fd3"
+      "sha256": "3a75b54b68f46784bffe772fe8306694b911b1b73ef0d214254b1552b33df659"
     },
     "06_screening_disjoint_test_1200K.jsonl": {
       "records": 210,
@@ -278,6 +278,9 @@
       "sha256": "7219e21f3e457cc546ab737d4ce85a3a338f65a41f017112473b4d5d4abd699b"
     }
   },
-  "n_macros": 245,
-  "audit_problems": []
+  "n_macros": 253,
+  "audit_problems": [
+    "ARTIFACT: \\fsCodeUrl is still the PLACEHOLDER. Publish the artifact and set the real anonymised URL in paper/main.tex.",
+    "working tree is dirty -- commit before freezing"
+  ]
 }

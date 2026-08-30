@@ -9,6 +9,7 @@ from forcesketch.exact.centered_basis import exact_seed_bundle
 from forcesketch.sketches.generators import (
     gaussian_seeds,
     haar_seeds,
+    head_subsample_exact_mean_seeds,
     head_subsample_seeds,
     pairwise_seeds,
     rademacher_seeds,
@@ -21,6 +22,7 @@ SEED_GENERATORS = {
     "rademacher": rademacher_seeds,
     "pairwise": pairwise_seeds,
     "head_subsample": head_subsample_seeds,
+    "head_subsample_exact_mean": head_subsample_exact_mean_seeds,
 }
 
 

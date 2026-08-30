@@ -28,6 +28,9 @@ allowed:
   - 'github\.com/beckobert'   # the multi-head-committee MACE fork the paper cites
   - 'github\.com/e3nn'
   - 'github\.com/pytorch'
+  - 'anonymous\.4open\.science'   # the anonymised artifact mirror
+  - 'proceedings\.neurips\.cc'    # bibliography: official NeurIPS proceedings
+  - 'openreview\.net'              # bibliography: official ICLR record
 
 substitutions:
   - pattern: '-e git\+https://github\.com/extremefattypunch/[^\s]+'
