@@ -1,6 +1,6 @@
 {
   "frozen": false,
-  "git_commit": "25a54ada3fe20b07fabed5fb02f7572bbc48cbaa",
+  "git_commit": "5c47eaf63659eb82688276fd0864abd0e2c97d40",
   "git_dirty": true,
   "n_bootstrap_resamples": 10000,
   "seeds": {
@@ -280,7 +280,6 @@
   },
   "n_macros": 253,
   "audit_problems": [
-    "ARTIFACT: \\fsCodeUrl is still the PLACEHOLDER. Publish the artifact and set the real anonymised URL in paper/main.tex.",
     "working tree is dirty -- commit before freezing"
   ]
 }
