@@ -72,11 +72,14 @@ result is robust; the speed result is not.
 \section{Introduction}
 Uncertainty quantification is what makes learned interatomic potentials usable beyond their training
 distribution: it drives active learning, flags extrapolation during molecular dynamics, and decides
-when an expensive reference calculation is required. Committee disagreement remains the most widely
-used estimator~\citep{behler2015,podryabinkin2017,carrete2023}, and multi-head
-committees~\citep{beck2025mhc} --- shallow ensembles more broadly~\citep{kellner2024} --- make it
-dramatically cheaper by attaching $M$ readout heads to one shared message-passing trunk, so all $M$
-energies come from a single forward pass.
+when a structure must go back to the quantum-chemistry calculation the model was trained to imitate,
+orders of magnitude slower and the very thing we are avoiding. Committee disagreement remains the
+most widely used estimator of that error: where training data pinned the model down its members
+agree, and where it did not they diverge, so their spread stands in for an error we cannot
+see~\citep{behler2015,podryabinkin2017,carrete2023}. Multi-head
+committees~\citep{beck2025mhc} --- shallow ensembles more broadly~\citep{kellner2024} --- make that
+cheap by attaching $M$ readout heads to one shared message-passing trunk, so all $M$ energies come
+from a single forward pass instead of $M$ separately trained models.
 
 That amortization does not extend to forces. As the multi-head committee work states directly, ``a
 single backward pass can not yield the forces for all the heads \ldots\ the standard deviation
@@ -254,9 +257,10 @@ the residual subspace:
 \begin{equation}
 \widehat v_d \;=\; \frac{1}{r}\Bigl[\textstyle\sum_{j\le r_0} g_{j,d}^{\,2} \;+\; \frac{r-r_0}{K'}\sum_{k=1}^{K'} G_{dk}^{\,2}\Bigr],
 \end{equation}
-which remains unbiased. We stress the motivation is the \emph{opposite} of the intuitive one: a
-concentrated spectrum does not explain why small $K$ works, it is what \emph{breaks} a random sketch,
-because the sketch either captures the dominant directions or misses them.
+which remains unbiased. By \emph{spectrum} we mean the eigenvalues of $\bar A$ --- how the total
+disagreement is divided among head-space directions. The motivation is then the \emph{opposite} of
+the intuitive one: a concentrated spectrum does not explain why small $K$ works, it is what
+\emph{breaks} a random sketch, since a probe either catches the dominant direction or misses it.
 
 \paragraph{Screening rather than replacement.}
 If the sketch cannot \emph{replace} the exact score, it can still say when the exact score is
@@ -407,7 +411,8 @@ the noisier axis because the positive sets hold only tens of structures.}
 Only in some regimes, and the honest answer required first making the strongest baseline available.
 Batched reverse mode --- vectorizing the backward over cotangents while reusing one forward graph ---
 is the baseline fairness demands, and on this stack it fails from the third call onwards, which
-disguises the cause. Appendix~\ref{app:tensorexpr} diagnoses it and Appendix~\ref{app:compile} shows
+disguises the cause. Appendix~\ref{app:tensorexpr} diagnoses it (the TensorExpr fuser and e3nn's
+scripted spherical harmonics~\citep{e3nn}); Appendix~\ref{app:compile} shows
 that compilation does not compose with it; without the fix we would have compared against a Python
 loop and overstated every speedup below.
 
