@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forcesketch"
+version = "0.1.0"
+description = "Randomized head-space VJPs for fast force uncertainty in multi-head molecular potentials"
+requires-python = ">=3.10"
+dependencies = ["torch", "numpy", "scipy", "pyyaml"]
+
+[project.optional-dependencies]
+dev = ["pytest", "matplotlib", "pandas"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests"]
+testpaths = ["tests"]
+markers = [
+    "slow: Monte Carlo tests with >=1e5 draws (spec SS22); deselect with -m 'not slow'",
+    "gpu: requires CUDA",
+    "requires_mace: requires the MACE multi-head-committee fork",
+]
+filterwarnings = ["ignore::DeprecationWarning:torch.*"]

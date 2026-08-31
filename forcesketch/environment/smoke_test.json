@@ -1,0 +1,126 @@
+{
+  "checks": {
+    "env_weights_only": {
+      "ok": true,
+      "detail": "TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1",
+      "value": null
+    },
+    "cuda_available": {
+      "ok": true,
+      "detail": "cuda available=True",
+      "value": null
+    },
+    "compute_capability": {
+      "ok": true,
+      "detail": "compute capability (12, 0) (expect (12, 0))",
+      "value": "(12, 0)"
+    },
+    "sm120_in_wheel": {
+      "ok": true,
+      "detail": "wheel arch list contains sm_120: ['sm_75', 'sm_80', 'sm_86', 'sm_90', 'sm_100', 'sm_120']",
+      "value": [
+        "sm_75",
+        "sm_80",
+        "sm_86",
+        "sm_90",
+        "sm_100",
+        "sm_120"
+      ]
+    },
+    "kernels_execute": {
+      "ok": true,
+      "detail": "2048^2 matmul produces finite output",
+      "value": null
+    },
+    "tp_finite_float32": {
+      "ok": true,
+      "detail": "tensor product forward+backward finite (float32)",
+      "value": null
+    },
+    "tp_backward_nonzero_float32": {
+      "ok": true,
+      "detail": "tensor product backward is nonzero (float32)",
+      "value": null
+    },
+    "tp_equivariance_float32": {
+      "ok": true,
+      "detail": "equivariance rel-err 2.396e-07 < 0.0001 (float32)",
+      "value": 2.395987621639506e-07
+    },
+    "tp_finite_float64": {
+      "ok": true,
+      "detail": "tensor product forward+backward finite (float64)",
+      "value": null
+    },
+    "tp_backward_nonzero_float64": {
+      "ok": true,
+      "detail": "tensor product backward is nonzero (float64)",
+      "value": null
+    },
+    "tp_equivariance_float64": {
+      "ok": true,
+      "detail": "equivariance rel-err 6.658e-09 < 1e-08 (float64)",
+      "value": 6.657610128371296e-09
+    },
+    "readout_shape": {
+      "ok": true,
+      "detail": "multi-head readout shape (64, 8) == (64, 8)",
+      "value": null
+    },
+    "heads_distinct": {
+      "ok": true,
+      "detail": "the 8 readout heads have DISTINCT gradients (max std 2.879e-01); zero here means instructions= was ignored and the committee is degenerate",
+      "value": 0.2879483997821808
+    },
+    "head_energy_shape": {
+      "ok": true,
+      "detail": "heads['energy'] shape (2, 8) == (2, 8)",
+      "value": null
+    },
+    "head_energy_finite": {
+      "ok": true,
+      "detail": "head energies finite",
+      "value": null
+    },
+    "head_energy_spread": {
+      "ok": true,
+      "detail": "head energies are non-degenerate (min std 1.545e+00)",
+      "value": null
+    },
+    "head_forces_finite": {
+      "ok": true,
+      "detail": "per-head forces finite",
+      "value": null
+    },
+    "head_forces_nonzero": {
+      "ok": true,
+      "detail": "per-head forces nonzero",
+      "value": null
+    },
+    "force_disagreement": {
+      "ok": true,
+      "detail": "per-head forces DISAGREE (max std 2.574e-01); zero here means there is nothing to sketch and every result would be vacuously exact",
+      "value": 0.25739893317222595
+    },
+    "finite_difference_fp64": {
+      "ok": true,
+      "detail": "analytic -0.044526610 vs central-difference -0.044526678; |diff|/max|F| = 1.53e-07 (max|F| = 0.4456)",
+      "value": 1.5317850328072373e-07
+    }
+  },
+  "passed": true,
+  "torch": {
+    "version": "2.13.0+cu130",
+    "cuda": "13.0",
+    "arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ]
+  },
+  "e3nn_version": "0.4.4",
+  "mace_version": "0.3.10"
+}

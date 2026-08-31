@@ -1,0 +1,414 @@
+{
+  "exact": {
+    "total_ms": 821.5881539999837,
+    "lanes": 7,
+    "families": {
+      "other": {
+        "ms": 101.5927600000066,
+        "launches": 9357,
+        "kernels": 23
+      },
+      "scatter / gather / index": {
+        "ms": 34.83559600000063,
+        "launches": 2750,
+        "kernels": 16
+      },
+      "elementwise / activation": {
+        "ms": 346.8308319999734,
+        "launches": 76250,
+        "kernels": 66
+      },
+      "GEMM / linear": {
+        "ms": 133.0767280000009,
+        "launches": 4910,
+        "kernels": 15
+      },
+      "reduction": {
+        "ms": 27.360462000003345,
+        "launches": 3680,
+        "kernels": 8
+      },
+      "tensor product / e3nn": {
+        "ms": 174.995304,
+        "launches": 3090,
+        "kernels": 3
+      },
+      "memory ops": {
+        "ms": 2.8964719999989956,
+        "launches": 1570,
+        "kernels": 3
+      }
+    },
+    "top": [
+      [
+        "aten::bmm",
+        136.29146999999884,
+        1830
+      ],
+      [
+        "aten::mul",
+        63.973917000000505,
+        10990
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+        54.85241700000527,
+        4580
+      ],
+      [
+        "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>)",
+        42.79487499999101,
+        8150
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_128x32_8x5_nt_align1>(cutlass_80_simt_sgemm_128x32_8x5_nt_align1::Params)",
+        41.92981100000042,
+        170
+      ],
+      [
+        "aten::add_",
+        36.98647099999412,
+        7350
+      ],
+      [
+        "aten::copy_",
+        35.42739599999502,
+        7850
+      ],
+      [
+        "aten::mm",
+        34.67892200000548,
+        4290
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1})",
+        33.28104199999513,
+        7350
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_64x64_8x5_tn_align1>(cutlass_80_simt_sgemm_64x64_8x5_tn_align1::Params)",
+        31.99018899999944,
+        1480
+      ],
+      [
+        "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, float, float, float, float, false, true, false, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float>)",
+        30.13310100000337,
+        280
+      ],
+      [
+        "aten::sum",
+        25.550583000000838,
+        2210
+      ]
+    ]
+  },
+  "haar_K2": {
+    "total_ms": 281.3059200000019,
+    "lanes": 2,
+    "families": {
+      "other": {
+        "ms": 39.517196999996585,
+        "launches": 3702,
+        "kernels": 23
+      },
+      "scatter / gather / index": {
+        "ms": 13.563296000000925,
+        "launches": 1000,
+        "kernels": 16
+      },
+      "elementwise / activation": {
+        "ms": 116.60363400000674,
+        "launches": 25100,
+        "kernels": 66
+      },
+      "GEMM / linear": {
+        "ms": 46.266027999998606,
+        "launches": 1860,
+        "kernels": 15
+      },
+      "reduction": {
+        "ms": 8.257855999998773,
+        "launches": 1380,
+        "kernels": 8
+      },
+      "tensor product / e3nn": {
+        "ms": 56.2318910000006,
+        "launches": 990,
+        "kernels": 3
+      },
+      "memory ops": {
+        "ms": 0.8660179999996436,
+        "launches": 520,
+        "kernels": 3
+      }
+    },
+    "top": [
+      [
+        "aten::bmm",
+        45.38297300000015,
+        630
+      ],
+      [
+        "aten::mul",
+        20.850584000002492,
+        3940
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+        17.612225000001423,
+        1580
+      ],
+      [
+        "aten::mm",
+        14.872768999997934,
+        1740
+      ],
+      [
+        "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>)",
+        12.358899000001198,
+        2400
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_128x32_8x5_nt_align1>(cutlass_80_simt_sgemm_128x32_8x5_nt_align1::Params)",
+        12.315166999999931,
+        70
+      ],
+      [
+        "aten::copy_",
+        10.886536000000572,
+        2500
+      ],
+      [
+        "aten::add_",
+        10.596244000001818,
+        2100
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1})",
+        10.287336000000575,
+        2350
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_64x64_8x5_tn_align1>(cutlass_80_simt_sgemm_64x64_8x5_tn_align1::Params)",
+        9.131989000000267,
+        430
+      ],
+      [
+        "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, float, float, float, float, false, true, false, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float>)",
+        8.618339999999872,
+        80
+      ],
+      [
+        "aten::add",
+        7.780965000000002,
+        530
+      ]
+    ]
+  },
+  "haar_K3": {
+    "total_ms": 388.751984000001,
+    "lanes": 3,
+    "families": {
+      "other": {
+        "ms": 51.66435899999765,
+        "launches": 4835,
+        "kernels": 24
+      },
+      "scatter / gather / index": {
+        "ms": 17.75184499999976,
+        "launches": 1350,
+        "kernels": 16
+      },
+      "elementwise / activation": {
+        "ms": 162.38784600000525,
+        "launches": 35330,
+        "kernels": 66
+      },
+      "GEMM / linear": {
+        "ms": 63.55828899999898,
+        "launches": 2470,
+        "kernels": 15
+      },
+      "reduction": {
+        "ms": 12.034850000000175,
+        "launches": 1840,
+        "kernels": 8
+      },
+      "tensor product / e3nn": {
+        "ms": 80.07501899999959,
+        "launches": 1410,
+        "kernels": 3
+      },
+      "memory ops": {
+        "ms": 1.2797759999997016,
+        "launches": 730,
+        "kernels": 3
+      }
+    },
+    "top": [
+      [
+        "aten::bmm",
+        63.71940899999997,
+        870
+      ],
+      [
+        "aten::mul",
+        29.39547200000086,
+        5350
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+        25.005931999998378,
+        2180
+      ],
+      [
+        "aten::mm",
+        18.59976999999821,
+        2250
+      ],
+      [
+        "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>)",
+        18.58828499999993,
+        3550
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_128x32_8x5_nt_align1>(cutlass_80_simt_sgemm_128x32_8x5_nt_align1::Params)",
+        18.242140000000088,
+        90
+      ],
+      [
+        "aten::add_",
+        16.039480999999107,
+        3150
+      ],
+      [
+        "aten::copy_",
+        15.723466999999358,
+        3570
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1})",
+        14.822179999999578,
+        3350
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_64x64_8x5_tn_align1>(cutlass_80_simt_sgemm_64x64_8x5_tn_align1::Params)",
+        13.686876999999432,
+        640
+      ],
+      [
+        "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, float, float, float, float, false, true, false, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float>)",
+        12.912294000000323,
+        120
+      ],
+      [
+        "aten::sum",
+        10.946079000000191,
+        970
+      ]
+    ]
+  },
+  "haar_K4": {
+    "total_ms": 494.27726599999716,
+    "lanes": 4,
+    "families": {
+      "other": {
+        "ms": 63.83394099999543,
+        "launches": 5964,
+        "kernels": 23
+      },
+      "scatter / gather / index": {
+        "ms": 21.912096000000727,
+        "launches": 1700,
+        "kernels": 16
+      },
+      "elementwise / activation": {
+        "ms": 207.03674300000392,
+        "launches": 45560,
+        "kernels": 66
+      },
+      "GEMM / linear": {
+        "ms": 80.60184199999738,
+        "launches": 3080,
+        "kernels": 15
+      },
+      "reduction": {
+        "ms": 15.80708399999834,
+        "launches": 2300,
+        "kernels": 8
+      },
+      "tensor product / e3nn": {
+        "ms": 103.41960000000161,
+        "launches": 1830,
+        "kernels": 3
+      },
+      "memory ops": {
+        "ms": 1.6659599999997807,
+        "launches": 940,
+        "kernels": 3
+      }
+    },
+    "top": [
+      [
+        "aten::bmm",
+        81.5276240000011,
+        1110
+      ],
+      [
+        "aten::mul",
+        37.89505999999845,
+        6760
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+        32.36035299999896,
+        2780
+      ],
+      [
+        "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>)",
+        24.354448999996656,
+        4700
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_128x32_8x5_nt_align1>(cutlass_80_simt_sgemm_128x32_8x5_nt_align1::Params)",
+        24.166506999999967,
+        110
+      ],
+      [
+        "aten::mm",
+        22.520126999996737,
+        2760
+      ],
+      [
+        "aten::add_",
+        21.014344999998062,
+        4200
+      ],
+      [
+        "aten::copy_",
+        20.53221200000395,
+        4640
+      ],
+      [
+        "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1} const&)::{lambda(int)#1})",
+        19.335628000003105,
+        4350
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_simt_sgemm_64x64_8x5_tn_align1>(cutlass_80_simt_sgemm_64x64_8x5_tn_align1::Params)",
+        18.214386999998574,
+        850
+      ],
+      [
+        "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, float, float, float, float, false, true, false, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float const>, cublasGemvTensorStridedBatched<float>, float>)",
+        17.12612800000098,
+        160
+      ],
+      [
+        "aten::sum",
+        14.540871999998444,
+        1280
+      ]
+    ]
+  }
+}

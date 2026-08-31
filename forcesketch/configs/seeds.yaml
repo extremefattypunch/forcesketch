@@ -1,0 +1,15 @@
+# Spec SS47: ten ForceSketch random seeds, chosen BEFORE final testing and
+# committed. Do NOT add, remove, reorder, or drop "bad" seeds -- the spec is
+# explicit that bad seeds stay in.
+schema_version: 1
+frozen: true
+frozen_at: "2026-08-15"
+
+sketch_seeds: [1000003, 1000033, 1000037, 1000039, 1000081,
+               1000099, 1000117, 1000121, 1000133, 1000151]
+
+# Disjoint namespaces, so a unit test can never consume an experiment seed and a
+# split can never collide with a probe draw.
+unit_test_seed: 20260820
+calibration_split_seed: 20260901   # SS33 20/20/60 split
+bootstrap_seed: 20260902           # SS47 paired bootstrap

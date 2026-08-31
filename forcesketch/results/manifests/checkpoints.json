@@ -1,0 +1,65 @@
+{
+  "disjoint": {
+    "force_rmse_committee_mev_A": 206.48137211758672,
+    "force_rmse_per_head_mev_A": [
+      200.03361405432065,
+      208.57188320840072,
+      205.06411330833257,
+      211.5070562597044,
+      200.10352044408395,
+      217.06681982131488,
+      203.34209486922242,
+      206.1618749753142
+    ],
+    "head_rmse_spread_ratio": 1.0851517173627065,
+    "median_atom_disagreement_mev_A": 33.4833249131789,
+    "mean_atom_disagreement_mev_A": 39.22866448720247,
+    "energy_mae_mev_per_atom": 4.034882708824794,
+    "median_head_energy_std_mev": 30.56232768134661,
+    "n_frames": 200,
+    "checkpoint_hash": "71ab2b8b07cc",
+    "path": "models/zenodo/3BPA/trainset_100/multihead-disjoint/multihead_committee_stagetwo.model"
+  },
+  "overlapping": {
+    "force_rmse_committee_mev_A": 180.33748398881,
+    "force_rmse_per_head_mev_A": [
+      174.8108276627626,
+      181.59542026795262,
+      173.14300059808372,
+      188.78653645278004,
+      171.04728056839366,
+      190.26982507789575,
+      174.4861285743882,
+      188.56085270822317
+    ],
+    "head_rmse_spread_ratio": 1.1123814681275561,
+    "median_atom_disagreement_mev_A": 12.809139628003848,
+    "mean_atom_disagreement_mev_A": 16.086674176184033,
+    "energy_mae_mev_per_atom": 3.8844359441551477,
+    "median_head_energy_std_mev": 23.869484377785874,
+    "n_frames": 200,
+    "checkpoint_hash": "7d00cf1eb986",
+    "path": "models/zenodo/3BPA/trainset_100/multihead-overlapping/multihead_committee_stagetwo.model"
+  },
+  "same": {
+    "force_rmse_committee_mev_A": 190.99382544574965,
+    "force_rmse_per_head_mev_A": [
+      189.22934623225092,
+      190.65497565494013,
+      191.90459756067756,
+      191.3243128209812,
+      191.92227307556553,
+      191.8954919879085,
+      189.05675258866026,
+      191.96285364501324
+    ],
+    "head_rmse_spread_ratio": 1.0153715803141712,
+    "median_atom_disagreement_mev_A": 7.1660140923500855,
+    "mean_atom_disagreement_mev_A": 7.796378513871445,
+    "energy_mae_mev_per_atom": 4.963449425864653,
+    "median_head_energy_std_mev": 12.525151697834902,
+    "n_frames": 200,
+    "checkpoint_hash": "a90f5db7262a",
+    "path": "models/zenodo/3BPA/trainset_100/multihead-same/multihead_committee_stagetwo.model"
+  }
+}

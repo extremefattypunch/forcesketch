@@ -1,0 +1,81 @@
+ForceSketch environment ladder outcome (plan Task 0.2)
+======================================================
+
+RUNG USED: A  -- succeeded on the first attempt, no fallback needed.
+
+  python  3.12.13
+  torch   2.13.0+cu130   (arch_list includes sm_120; capability (12,0))
+  e3nn    0.4.4
+  mace    0.3.10  editable from /home/ianpoon/src/mace-mhc
+          repo   https://github.com/beckobert/mace.git
+          branch multihead-committee
+          commit 86ad191e5d3c7eae154243ed181d8c9a898789e4
+          upstream draft PR ACEsuit/mace#800
+  numpy   2.5.2
+  ase     3.29.0
+
+Rungs B (torch 2.8+cu128), C (e3nn 0.5.6), and D (multi-head TensorNet2) were
+NOT needed and were not attempted.
+
+Notes for reproduction
+----------------------
+
+1. TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 is REQUIRED and must be exported before
+   the interpreter starts. e3nn 0.4.4 does a bare torch.load() at import time on
+   a bundled constants file containing `slice` objects, which torch >= 2.6
+   rejects under the weights_only=True default. It is set in
+   $CONDA_PREFIX/etc/conda/activate.d/forcesketch.sh.
+
+   SECURITY NOTE: this disables torch's unpickling guard process-wide. It is
+   required for e3nn's own bundled data file. Any *checkpoint* loaded under it
+   must therefore be independently trusted -- we load only the Zenodo record
+   17829635 artifacts and verify their sha256 before loading.
+
+2. The `numpy<2.0` pin in the fork's setup.cfg is inherited, not real: numpy
+   2.5.2 works. No numpy-2-removed API appears in the code paths we use.
+
+3. cuEquivariance is unavailable ("Cuequivariance acceleration will be
+   disabled"). PR #800's structured-`instructions` readout has no cueq
+   equivalent. Consequence: every exact baseline in spec SS26 is e3nn-only, and
+   ForceSketch speedups are measured relative to the e3nn path. This must be
+   stated in the paper's limitations (plan resolution R16).
+
+Applied patch (recorded in environment/mace-fork.patch)
+-------------------------------------------------------
+
+ScaleShiftMACE.forward in the pinned commit hardcodes
+
+    loss = "dpose"
+    # loss = "normal"
+
+which makes the committee branch unreachable and always sets
+output["heads"] = None, so head energies cannot be obtained at all. The author
+left the intended toggle commented on the next line. We set loss = "normal".
+
+This is present in all three commits on the branch (86ad191, 9a4fa02, 7dc734b),
+so it is the fork's state rather than a merge regression. The patch is one line
+plus a comment and is recorded rather than applied silently, so the deviation
+from the pinned commit is auditable.
+
+Smoke test (scripts/00_environment.py, results in environment/smoke_test.json)
+-----------------------------------------------------------------------------
+
+  [OK] cuda available, capability (12,0), sm_120 in wheel, 2048^2 matmul finite
+  [OK] e3nn tensor product forward/backward finite, fp32 and fp64
+  [OK] equivariance rel-err 2.4e-07 (fp32), 3.7e-09 (fp64)
+  [OK] o3.Linear(instructions=...) -> [64, 8] with 8 DISTINCT gradient patterns
+  [OK] ScaleShiftMACE(heads=8) -> heads['energy'] shape [B, 8], finite
+  [OK] per-head forces finite, nonzero, and DISAGREEING (max std 2.6e-01)
+  [OK] fp64 central difference vs analytic force: |diff|/max|F| = 1.5e-07
+
+Two tolerances were corrected during bring-up, both my error rather than the
+environment's:
+
+  - fp64 equivariance threshold 1e-10 -> 1e-8. The check composes a random SO(3)
+    matrix (itself from an fp64 QR), Wigner D-matrices, and a tensor product;
+    ~1e-9 is the healthy floor.
+  - The finite-difference check must run in FLOAT64 and be normalized by the
+    force scale. In fp32 it failed by a factor of 110: 3BPA-like energies are
+    ~-4200 eV, so at h=1e-4 the fp32 cancellation in E(+h)-E(-h) is ~2.5 eV/A,
+    about 50x a real force. This is exactly the precision mechanism recorded as
+    plan resolution R5, observed in the wild on day 0.

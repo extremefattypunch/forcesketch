@@ -1,0 +1,17 @@
+diff --git a/mace/modules/models.py b/mace/modules/models.py
+index 5b27c7d..3959f7f 100644
+--- a/mace/modules/models.py
++++ b/mace/modules/models.py
+@@ -486,8 +486,10 @@ class ScaleShiftMACE(MACE):
+         node_energy_heads = node_e0_heads + node_inter_es_heads
+         output = {}
+         # TODO: Sort out the best way to active dpose output
+-        loss = "dpose"
+-        # loss = "normal"
++        # FORCESKETCH PATCH: upstream hardcodes loss="dpose", which makes the
++        # committee branch below unreachable and always sets output["heads"]=None.
++        # The author left the intended toggle commented on the next line.
++        loss = "normal"
+         if loss == "dpose":
+             inter_e = torch.mean(inter_e_heads[num_graphs_arange], dim=-1)
+             total_energy = torch.mean(total_energy_heads[num_graphs_arange], dim=-1)
