@@ -31,6 +31,8 @@ allowed:
   - 'anonymous\.4open\.science'   # the anonymised artifact mirror
   - 'proceedings\.neurips\.cc'    # bibliography: official NeurIPS proceedings
   - 'openreview\.net'              # bibliography: official ICLR record
+  - 'neurips\.cc'                 # the NeurIPS checklist template embeds its own
+                                  # policy URLs (code submission, ethics guidelines)
 
 substitutions:
   - pattern: '-e git\+https://github\.com/extremefattypunch/[^\s]+'
