@@ -1,49 +1,34 @@
 \begin{abstract}
 \noindent
-Simulating molecules with machine-learned models is far cheaper than the quantum
-chemistry they imitate, but the models are only trustworthy where they have seen
-data, so the practical question is which new structures are worth the expense of
-labelling. The usual answer is to train several models and look for the
-structures they disagree about most. Disagreement is expensive to measure,
-because it is disagreement about \emph{forces}, and each model needs its own
-backward pass to produce them. A large literature therefore approximates that
-disagreement more cheaply, and validates the approximation by checking that it
-reproduces what the full set of models would have said.
+A machine-learned potential is only reliable where it has seen data, so running
+molecular dynamics with one means deciding which new structures are worth the cost
+of labelling. The standard method trains an ensemble of models and picks the
+structures they most disagree about. That disagreement is costly: it is
+disagreement about forces, and every member needs its own backward pass. Much work
+therefore tries to estimate it cheaply, and checks the estimate by seeing whether
+it matches the full ensemble.
 
-We argue that this is the wrong thing to check, and that checking it first has
-hidden a weakness in the whole approach. Model disagreement is not the goal; it
-is a stand-in for the model's actual error against the expensive reference
-calculation, and that error is what a practitioner is trying to find. So we ask
-two questions in the right order. Is disagreement a good stand-in at all? And
-separately, how faithfully does a cheap approximation reproduce whichever
-stand-in you have chosen? The second answer holds even if the first is
-disappointing.
+That check asks the wrong question. The ensemble is not the goal; it is itself only
+a guess at how wrong the model is against the expensive reference. So we ask two
+questions separately: is the ensemble a good guess, and does a cheap estimate
+reproduce it?
 
-On the first question, disagreement does carry real signal, ranking the worst
-structures at AUROC $\fsFactorALo$--$\fsFactorAHi$ on six molecular systems and
-$\fsMPtrajGlobal$ on \fsMPtrajN\ crystals under a frozen foundation model, against
-$\fsMPtrajRandom$ for chance. But the scoring rule matters in a way that has gone
-unnoticed: a rule that sums over all coordinates wins on
-$\fsGlobalWins$ of $\fsGlobalCells$ comparisons at fixed molecule size, and then
-reverses when sizes vary, because summing grows with size whether or not the model
-is uncertain---it selects structures $\fsMPtrajExtensivity\times$ larger instead of
-structures that are harder. On the second question, the cheap approximation that
-works is the unfashionable one: spending every measurement on the few directions
-that matter most beats random probing at equal cost on $\fsLOBeatsCV$ of
-$\fsLOSystems$ systems, and skips $\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of the expensive
-computations while still making the same decisions. A closed-form law predicts
-where random probing fails, to within $\fsBetaMAE$ and with no fitted parameters.
+It is a good guess, but the scoring rule everyone uses is not. That rule adds up
+contributions from every coordinate, so it grows with the size of the molecule
+whether or not the model is uncertain. On datasets where all molecules are the same
+size this is invisible. Let sizes vary and it inverts, preferring big structures
+over difficult ones. Estimating the score cheaply turns out to favour the plain
+deterministic approach over random sampling, which skips
+$\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of the expensive work without changing a single
+decision.
 
-The finding practitioners should act on is the least flattering one. On a
-realistic materials pool, simply asking how large the predicted forces are---which
-costs nothing, since it is already computed---ranks the worst structures at AUROC
-$\fsMPtrajFree$, against $\fsMPtrajGlobal$ for the committee, and adding the
-committee on top changes that by $\fsCompMarginal$, which is not significant. On
-single-composition systems the committee does help, on $\fsCompFixedSig$ of
-$\fsCompFixedN$ by $\fsCompFixedLo$--$\fsCompFixedHi$ AUROC. So committee
-uncertainty is not redundant in general---it is redundant wherever a free signal
-is already near-saturated, and future work should be measured against that free
-signal rather than against chance.
+Our least convenient result is the most useful. On a realistic materials dataset,
+simply asking how large the predicted forces are---free, because it is already
+computed---finds the worst structures slightly better than the ensemble does, and
+the ensemble adds nothing significant on top of it. The ensemble still helps when
+every molecule has the same composition. So it is not useless, but it is
+unnecessary wherever a free signal is already good enough---and that free signal,
+not chance, is what future methods should be measured against.
 \end{abstract}
 
 \section{Introduction}
@@ -167,7 +152,8 @@ $\lceil (n+1)(1-\alpha)\rceil > n$ no order statistic carries the finite-sample
 guarantee and the implementation returns $+\infty$, which makes the gate skip
 nothing---the safe failure. Realised coverage is verified against the
 $\mathrm{Beta}(k,n{+}1{-}k)$ law by simulation rather than asserted, at the
-smallest and largest calibration sets among the $\fsCovSplits$ registered splits.
+smallest and largest calibration sets ($n=\fsCovNCalMin$ and $n=\fsCovNCalMax$) among
+the $\fsCovSplits$ registered splits.
 The guarantee is weakest at the smallest, $n=\fsCovNCalMin$, and there realised
 coverage is $\fsCovRealisedMin$ against the $\fsCovBetaMin$ the law predicts;
 $\fsCovInfeasible$ of $\fsCovSplits$ splits lack a feasible order statistic at

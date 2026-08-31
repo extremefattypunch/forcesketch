@@ -5,17 +5,17 @@
 %
 % Loaded WITHOUT \iclrfinalcopy, so the class typesets "Anonymous authors / Paper
 % under double-blind review" and stamps "Under review as a conference paper at
-% ICLR 2026" on every page. That is the submission state; do not define
+% ICLR 2027" on every page. That is the submission state; do not define
 % \iclrfinalcopy until acceptance.
-% Loaded exactly as ICLR's own iclr2026_conference.tex does, including `times`:
+% Loaded exactly as ICLR's own iclr2027_conference.tex does, including `times`:
 % the class expects Times, and without it the manuscript renders in Computer
 % Modern, which is visibly non-conforming. Build with
 %   TEXINPUTS=./template_iclr: pdflatex main_iclr
 % so the vendored class is found under its own name -- loading it as
-% `template_iclr/iclr2026_conference` instead suppressed the class's
+% `template_iclr/iclr2027_conference` instead suppressed the class's
 % \pagestyle{fancy}, which silently dropped the mandatory "Under review as a
-% conference paper at ICLR 2026" running header.
-\usepackage{iclr2026_conference,times}
+% conference paper at ICLR 2027" running header.
+\usepackage{iclr2027_conference,times}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -26,10 +26,10 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
 
-% natbib is NOT loaded here: iclr2026_conference.sty already does
+% natbib is NOT loaded here: iclr2027_conference.sty already does
 % \RequirePackage{natbib} (line 20), and loading it again with different options
 % is an option-clash. Author-year is the class default and matches
-% iclr2026_conference.bst. The shared body only uses \citep, which renders
+% iclr2027_conference.bst. The shared body only uses \citep, which renders
 % correctly under author-year and numeric alike, so no body text changes between
 % the two manuscripts.
 

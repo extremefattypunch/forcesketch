@@ -2,8 +2,8 @@
 # Build the ICLR submission PDF. Run from anywhere.
 #
 # Separate from build.sh because the ICLR class must be found under its own name:
-# TEXINPUTS has to include template_iclr/, or `\usepackage{iclr2026_conference}`
-# fails. Loading it as `template_iclr/iclr2026_conference` does compile, but it
+# TEXINPUTS has to include template_iclr/, or `\usepackage{iclr2027_conference}`
+# fails. Loading it as `template_iclr/iclr2027_conference` does compile, but it
 # suppresses the class's \pagestyle{fancy} -- so the failure is a silently missing
 # running header rather than an error, which is worse.
 #
