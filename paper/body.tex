@@ -1,34 +1,22 @@
 \begin{abstract}
 \noindent
-A machine-learned potential is only reliable where it has seen data, so running
-molecular dynamics with one means deciding which new structures are worth the cost
-of labelling. The standard method trains an ensemble of models and picks the
-structures they most disagree about. That disagreement is costly: it is
-disagreement about forces, and every member needs its own backward pass. Much work
-therefore tries to estimate it cheaply, and checks the estimate by seeing whether
-it matches the full ensemble.
+Molecular dynamics with a machine-learned potential requires repeatedly choosing
+which structures to label with expensive quantum chemistry. The usual signal is
+disagreement among an ensemble of models, and cheap approximations of that signal
+are validated by how closely they match the full ensemble. We instead evaluate the
+ensemble against the model's actual error, and evaluate cheap approximations of it
+separately. Three results follow.
 
-That check asks the wrong question. The ensemble is not the goal; it is itself only
-a guess at how wrong the model is against the expensive reference. So we ask two
-questions separately: is the ensemble a good guess, and does a cheap estimate
-reproduce it?
-
-It is a good guess, but the scoring rule everyone uses is not. That rule adds up
-contributions from every coordinate, so it grows with the size of the molecule
-whether or not the model is uncertain. On datasets where all molecules are the same
-size this is invisible. Let sizes vary and it inverts, preferring big structures
-over difficult ones. Estimating the score cheaply turns out to favour the plain
-deterministic approach over random sampling, which skips
-$\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of the expensive work without changing a single
-decision.
-
-Our least convenient result is the most useful. On a realistic materials dataset,
-simply asking how large the predicted forces are---free, because it is already
-computed---finds the worst structures slightly better than the ensemble does, and
-the ensemble adds nothing significant on top of it. The ensemble still helps when
-every molecule has the same composition. So it is not useless, but it is
-unnecessary wherever a free signal is already good enough---and that free signal,
-not chance, is what future methods should be measured against.
+The acquisition rule in common use sums over coordinates, so it grows with molecule
+size whether or not the model is uncertain. It is harmless at fixed size and
+misleading when sizes vary, where it selects large structures rather than difficult
+ones. A deterministic choice of probe directions beats random sampling, skipping
+$\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of the expensive work without changing a
+decision. On a realistic materials dataset the magnitude of the predicted
+forces---free, already computed---identifies the worst structures as well as the
+ensemble does, and the ensemble adds nothing significant on top of it. Ensemble
+uncertainty is unnecessary where that free signal suffices, and is the baseline
+future methods should be measured against.
 \end{abstract}
 
 \section{Introduction}
@@ -487,3 +475,40 @@ registration record written before that experiment produced any artifact, the
 provenance of every number in this manuscript, the split manifests, and the
 test-access ledger. \texttt{tools/report\_go\_no\_go.py} emits every scored
 verdict as data, alongside the confidence stated for it in advance.
+
+% MANDATORY for ICLR 2027: https://iclr.cc/Conferences/2027/AIPolicyForAuthors
+% states the disclosure is a required in-paper section and that omitting it can
+% lead to desk rejection. It does not count toward the page limit. ACS journals
+% have no equivalent requirement, but the statement is true at either venue and
+% is left in both builds rather than maintained as a variant.
+%
+% AUTHOR: please check this against your own recollection of the division of
+% labour before submitting. It is written from what the repository evidences,
+% which is not the same thing as what you remember doing.
+\section*{Use of Large Language Models}
+\label{sec:llm}
+LLM-based coding agents were used substantially throughout this work: for
+research ideation, for implementing the experiment scripts and analysis code, for
+the adversarial review described below, and for drafting and revising this
+manuscript. The author directed the work, chose which questions to ask, and is
+responsible for its contents.
+
+Because that exposure is broad, the verification is mechanical rather than a
+matter of inspection. Every number in this paper is generated from a committed
+record by \texttt{tools/paper\_numbers.py} and re-checked by
+\texttt{tools/audit.py}; none is transcribed, so an agent cannot introduce a figure
+by typing one. Each experiment's protocol was registered, and hash-bound to a
+record written before that experiment produced any artifact, so a hypothesis
+cannot be adjusted after seeing the outcome. Split roles are content-hashed and
+recompute from recorded seeds.
+
+That machinery exists because agent-written prose did fail in exactly the way one
+would predict. An adversarial review, itself agent-driven and documented in
+\texttt{results/REVIEW\_FINDINGS.md}, confirmed 22 real defects, two of them
+critical: a benchmark that silently measured seven lanes where it reported eight,
+and a filename collision that destroyed a result file. A separate cross-document
+audit found roughly 70 quantitative claims in the supporting documents that a
+record contradicts, nearly all of them stale copies left behind by corrections
+that were made in one place and not propagated. The macro-derived numbers --- the
+ones in this manuscript --- were not among the failures, which is the entire
+argument for deriving them.
