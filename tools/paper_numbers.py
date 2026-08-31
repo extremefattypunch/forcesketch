@@ -306,6 +306,12 @@ MACROS = [
     # These three ranges were the only result figures in the manuscript not
     # backed by a record. Each reproduces the typed value exactly, which is
     # reassuring but was luck rather than provenance until now.
+    # Percentages of the same two records, for the abstract: a general reader
+    # parses "82--94%" far faster than "0.822--0.943 of".
+    ("fsLOSkipLoPct", "j2b_r0_4.jsonl", lambda: 100 * lo_skip_range(True), "{:.0f}",
+     "smallest share of exact evaluations skipped, percent"),
+    ("fsLOSkipHiPct", "j2b_r0_4.jsonl", lambda: 100 * lo_skip_range(False), "{:.0f}",
+     "largest share of exact evaluations skipped, percent"),
     ("fsFreeAurocLo", "j2a_oracle_panel.jsonl", lambda: free_auroc_range(True), "{:.2f}",
      "lowest AUROC of a free signal over the molecular panel"),
     ("fsFreeAurocHi", "j2a_oracle_panel.jsonl", lambda: free_auroc_range(False), "{:.2f}",

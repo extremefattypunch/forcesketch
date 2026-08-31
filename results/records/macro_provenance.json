@@ -195,12 +195,26 @@
   "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
   "value": 0.9427001569858713
  },
+ "fsLOSkipHiPct": {
+  "description": "largest share of exact evaluations skipped, percent",
+  "formatted": "94",
+  "source": "j2b_r0_4.jsonl",
+  "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
+  "value": 94.27001569858713
+ },
  "fsLOSkipLo": {
   "description": "lowest fraction of exact evaluations skipped, leading-only r0=4 at 5 lanes",
   "formatted": "0.822",
   "source": "j2b_r0_4.jsonl",
   "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
   "value": 0.8215488215488216
+ },
+ "fsLOSkipLoPct": {
+  "description": "smallest share of exact evaluations skipped, percent",
+  "formatted": "82",
+  "source": "j2b_r0_4.jsonl",
+  "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
+  "value": 82.15488215488216
  },
  "fsLOSystems": {
   "description": "systems compared",

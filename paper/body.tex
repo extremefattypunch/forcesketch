@@ -1,38 +1,49 @@
 \begin{abstract}
 \noindent
-Ensembles of machine-learned interatomic potentials are the standard tool for
-deciding which structures to label next, and the standard way to validate a
-cheap approximation of one is to check that it reproduces the exact ensemble.
-That is the wrong target. We separate two questions that the literature
-conflates: whether exact committee disagreement predicts reference-force error at
-all (\emph{oracle quality}), and what a cheap screening gate costs relative to
-whichever oracle one has chosen (\emph{preservation}). Preservation is
-independent of oracle quality, which makes the second claim robust to the first
-failing.
-On the first question, exact committee disagreement ranks top-5\% force error at
-AUROC $\fsFactorALo$--$\fsFactorAHi$ across six molecular systems and
-$\fsMPtrajGlobal$ across \fsMPtrajN\ periodic crystals evaluated with a frozen
-foundation-model trunk, against a random null of $\fsMPtrajRandom$. A
-sum-over-coordinates (\emph{global}) statistic beats the max-component rule used
-in prior work in $\fsGlobalWins$ of $\fsGlobalCells$ cells---but only at fixed
-system size, because it is extensive; at variable size it acquires structures
-$\fsMPtrajExtensivity\times$ larger than the intensive alternative and the
-ordering reverses. On the second, a \emph{deterministic} leading-subspace
-estimator skips $\fsLOSkipLo$--$\fsLOSkipHi$ of exact evaluations while
-preserving the exact policy's decisions, and beats a randomised low-rank sketch
-at matched cost on $\fsLOBeatsCV$ of $\fsLOSystems$ systems; an exact
-finite-sample law for the randomised estimator predicts its measured failure to a
-mean absolute error of $\fsBetaMAE$ with no free parameters.
-The result practitioners should act on is the least flattering. On a real
-materials pool the max mean-force norm---free, already computed in the forward
-pass---reaches AUROC $\fsMPtrajFree$ against the committee's $\fsMPtrajGlobal$,
-and adding the committee on top of it changes that by $\fsCompMarginal$ ---
-not significant.
-On fixed-composition systems the committee does add significantly, on
-$\fsCompFixedSig$ of $\fsCompFixedN$ systems by $\fsCompFixedLo$--$\fsCompFixedHi$
-AUROC. Committee uncertainty is therefore not redundant in general; it is
-redundant where a free signal is already near-saturated, and every future claim
-should be scored against that signal rather than against chance.
+Simulating molecules with machine-learned models is far cheaper than the quantum
+chemistry they imitate, but the models are only trustworthy where they have seen
+data, so the practical question is which new structures are worth the expense of
+labelling. The usual answer is to train several models and look for the
+structures they disagree about most. Disagreement is expensive to measure,
+because it is disagreement about \emph{forces}, and each model needs its own
+backward pass to produce them. A large literature therefore approximates that
+disagreement more cheaply, and validates the approximation by checking that it
+reproduces what the full set of models would have said.
+
+We argue that this is the wrong thing to check, and that checking it first has
+hidden a weakness in the whole approach. Model disagreement is not the goal; it
+is a stand-in for the model's actual error against the expensive reference
+calculation, and that error is what a practitioner is trying to find. So we ask
+two questions in the right order. Is disagreement a good stand-in at all? And
+separately, how faithfully does a cheap approximation reproduce whichever
+stand-in you have chosen? The second answer holds even if the first is
+disappointing.
+
+On the first question, disagreement does carry real signal, ranking the worst
+structures at AUROC $\fsFactorALo$--$\fsFactorAHi$ on six molecular systems and
+$\fsMPtrajGlobal$ on \fsMPtrajN\ crystals under a frozen foundation model, against
+$\fsMPtrajRandom$ for chance. But the scoring rule matters in a way that has gone
+unnoticed: a rule that sums over all coordinates wins on
+$\fsGlobalWins$ of $\fsGlobalCells$ comparisons at fixed molecule size, and then
+reverses when sizes vary, because summing grows with size whether or not the model
+is uncertain---it selects structures $\fsMPtrajExtensivity\times$ larger instead of
+structures that are harder. On the second question, the cheap approximation that
+works is the unfashionable one: spending every measurement on the few directions
+that matter most beats random probing at equal cost on $\fsLOBeatsCV$ of
+$\fsLOSystems$ systems, and skips $\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of the expensive
+computations while still making the same decisions. A closed-form law predicts
+where random probing fails, to within $\fsBetaMAE$ and with no fitted parameters.
+
+The finding practitioners should act on is the least flattering one. On a
+realistic materials pool, simply asking how large the predicted forces are---which
+costs nothing, since it is already computed---ranks the worst structures at AUROC
+$\fsMPtrajFree$, against $\fsMPtrajGlobal$ for the committee, and adding the
+committee on top changes that by $\fsCompMarginal$, which is not significant. On
+single-composition systems the committee does help, on $\fsCompFixedSig$ of
+$\fsCompFixedN$ by $\fsCompFixedLo$--$\fsCompFixedHi$ AUROC. So committee
+uncertainty is not redundant in general---it is redundant wherever a free signal
+is already near-saturated, and future work should be measured against that free
+signal rather than against chance.
 \end{abstract}
 
 \section{Introduction}
