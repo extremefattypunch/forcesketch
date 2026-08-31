@@ -114,7 +114,20 @@ $S/\hat{S}$~\citep{vovk2005algorithmic,lei2018distribution}. When
 $\lceil (n+1)(1-\alpha)\rceil > n$ no order statistic carries the finite-sample
 guarantee and the implementation returns $+\infty$, which makes the gate skip
 nothing---the safe failure. Realised coverage is verified against the
-$\mathrm{Beta}(k,n{+}1{-}k)$ law by simulation rather than asserted.
+$\mathrm{Beta}(k,n{+}1{-}k)$ law by simulation rather than asserted, at the
+smallest and largest calibration sets among the $\fsCovSplits$ registered splits.
+The guarantee is weakest at the smallest, $n=\fsCovNCalMin$, and there realised
+coverage is $\fsCovRealisedMin$ against the $\fsCovBetaMin$ the law predicts;
+$\fsCovInfeasible$ of $\fsCovSplits$ splits lack a feasible order statistic at
+the $\alpha$ we ship.
+
+What the gate costs when it does \emph{not} skip is worth stating explicitly,
+because it is the obvious way to flatter such a method. There is no partial
+credit: a structure the gate declines to skip is evaluated exactly and in full,
+so the $K{+}1$ lanes already spent on its cheap score are pure overhead rather
+than a down payment on the exact basis. The skip fractions below are therefore
+counts of structures that avoided the exact computation altogether, and the
+estimators are compared at matched lane budgets.
 
 Design, calibration and test roles are disjoint contiguous blocks with guard
 bands sized from a measured integrated autocorrelation time; every split is

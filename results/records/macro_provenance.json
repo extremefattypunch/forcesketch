@@ -62,6 +62,48 @@
   "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
   "value": 0.00020213779999067594
  },
+ "fsCovBetaMin": {
+  "description": "Beta(k,n+1-k) mean the theory predicts at that calibration set",
+  "formatted": "0.953",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 0.9529411764705882
+ },
+ "fsCovInfeasible": {
+  "description": "splits with no feasible order statistic at the shipped alpha",
+  "formatted": "0",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 0
+ },
+ "fsCovNCalMax": {
+  "description": "largest calibration set over all registered splits",
+  "formatted": "428",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 428
+ },
+ "fsCovNCalMin": {
+  "description": "smallest calibration set over all registered splits (the binding case)",
+  "formatted": "84",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 84
+ },
+ "fsCovRealisedMin": {
+  "description": "realised coverage at the smallest calibration set, alpha=0.05",
+  "formatted": "0.952",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 0.9518
+ },
+ "fsCovSplits": {
+  "description": "registered splits the coverage check covers",
+  "formatted": "28",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 28
+ },
  "fsFactorAHi": {
   "description": "highest exact-global AUROC over the six molecular systems",
   "formatted": "0.848",

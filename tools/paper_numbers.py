@@ -197,6 +197,31 @@ def j6d(key: str):
     raise KeyError(key)
 
 
+def j2c(key: str):
+    """Realised finite-sample coverage of the gate's conformal constant.
+
+    The manuscript claimed coverage was "verified against the Beta(k, n+1-k) law
+    by simulation rather than asserted" and then quoted no number, so the claim
+    was uncheckable. `min` is the binding case: the guarantee is weakest at the
+    smallest calibration set.
+    """
+    d = load("j2c_conformal_coverage.json")
+    if key == "n_cal_min":
+        return d["n_cal_min"]
+    if key == "n_cal_max":
+        return d["n_cal_max"]
+    if key == "realised_min":
+        return d["coverage"]["min"]["realised"]
+    if key == "beta_min":
+        return d["coverage"]["min"]["beta_mean"]
+    if key == "splits":
+        return d["n_splits"]
+    if key == "infeasible_at_shipped_alpha":
+        a = d["alpha"]
+        return d["feasibility"][f"alpha_{a}"]["n_infeasible"]
+    raise KeyError(key)
+
+
 def _fit(rows, B, impl):
     pts = sorted({(r["lanes"], r["median_ms"]) for r in rows
                   if r["batch_size"] == B and r["impl"] == impl and r.get("status") == "ok"})
@@ -241,6 +266,20 @@ def j8_speedup_spread(B: int = 16):
 # the registry: (macro, source, fn, format, description)
 # --------------------------------------------------------------------------
 MACROS = [
+    # --- realised coverage of the calibrated gate (j2c) --------------------
+    ("fsCovNCalMin", "j2c_conformal_coverage.json", lambda: j2c("n_cal_min"), "{:d}",
+     "smallest calibration set over all registered splits (the binding case)"),
+    ("fsCovNCalMax", "j2c_conformal_coverage.json", lambda: j2c("n_cal_max"), "{:d}",
+     "largest calibration set over all registered splits"),
+    ("fsCovRealisedMin", "j2c_conformal_coverage.json", lambda: j2c("realised_min"), "{:.3f}",
+     "realised coverage at the smallest calibration set, alpha=0.05"),
+    ("fsCovBetaMin", "j2c_conformal_coverage.json", lambda: j2c("beta_min"), "{:.3f}",
+     "Beta(k,n+1-k) mean the theory predicts at that calibration set"),
+    ("fsCovSplits", "j2c_conformal_coverage.json", lambda: j2c("splits"), "{:d}",
+     "registered splits the coverage check covers"),
+    ("fsCovInfeasible", "j2c_conformal_coverage.json",
+     lambda: j2c("infeasible_at_shipped_alpha"), "{:d}",
+     "splits with no feasible order statistic at the shipped alpha"),
     ("fsFactorALo", "j2a_oracle_panel.jsonl", lambda: factor_a_range(True), "{:.3f}",
      "lowest exact-global AUROC (top-5% e_max) over the six molecular systems"),
     ("fsFactorAHi", "j2a_oracle_panel.jsonl", lambda: factor_a_range(False), "{:.3f}",

@@ -122,10 +122,16 @@ def conformal_c(s_exact: torch.Tensor, s_hat: torch.Tensor, alpha: float) -> flo
     contract, and `fallback_gate.calibrate` in the frozen tree already implements
     it correctly -- this function was the outlier. Found by adversarial review.
 
-    Reachable only with alpha < 1/(n_cal+1); the smallest n_cal in this project is
-    92 (water, blocked split), so only alpha=0.01 on water triggers it. Every
-    shipped record uses alpha=0.05, where all n_cal (92-428) are feasible, so no
-    published number was affected.
+    Reachable only with alpha < 1/(n_cal+1). The smallest n_cal in this project is
+    84, not 92 as this docstring previously said -- the manifests give
+    water-disjoint_md_T300K__contiguous_block at 84. The conclusion survives the
+    correction: every shipped record uses alpha=0.05, where k = ceil(85*0.95) = 81
+    <= 84, so all 28 registered splits (n_cal 84-428) are feasible and no published
+    number was affected. At alpha=0.01, 6 of 28 are infeasible and all 6 are water
+    blocked splits, which is what the original claim meant.
+
+    Measured by experiments/j2c_conformal_coverage.py, which reads the sizes from
+    the manifests rather than restating them here.
     """
     r = (s_exact / (s_hat + EPS)).sort().values
     n = r.numel()
