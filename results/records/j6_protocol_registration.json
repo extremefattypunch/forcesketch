@@ -1,0 +1,7 @@
+{
+ "protocol": "protocols/j6_naive_committee.yaml",
+ "protocol_sha256": "d84289909e4d1a9f30c6409b8ec2d6cdd7dc7e9c93629d747f09152d82c0aecb",
+ "registered_utc": "2026-08-16T01:47:27+00:00",
+ "naive_caches_existing_at_registration": [],
+ "note": "Registered before any naive cache existed; the empty list above is the evidence. Git-ancestry binding (merge-base --is-ancestor) additionally requires this file to be committed, which is left to the user."
+}

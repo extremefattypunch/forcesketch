@@ -1,0 +1,353 @@
+[
+ {
+  "variant": "disjoint",
+  "temperature_K": 300,
+  "n": 1669,
+  "block_len": 23,
+  "force_rmse_mev_A": 50.916148368453555,
+  "median_disagreement_mev_A": 20.32998261653761,
+  "overconfidence": 2.504485583132538,
+  "auroc_exact_global": 0.751052127805041,
+  "auroc_exact_global_ci": [
+   0.6903922119752656,
+   0.8091914948571081
+  ],
+  "auroc_exact_maxcomp": 0.6937054649873137,
+  "auroc_exact_maxcomp_ci": [
+   0.6217573952809979,
+   0.7659433446269314
+  ],
+  "auroc_force_norm": 0.5460961120649053,
+  "auroc_force_norm_ci": [
+   0.47905202145277204,
+   0.6082899694617055
+  ],
+  "auroc_energy_std": 0.7071742202099698,
+  "auroc_energy_std_ci": [
+   0.6281283745236657,
+   0.7717603650292925
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.20495601574013578,
+   "ci_lo": 0.11757540817844095,
+   "ci_hi": 0.29732668619498265,
+   "boot_sd": 0.045529430331080235,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 23
+  }
+ },
+ {
+  "variant": "disjoint",
+  "temperature_K": 600,
+  "n": 2138,
+  "block_len": 5,
+  "force_rmse_mev_A": 93.98098434464562,
+  "median_disagreement_mev_A": 24.983786520437175,
+  "overconfidence": 3.7616789699898985,
+  "auroc_exact_global": 0.713961632085847,
+  "auroc_exact_global_ci": [
+   0.6550552878974033,
+   0.7662656891618428
+  ],
+  "auroc_exact_maxcomp": 0.6544264829718798,
+  "auroc_exact_maxcomp_ci": [
+   0.6002251701814117,
+   0.7098812800053181
+  ],
+  "auroc_force_norm": 0.6010068241324885,
+  "auroc_force_norm_ci": [
+   0.5404463302874246,
+   0.6544024614593172
+  ],
+  "auroc_energy_std": 0.6163392647606952,
+  "auroc_energy_std_ci": [
+   0.5567430297675745,
+   0.6698962451282157
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.11295480795335844,
+   "ci_lo": 0.039420408895760525,
+   "ci_hi": 0.18540875771338644,
+   "boot_sd": 0.03675400396000313,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 5
+  }
+ },
+ {
+  "variant": "disjoint",
+  "temperature_K": 1200,
+  "n": 2139,
+  "block_len": 3,
+  "force_rmse_mev_A": 200.94156700778095,
+  "median_disagreement_mev_A": 33.577521729150604,
+  "overconfidence": 5.984407325491561,
+  "auroc_exact_global": 0.77307013025241,
+  "auroc_exact_global_ci": [
+   0.731763742733093,
+   0.8168322034366031
+  ],
+  "auroc_exact_maxcomp": 0.7083118698947678,
+  "auroc_exact_maxcomp_ci": [
+   0.6596812077542754,
+   0.7583162431628448
+  ],
+  "auroc_force_norm": 0.637280153064979,
+  "auroc_force_norm_ci": [
+   0.576779629632213,
+   0.6919157638942576
+  ],
+  "auroc_energy_std": 0.6320369416439767,
+  "auroc_energy_std_ci": [
+   0.5778952760343729,
+   0.6898719139851825
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.13578997718743102,
+   "ci_lo": 0.0755873316653175,
+   "ci_hi": 0.20473893083137298,
+   "boot_sd": 0.0328391572040724,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ },
+ {
+  "variant": "overlapping",
+  "temperature_K": 300,
+  "n": 1669,
+  "block_len": 12,
+  "force_rmse_mev_A": 42.384122284801975,
+  "median_disagreement_mev_A": 5.0340094286038815,
+  "overconfidence": 8.419555601936302,
+  "auroc_exact_global": 0.8081556997219648,
+  "auroc_exact_global_ci": [
+   0.7620350886522129,
+   0.8580911000473317
+  ],
+  "auroc_exact_maxcomp": 0.7609276956501922,
+  "auroc_exact_maxcomp_ci": [
+   0.708867690180647,
+   0.8185237086705788
+  ],
+  "auroc_force_norm": 0.5580683389294885,
+  "auroc_force_norm_ci": [
+   0.4950515077174959,
+   0.6254454279043344
+  ],
+  "auroc_energy_std": 0.5518011516431426,
+  "auroc_energy_std_ci": [
+   0.4727412849400347,
+   0.6133265477058174
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.2500873607924763,
+   "ci_lo": 0.1762253300718637,
+   "ci_hi": 0.3227500797642018,
+   "boot_sd": 0.03740732748572364,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 12
+  }
+ },
+ {
+  "variant": "overlapping",
+  "temperature_K": 600,
+  "n": 2138,
+  "block_len": 4,
+  "force_rmse_mev_A": 79.87586997856454,
+  "median_disagreement_mev_A": 6.927736728428317,
+  "overconfidence": 11.529865107429657,
+  "auroc_exact_global": 0.7671512122843588,
+  "auroc_exact_global_ci": [
+   0.7199960952808568,
+   0.8152108440665019
+  ],
+  "auroc_exact_maxcomp": 0.7376597320964305,
+  "auroc_exact_maxcomp_ci": [
+   0.6905481393540313,
+   0.7884140618434046
+  ],
+  "auroc_force_norm": 0.611829723399458,
+  "auroc_force_norm_ci": [
+   0.5497029552469918,
+   0.6638868605164724
+  ],
+  "auroc_energy_std": 0.591886506808027,
+  "auroc_energy_std_ci": [
+   0.5257466051896539,
+   0.6486294215362811
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.15532148888490083,
+   "ci_lo": 0.08926895183360704,
+   "ci_hi": 0.2321392624852213,
+   "boot_sd": 0.036506782090386346,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 4
+  }
+ },
+ {
+  "variant": "overlapping",
+  "temperature_K": 1200,
+  "n": 2139,
+  "block_len": 3,
+  "force_rmse_mev_A": 177.19345245001816,
+  "median_disagreement_mev_A": 13.109891633270795,
+  "overconfidence": 13.516011985967122,
+  "auroc_exact_global": 0.7878523070130252,
+  "auroc_exact_global_ci": [
+   0.7502061639929355,
+   0.8329274080551644
+  ],
+  "auroc_exact_maxcomp": 0.772191662373979,
+  "auroc_exact_maxcomp_ci": [
+   0.7360037300390021,
+   0.8144328592979616
+  ],
+  "auroc_force_norm": 0.6063498049893296,
+  "auroc_force_norm_ci": [
+   0.5490099672133844,
+   0.6664121716093899
+  ],
+  "auroc_energy_std": 0.7552478107292663,
+  "auroc_energy_std_ci": [
+   0.7168433567591435,
+   0.8129714290970637
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.18150250202369567,
+   "ci_lo": 0.12548729671057474,
+   "ci_hi": 0.24301495480896187,
+   "boot_sd": 0.030029220592521645,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ },
+ {
+  "variant": "same",
+  "temperature_K": 300,
+  "n": 1669,
+  "block_len": 24,
+  "force_rmse_mev_A": 43.40144150667687,
+  "median_disagreement_mev_A": 4.379366916671582,
+  "overconfidence": 9.910437360581549,
+  "auroc_exact_global": 0.7730594509184278,
+  "auroc_exact_global_ci": [
+   0.7043403120679439,
+   0.82529795109862
+  ],
+  "auroc_exact_maxcomp": 0.7579954116592473,
+  "auroc_exact_maxcomp_ci": [
+   0.6917599894847528,
+   0.8073050714839181
+  ],
+  "auroc_force_norm": 0.5518695209589936,
+  "auroc_force_norm_ci": [
+   0.4755158085051429,
+   0.6258331203047104
+  ],
+  "auroc_energy_std": 0.6492502165028335,
+  "auroc_energy_std_ci": [
+   0.5742131123183281,
+   0.7119710873759857
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.2211899299594342,
+   "ci_lo": 0.13891695407101295,
+   "ci_hi": 0.288913545344878,
+   "boot_sd": 0.03841718386362466,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 24
+  }
+ },
+ {
+  "variant": "same",
+  "temperature_K": 600,
+  "n": 2138,
+  "block_len": 5,
+  "force_rmse_mev_A": 82.53762179432807,
+  "median_disagreement_mev_A": 5.371963694383395,
+  "overconfidence": 15.3645159368118,
+  "auroc_exact_global": 0.8327374296534555,
+  "auroc_exact_global_ci": [
+   0.7899286035539611,
+   0.8711200688395294
+  ],
+  "auroc_exact_maxcomp": 0.8104013951968783,
+  "auroc_exact_maxcomp_ci": [
+   0.7656402858497033,
+   0.847080647165201
+  ],
+  "auroc_force_norm": 0.6124831467395556,
+  "auroc_force_norm_ci": [
+   0.5559477629453747,
+   0.6689738297279758
+  ],
+  "auroc_energy_std": 0.5125047741317983,
+  "auroc_energy_std_ci": [
+   0.4483155942701215,
+   0.5696086891754528
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.22025428291389992,
+   "ci_lo": 0.15448204696365214,
+   "ci_hi": 0.2836141443145267,
+   "boot_sd": 0.03326106032284641,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 5
+  }
+ },
+ {
+  "variant": "same",
+  "temperature_K": 1200,
+  "n": 2139,
+  "block_len": 3,
+  "force_rmse_mev_A": 187.08569211809635,
+  "median_disagreement_mev_A": 7.260135997093736,
+  "overconfidence": 25.76889636681566,
+  "auroc_exact_global": 0.847588122746339,
+  "auroc_exact_global_ci": [
+   0.8121271110824931,
+   0.8785362025216269
+  ],
+  "auroc_exact_maxcomp": 0.8239660755022444,
+  "auroc_exact_maxcomp_ci": [
+   0.7820358434686329,
+   0.8630095295902436
+  ],
+  "auroc_force_norm": 0.7015646846714254,
+  "auroc_force_norm_ci": [
+   0.6516979736536117,
+   0.7601983760942305
+  ],
+  "auroc_energy_std": 0.5878375892265804,
+  "auroc_energy_std_ci": [
+   0.5198100684816402,
+   0.6473576974023107
+  ],
+  "gain_over_force_norm": {
+   "delta": 0.14602343807491358,
+   "ci_lo": 0.0791052407081835,
+   "ci_hi": 0.20095355682909863,
+   "boot_sd": 0.031298103207799535,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ }
+]

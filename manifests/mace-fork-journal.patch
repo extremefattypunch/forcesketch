@@ -1,0 +1,28 @@
+diff --git a/mace/modules/models.py b/mace/modules/models.py
+index 5b27c7d..6dcd182 100644
+--- a/mace/modules/models.py
++++ b/mace/modules/models.py
+@@ -486,8 +486,21 @@ class ScaleShiftMACE(MACE):
+         node_energy_heads = node_e0_heads + node_inter_es_heads
+         output = {}
+         # TODO: Sort out the best way to active dpose output
+-        loss = "dpose"
+-        # loss = "normal"
++        # FORCESKETCH PATCH (journal version). Upstream hardcodes loss="dpose",
++        # which makes the committee branch below unreachable and always sets
++        # output["heads"] = None, so per-head energies cannot be obtained at all.
++        # The author left the intended toggle commented on the next line.
++        #
++        # This is an ENV VAR rather than a hardcode because the two branches
++        # compute total_energy differently (dpose takes a mean over heads), and
++        # this function runs at TRAINING time too. The published checkpoints were
++        # trained under "dpose"; hardcoding "normal" would silently change the
++        # training objective and make any committee we train incomparable to
++        # theirs. Default therefore reproduces upstream exactly; evaluation sets
++        # FORCESKETCH_MACE_LOSS=normal explicitly, and the value is recorded in
++        # every result record.
++        import os as _os
++        loss = _os.environ.get("FORCESKETCH_MACE_LOSS", "dpose")
+         if loss == "dpose":
+             inter_e = torch.mean(inter_e_heads[num_graphs_arange], dim=-1)
+             total_energy = torch.mean(total_energy_heads[num_graphs_arange], dim=-1)

@@ -1,0 +1,203 @@
+{
+ "beta_law": [
+  {
+   "r": 7,
+   "K": 1,
+   "n_draws": 200000,
+   "empirical_mean": 0.14293300577452564,
+   "analytic_mean": 0.14285714285714285,
+   "empirical_var": 0.027258479585490613,
+   "analytic_var": 0.027210884353741496
+  },
+  {
+   "r": 7,
+   "K": 2,
+   "n_draws": 200000,
+   "empirical_mean": 0.286318777261245,
+   "analytic_mean": 0.2857142857142857,
+   "empirical_var": 0.045417266373856256,
+   "analytic_var": 0.045351473922902494
+  },
+  {
+   "r": 7,
+   "K": 3,
+   "n_draws": 200000,
+   "empirical_mean": 0.4284703607235793,
+   "analytic_mean": 0.42857142857142855,
+   "empirical_var": 0.054549746693476134,
+   "analytic_var": 0.05442176870748299
+  },
+  {
+   "r": 7,
+   "K": 4,
+   "n_draws": 200000,
+   "empirical_mean": 0.5715063712736326,
+   "analytic_mean": 0.5714285714285714,
+   "empirical_var": 0.05437101679837839,
+   "analytic_var": 0.05442176870748299
+  },
+  {
+   "r": 7,
+   "K": 5,
+   "n_draws": 200000,
+   "empirical_mean": 0.7152953643030548,
+   "analytic_mean": 0.7142857142857143,
+   "empirical_var": 0.045332616945558714,
+   "analytic_var": 0.045351473922902494
+  },
+  {
+   "r": 7,
+   "K": 6,
+   "n_draws": 200000,
+   "empirical_mean": 0.8569326765269818,
+   "analytic_mean": 0.8571428571428571,
+   "empirical_var": 0.027308624520093666,
+   "analytic_var": 0.027210884353741496
+  }
+ ],
+ "recall_prediction": [
+  {
+   "system": "water-disjoint_md_T300K",
+   "D": 576,
+   "K": 3,
+   "measured": 0.58,
+   "shared": 0.632,
+   "indep": 0.636
+  },
+  {
+   "system": "water-disjoint_md_T300K",
+   "D": 576,
+   "K": 4,
+   "measured": 0.66,
+   "shared": 0.712,
+   "indep": 0.692
+  },
+  {
+   "system": "water-disjoint_md_T300K",
+   "D": 576,
+   "K": 6,
+   "measured": 0.8400000000000001,
+   "shared": 0.8960000000000001,
+   "indep": 0.876
+  },
+  {
+   "system": "water-disjoint_pimd_T300K",
+   "D": 576,
+   "K": 3,
+   "measured": 0.692,
+   "shared": 0.744,
+   "indep": 0.768
+  },
+  {
+   "system": "water-disjoint_pimd_T300K",
+   "D": 576,
+   "K": 4,
+   "measured": 0.74,
+   "shared": 0.8320000000000001,
+   "indep": 0.828
+  },
+  {
+   "system": "water-disjoint_pimd_T300K",
+   "D": 576,
+   "K": 6,
+   "measured": 0.8640000000000001,
+   "shared": 0.908,
+   "indep": 0.9400000000000001
+  },
+  {
+   "system": "water-overlapping_md_T300K",
+   "D": 576,
+   "K": 3,
+   "measured": 0.548,
+   "shared": 0.584,
+   "indep": 0.572
+  },
+  {
+   "system": "water-overlapping_md_T300K",
+   "D": 576,
+   "K": 4,
+   "measured": 0.612,
+   "shared": 0.648,
+   "indep": 0.628
+  },
+  {
+   "system": "water-overlapping_md_T300K",
+   "D": 576,
+   "K": 6,
+   "measured": 0.8039999999999999,
+   "shared": 0.8240000000000001,
+   "indep": 0.828
+  },
+  {
+   "system": "water-overlapping_pimd_T300K",
+   "D": 576,
+   "K": 3,
+   "measured": 0.6759999999999999,
+   "shared": 0.732,
+   "indep": 0.728
+  },
+  {
+   "system": "water-overlapping_pimd_T300K",
+   "D": 576,
+   "K": 4,
+   "measured": 0.692,
+   "shared": 0.796,
+   "indep": 0.8039999999999999
+  },
+  {
+   "system": "water-overlapping_pimd_T300K",
+   "D": 576,
+   "K": 6,
+   "measured": 0.8800000000000001,
+   "shared": 0.932,
+   "indep": 0.924
+  }
+ ],
+ "budget": [
+  {
+   "system": "ethanol",
+   "N": 9,
+   "D": 27,
+   "K_eps50": 224,
+   "K_eps20": 1397,
+   "K_eps10": 5588,
+   "K_available": 7
+  },
+  {
+   "system": "aspirin",
+   "N": 21,
+   "D": 63,
+   "K_eps50": 251,
+   "K_eps20": 1567,
+   "K_eps10": 6266,
+   "K_available": 7
+  },
+  {
+   "system": "azobenzene",
+   "N": 24,
+   "D": 72,
+   "K_eps50": 255,
+   "K_eps20": 1594,
+   "K_eps10": 6373,
+   "K_available": 7
+  },
+  {
+   "system": "3BPA",
+   "N": 27,
+   "D": 81,
+   "K_eps50": 259,
+   "K_eps20": 1617,
+   "K_eps10": 6467,
+   "K_available": 7
+  },
+  {
+   "system": "water (J5)",
+   "N": 192,
+   "D": 576,
+   "K_eps50": 322,
+   "K_eps20": 2009,
+   "K_eps10": 8036,
+   "K_available": 7
+  }
+ ]
+}

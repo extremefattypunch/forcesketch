@@ -1,0 +1,73 @@
+== node holygpu7c2131.rc.fas.harvard.edu partition gpu_requeue job 39483448
+name, driver_version, memory.total [MiB], mig.mode.current
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 595.71.05, 97887 MiB, Disabled
+
+=== fuser_ON_(upstream_default) ===
+  texpr_enabled                    True
+  n_success                        2
+  first_failing_call_index         2
+  max_rel_err_vs_serial_fp64       None
+  first error                      RuntimeError: The following operation failed in the TorchScript interpreter.
+Traceback of TorchScript (most recent call last):
+RuntimeError: Cannot access data pointer of Ten
+
+=== fuser_OFF_(shipped_fix) ===
+  texpr_enabled                    False
+  n_success                        12
+  first_failing_call_index         None
+  max_rel_err_vs_serial_fp64       2.773824800613524e-15
+
+fuser_needed=True  fix_sufficient=True
+VERDICT: fix still needed AND sufficient -- workshop result stands
+wrote j0b_guard_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition_torch2.13.0+cu129.json
+{
+ "device_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "compute_capability": "12.0",
+ "sm_count": 188,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.004528000019490719
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+  B=  1 L=1 serial       11.44 ms  IQR 0.18
+  B=  1 L=1 batched      12.51 ms  IQR 0.06
+  B=  1 L=2 serial       17.40 ms  IQR 0.09
+  B=  1 L=2 batched      12.89 ms  IQR 0.05
+  B=  1 L=3 serial       20.58 ms  IQR 0.10
+  B=  1 L=3 batched      11.49 ms  IQR 0.02
+  B=  1 L=4 serial       25.95 ms  IQR 0.12
+  B=  1 L=4 batched      11.76 ms  IQR 0.04
+  B=  1 L=8 serial       47.40 ms  IQR 0.23
+  B=  1 L=8 batched      12.87 ms  IQR 0.03
+  B=  4 L=1 serial        9.72 ms  IQR 0.03
+  B=  4 L=1 batched      10.83 ms  IQR 0.03
+  B=  4 L=2 serial       15.14 ms  IQR 0.05
+  B=  4 L=2 batched      11.19 ms  IQR 0.03
+  B=  4 L=3 serial       20.52 ms  IQR 0.07
+  B=  4 L=3 batched      11.49 ms  IQR 0.04
+  B=  4 L=4 serial       25.96 ms  IQR 0.05
+  B=  4 L=4 batched      11.77 ms  IQR 0.02
+  B=  4 L=8 serial       47.43 ms  IQR 0.16
+  B=  4 L=8 batched      12.90 ms  IQR 0.03
+  B= 16 L=1 serial        9.70 ms  IQR 0.03
+  B= 16 L=1 batched      10.84 ms  IQR 0.03
+  B= 16 L=2 serial       15.14 ms  IQR 0.04
+  B= 16 L=2 batched      11.24 ms  IQR 0.03
+  B= 16 L=3 serial       20.58 ms  IQR 0.04
+  B= 16 L=3 batched      11.56 ms  IQR 0.03
+  B= 16 L=4 serial       25.96 ms  IQR 0.06
+  B= 16 L=4 batched      11.84 ms  IQR 0.03
+  B= 16 L=8 serial       47.56 ms  IQR 0.17
+  B= 16 L=8 batched      17.18 ms  IQR 0.01
+  B= 64 L=1 serial       10.53 ms  IQR 0.01
+  B= 64 L=1 batched      11.35 ms  IQR 0.02
+  B= 64 L=2 serial       16.32 ms  IQR 0.01
+  B= 64 L=2 batched      18.96 ms  IQR 0.04
+  B= 64 L=3 serial       22.13 ms  IQR 0.01
+  B= 64 L=3 batched      26.05 ms  IQR 0.06
+  B= 64 L=4 serial       27.86 ms  IQR 0.01
+  B= 64 L=4 batched      33.77 ms  IQR 0.45
+  B= 64 L=8 serial       50.99 ms  IQR 0.02
+  B= 64 L=8 batched      63.85 ms  IQR 0.43
+
+wrote 40 records to results/records/j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl

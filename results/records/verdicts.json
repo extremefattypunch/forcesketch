@@ -1,0 +1,180 @@
+{
+ "verdicts": [
+  {
+   "experiment": "J6 naive committees",
+   "kind": "pre-registered",
+   "score": "3/5",
+   "predictions": [
+    {
+     "id": "P1",
+     "passed": false,
+     "stated_confidence": "high"
+    },
+    {
+     "id": "P2",
+     "passed": true,
+     "stated_confidence": "medium"
+    },
+    {
+     "id": "P3",
+     "passed": true,
+     "stated_confidence": "high"
+    },
+    {
+     "id": "P4",
+     "passed": true,
+     "stated_confidence": "high"
+    },
+    {
+     "id": "P5",
+     "passed": false,
+     "stated_confidence": "medium"
+    }
+   ]
+  },
+  {
+   "experiment": "J6B foundation acquisition (MPtraj)",
+   "kind": "pre-registered",
+   "score": "2/5",
+   "predictions": [
+    {
+     "id": "Q1",
+     "passed": true,
+     "stated_confidence": "medium"
+    },
+    {
+     "id": "Q2",
+     "passed": false,
+     "stated_confidence": "medium"
+    },
+    {
+     "id": "Q3",
+     "passed": true,
+     "stated_confidence": "high"
+    },
+    {
+     "id": "Q4",
+     "passed": false,
+     "stated_confidence": "medium"
+    },
+    {
+     "id": "Q5",
+     "passed": false,
+     "stated_confidence": "low"
+    }
+   ]
+  },
+  {
+   "experiment": "J6C size normalisation",
+   "kind": "post-hoc repair, criteria pre-specified",
+   "score": "5/6",
+   "predictions": [
+    {
+     "id": "N1",
+     "passed": true
+    },
+    {
+     "id": "N2",
+     "passed": true
+    },
+    {
+     "id": "N3",
+     "passed": true
+    },
+    {
+     "id": "N4",
+     "passed": true
+    },
+    {
+     "id": "N5",
+     "passed": true
+    },
+    {
+     "id": "N6",
+     "passed": false
+    }
+   ],
+   "caveat": "N4's criterion is a bare point comparison; across the four error scores the result is 2 significant wins, 1 ties, 1 significant losses. Do not quote the score without this."
+  },
+  {
+   "experiment": "J8 water systems prediction \u2014 clean matched pair, H200",
+   "kind": "pre-registered (v2, frozen protocol)",
+   "score": "4/4",
+   "predictions": [
+    {
+     "id": "P1",
+     "passed": true
+    },
+    {
+     "id": "P2",
+     "passed": true
+    },
+    {
+     "id": "P3",
+     "passed": true
+    },
+    {
+     "id": "P4",
+     "passed": true
+    }
+   ],
+   "caveat": "v3 scores 4/4 \u2014 IDENTICAL to v2, so the post-hoc protocol repair changes nothing on this device."
+  },
+  {
+   "experiment": "J8 water systems prediction \u2014 clean matched pair, A100-80GB",
+   "kind": "pre-registered (v2, frozen protocol)",
+   "score": "3/4",
+   "predictions": [
+    {
+     "id": "P1",
+     "passed": true
+    },
+    {
+     "id": "P2",
+     "passed": true
+    },
+    {
+     "id": "P3",
+     "passed": false
+    },
+    {
+     "id": "P4",
+     "passed": true
+    }
+   ],
+   "caveat": "v3 scores 3/4 \u2014 IDENTICAL to v2, so the post-hoc protocol repair changes nothing on this device."
+  },
+  {
+   "experiment": "J8 water systems prediction \u2014 clean matched pair, RTX PRO 6000 Blackwell",
+   "kind": "pre-registered (v2, frozen protocol)",
+   "score": "2/4",
+   "predictions": [
+    {
+     "id": "P1",
+     "passed": true
+    },
+    {
+     "id": "P2",
+     "passed": true
+    },
+    {
+     "id": "P3",
+     "passed": false
+    },
+    {
+     "id": "P4",
+     "passed": false
+    }
+   ],
+   "caveat": "v3 scores 3/4 \u2014 the difference is P4, whose frozen threshold was an A100 number and does not fit this device."
+  },
+  {
+   "experiment": "J6D committee value over the free signal",
+   "kind": "exploratory (not scored)",
+   "score": "n/a",
+   "finding": "MPtraj marginal +0.0002 [-0.0003,+0.0007], significant=False; fixed-N systems 8/10 significant"
+  }
+ ],
+ "total_confirmed": 19,
+ "total_predictions": 28
+}

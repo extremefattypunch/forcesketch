@@ -1,9 +1,0 @@
-{
-  "projectRoot": "/home/ianpoon/HPCxBIO-journal-collab-with-Manpreet-2026",
-  "batchFiles": [
-    {"path": "research plan/01-research-paper-plan.md", "language": "markdown", "sizeLines": 332, "fileCategory": "docs"},
-    {"path": "research plan/02-experimental-protocol.md", "language": "markdown", "sizeLines": 367, "fileCategory": "docs"},
-    {"path": "research plan/03-target-venues.md", "language": "markdown", "sizeLines": 99, "fileCategory": "docs"}
-  ],
-  "batchImportData": {}
-}

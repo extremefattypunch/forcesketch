@@ -1,0 +1,9 @@
+== holygpu8a22105.rc.fas.harvard.edu gpu 39486556
+NVIDIA A100-SXM4-80GB, Disabled
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+[3bpa-naive-same_test_1200K] S=2139 A=27 M=8 rmse=158.5 disagreement=61.3 meV/A overconfidence=2.58x (113s)
+[3bpa-naive_test_1200K] S=2139 A=27 M=8 rmse=167.0 disagreement=65.3 meV/A overconfidence=2.56x (91s)
+[water-naive_md_T300K] S=500 A=192 M=8 rmse=30.4 disagreement=13.3 meV/A overconfidence=2.28x (42s)
+[water-naive_pimd_T300K] S=500 A=192 M=8 rmse=81.4 disagreement=26.4 meV/A overconfidence=3.08x (41s)
+
+wrote 4 caches to /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/processed/naive and records to /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/records/j6_naive_caches.jsonl

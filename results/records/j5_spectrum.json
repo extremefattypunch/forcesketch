@@ -1,0 +1,92 @@
+[
+ {
+  "system": "disjoint_test_1200K",
+  "stable_rank_FQ": 2.9928361267106496,
+  "stable_rank_A": 1.7452395420865763,
+  "effective_rank": 5.132285778166302,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.33413122458498073,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "overlapping_test_1200K",
+  "stable_rank_FQ": 1.2121965701723054,
+  "stable_rank_A": 1.0083800696302332,
+  "effective_rank": 1.4572090117532055,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.8249487126150316,
+  "n_for_90pct": 3.0
+ },
+ {
+  "system": "rmd17-disjoint_aspirin",
+  "stable_rank_FQ": 2.9175049898636685,
+  "stable_rank_A": 1.7730260924299155,
+  "effective_rank": 4.800738918745417,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.3427586254262855,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "rmd17-disjoint_azobenzene",
+  "stable_rank_FQ": 2.907869170524941,
+  "stable_rank_A": 1.822058521519166,
+  "effective_rank": 4.6407417835511415,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.3438944262473389,
+  "n_for_90pct": 5.0
+ },
+ {
+  "system": "rmd17-disjoint_ethanol",
+  "stable_rank_FQ": 3.0792645335732356,
+  "stable_rank_A": 1.945394459851189,
+  "effective_rank": 4.874008980393263,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.32475287169939293,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "same_test_1200K",
+  "stable_rank_FQ": 4.175076400829497,
+  "stable_rank_A": 2.9416929298538976,
+  "effective_rank": 5.925588893341472,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.23951657502634482,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "water-disjoint_md_T300K",
+  "stable_rank_FQ": 4.253899128277951,
+  "stable_rank_A": 2.988192469872339,
+  "effective_rank": 6.055720297808321,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.2350784468189345,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "water-disjoint_pimd_T300K",
+  "stable_rank_FQ": 1.5001745258445587,
+  "stable_rank_A": 1.0711978861438085,
+  "effective_rank": 2.1009410465647744,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.6665891086485596,
+  "n_for_90pct": 3.0
+ },
+ {
+  "system": "water-overlapping_md_T300K",
+  "stable_rank_FQ": 2.9435034239693483,
+  "stable_rank_A": 1.772958565055854,
+  "effective_rank": 4.886866832472379,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.339731216840743,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "water-overlapping_pimd_T300K",
+  "stable_rank_FQ": 2.0324404389451565,
+  "stable_rank_A": 1.4349122005030697,
+  "effective_rank": 2.878792260886309,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.4920193383472548,
+  "n_for_90pct": 4.0
+ }
+]

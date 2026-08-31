@@ -1,0 +1,43 @@
+== holygpu8a22204.rc.fas.harvard.edu gpu 39490183
+NVIDIA A100-SXM4-80GB, Disabled
+self-test OK: global 1.80e-13, leading-only 4.37e-13 (n=64 structures)
+sampling 136923 of 136923 pool structures (seed 20260816)
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+model MACE_qbc_max_selection_stagetwo.model  heads=8  dtype=float64
+     4000 scanned    39.2/s  eta   56.6 min
+     8000 scanned    39.1/s  eta   55.0 min
+    12000 scanned    39.5/s  eta   52.7 min
+    16000 scanned    39.6/s  eta   50.9 min
+    20000 scanned    39.7/s  eta   49.1 min
+    24000 scanned    39.6/s  eta   47.5 min
+    28000 scanned    39.8/s  eta   45.6 min
+    32000 scanned    39.7/s  eta   44.0 min
+    36000 scanned    39.7/s  eta   42.4 min
+    40000 scanned    39.8/s  eta   40.6 min
+    44000 scanned    39.8/s  eta   39.0 min
+    48000 scanned    39.8/s  eta   37.2 min
+    52000 scanned    39.8/s  eta   35.6 min
+    56000 scanned    39.9/s  eta   33.8 min
+    60000 scanned    39.8/s  eta   32.2 min
+    64000 scanned    39.8/s  eta   30.6 min
+    68000 scanned    39.8/s  eta   28.9 min
+    72000 scanned    39.8/s  eta   27.2 min
+    76000 scanned    39.8/s  eta   25.5 min
+    80000 scanned    39.9/s  eta   23.8 min
+    84000 scanned    39.9/s  eta   22.1 min
+    88000 scanned    39.9/s  eta   20.4 min
+    92000 scanned    39.9/s  eta   18.7 min
+    96000 scanned    39.9/s  eta   17.1 min
+   100000 scanned    39.9/s  eta   15.4 min
+   104000 scanned    39.9/s  eta   13.8 min
+   108000 scanned    39.9/s  eta   12.1 min
+   112000 scanned    39.8/s  eta   10.4 min
+   116000 scanned    39.9/s  eta    8.7 min
+   120000 scanned    39.9/s  eta    7.1 min
+   124000 scanned    39.9/s  eta    5.4 min
+   128000 scanned    39.9/s  eta    3.7 min
+   132000 scanned    39.9/s  eta    2.1 min
+   136000 scanned    39.9/s  eta    0.4 min
+   136923 scanned    39.9/s  eta    0.0 min
+scanned 136923 structures in 3436s (39.9/s, 160284014 periodic edges)
+wrote /n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/records/j6b_foundation_scan.pt

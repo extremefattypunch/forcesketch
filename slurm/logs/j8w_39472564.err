@@ -1,0 +1,3 @@
+/n/holylabs/hekstra_lab/Everyone/ianpoon/envs/fs-gpu/lib/python3.12/site-packages/e3nn/o3/_wigner.py:10: UserWarning: Environment variable TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD detected, since the`weights_only` argument was not explicitly passed to `torch.load`, forcing weights_only=False.
+  _Jd, _W3j_flat, _W3j_indices = torch.load(os.path.join(os.path.dirname(__file__), 'constants.pt'))
+[W815 21:15:36.317383137 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 8426356736 bytes (free: 8367177728, total: 101975851008).
