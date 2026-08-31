@@ -1,0 +1,34 @@
+% ICLR 2026 build. Shares body.tex verbatim with main.tex (the JCTC build), so a
+% correction to the science lands in both manuscripts at once. This file
+% contributes only the class, the anonymous title block and the bibliography
+% style.
+%
+% Double-blind: the class supplies the anonymous author block, so there is
+% deliberately no \authorblock call here -- that is the one line of main.tex that
+% names the author. The body carries no URLs, no names and no acknowledgements
+% (checked: the only identifying string in the original single-file manuscript was
+% the \authorblock line), so nothing else needs suppressing.
+%
+% Page budget: ICLR allows 9 pages of main text with unlimited references and
+% appendices. The shared body already renders to 9 pages, so nothing is cut.
+\documentclass{article}
+\input{preamble_iclr}
+\input{macros}
+
+\title{When is committee force uncertainty worth computing?\\
+Decision quality, cheap gates, and the baselines that must be beaten}
+
+% The ICLR class ignores \author when \iclrfinalcopy is undefined and prints
+% "Anonymous authors / Paper under double-blind review" instead. Left empty so an
+% accidental name cannot leak into a submission build.
+\author{}
+
+\begin{document}
+\maketitle
+
+\input{body}
+
+\bibliographystyle{iclr2026_conference}
+\bibliography{references}
+
+\end{document}

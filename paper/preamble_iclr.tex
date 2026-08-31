@@ -1,0 +1,43 @@
+% ICLR build preamble. Deliberately NOT preamble.tex: that one sets
+% \usepackage[margin=1in]{geometry}, which would fight the class. The ICLR class
+% fixes its own text block (9.0in x 5.5in true), and overriding it is grounds for
+% desk rejection at a venue that checks formatting.
+%
+% Loaded WITHOUT \iclrfinalcopy, so the class typesets "Anonymous authors / Paper
+% under double-blind review" and stamps "Under review as a conference paper at
+% ICLR 2026" on every page. That is the submission state; do not define
+% \iclrfinalcopy until acceptance.
+% Loaded exactly as ICLR's own iclr2026_conference.tex does, including `times`:
+% the class expects Times, and without it the manuscript renders in Computer
+% Modern, which is visibly non-conforming. Build with
+%   TEXINPUTS=./template_iclr: pdflatex main_iclr
+% so the vendored class is found under its own name -- loading it as
+% `template_iclr/iclr2026_conference` instead suppressed the class's
+% \pagestyle{fancy}, which silently dropped the mandatory "Under review as a
+% conference paper at ICLR 2026" running header.
+\usepackage{iclr2026_conference,times}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+% natbib is NOT loaded here: iclr2026_conference.sty already does
+% \RequirePackage{natbib} (line 20), and loading it again with different options
+% is an option-clash. Author-year is the class default and matches
+% iclr2026_conference.bst. The shared body only uses \citep, which renders
+% correctly under author-year and numeric alike, so no body text changes between
+% the two manuscripts.
+
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+% preamble.tex defines these two; the body uses \note nowhere but macros.tex is
+% shared, and \authorblock must exist even though the ICLR build never calls it
+% (the class prints the anonymous block itself).
+\providecommand{\authorblock}[2]{}
+\providecommand{\note}[1]{\textcolor{gray}{\small[#1]}}
