@@ -77,6 +77,47 @@ committee loses to a signal that costs nothing.
 Every numeric claim below is derived programmatically from a committed record;
 none is transcribed. Section~\ref{sec:avail} describes the reproduction path.
 
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Committee uncertainty for atomistic models.}
+Query-by-committee~\citep{seung1992query} is the standard selection rule for
+interatomic potentials, and the standard critique of force-field evaluation is
+that aggregate error metrics hide the failures that matter~\citep{kovacs2021beyond}.
+\citet{christensen2020role} show that gradient information changes what a model
+learns, which is part of why force disagreement rather than energy disagreement is
+the quantity acquisition consumes. Multi-head committees~\citep{beck2025committee}
+amortise the energy spread across one trunk and are the construction we take as
+given; our contribution is not a better estimator of their statistic but a
+different question about it. Where that work validates a cheap approximation
+against the exact committee, we ask first whether the exact committee is worth
+approximating.
+
+\paragraph{Estimating a trace from few products.}
+The centred head-space statistic is a trace, so the natural tools are randomised.
+\citet{meyer2021hutchpp} establish that splitting a fixed budget between an exact
+leading subspace and a sketched residual is optimal for trace estimation, and our
+control variate is that construction. Our negative result is not a contradiction
+of it: their guarantee is on the trace's \emph{value}, while acquisition consumes
+a \emph{ranking} across structures, and Section~\ref{sec:theory} shows the
+finite-sample noise that is harmless for the former is decisive for the latter.
+
+\paragraph{Distribution-free calibration.}
+The gate's constant is the split-conformal
+one~\citep{vovk2005algorithmic,lei2018distribution}, which buys a finite-sample
+guarantee under exchangeability alone. Exchangeability is the assumption a
+molecular dynamics trajectory violates, which is why every split here is blocked
+with guard bands sized from a measured autocorrelation time rather than drawn at
+random.
+
+\paragraph{Foundation models and real pools.}
+Universal potentials trained on materials
+trajectories~\citep{deng2023chgnet,batatia2023foundation} are the setting the
+method is pitched at, and the setting in which we find its motivating premise
+weakest: a pool spanning composition and size is exactly where an extensive
+statistic misbehaves and where a free force-magnitude signal is already close to
+saturated.
+
 \section{Method}
 
 \subsection{Centred head space}
@@ -435,7 +476,10 @@ $\alpha$ is pool-dependent. Finally, several results here correct earlier
 statements of our own; the record of those corrections is retained in the
 repository rather than silently overwritten.
 
-\section*{Data and Software Availability}
+% Titled to satisfy both venues at once: ICLR asks for a "Reproducibility
+% Statement", ACS journals for "Data and Software Availability". One section,
+% both names, no duplicated prose.
+\section*{Reproducibility Statement / Data and Software Availability}
 \label{sec:avail}
 All statistical results regenerate on CPU from repository-tracked artifacts:
 \texttt{tools/reproduce.py --tier offline} re-derives every headline quantity in
