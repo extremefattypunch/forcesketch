@@ -197,6 +197,42 @@ def j6d(key: str):
     raise KeyError(key)
 
 
+def free_auroc_range(lo: bool):
+    """AUROC span of the two FREE signals over the molecular panel.
+
+    Was typed into the manuscript as "0.60--0.70".
+    """
+    rows = load("j2a_oracle_panel.jsonl")
+    v = [r["auroc_top05"] for r in rows
+         if r.get("error_score") == "e_max"
+         and r.get("signal") in ("force_norm", "energy_std")]
+    return min(v) if lo else max(v)
+
+
+def stable_rank_range(lo: bool):
+    """Span of the head-space stable rank over the molecular panel.
+
+    Was typed into the manuscript as "1.2--4.3 of a possible 7".
+    """
+    v = [r["stable_rank_FQ"] for r in load("j5_spectrum.json")]
+    return min(v) if lo else max(v)
+
+
+def naive_accuracy_ratio():
+    """How much more accurate a matched independently-trained committee is on the
+    shifted (PIMD) data: multi-head force RMSE over naive force RMSE.
+
+    Was typed into the manuscript as "2.7x". Reads both cache records; the
+    declared source is the multi-head one, following fsWaterSpeedupSpread, which
+    likewise derives across devices from one declared record.
+    """
+    mh = {f"{r['variant']}_{r.get('split')}": r["force_rmse_mean_mev_A"]
+          for r in load("j5_water_caches.jsonl")}
+    nv = {(r["variant"], r.get("split")): r["force_rmse_mean_mev_A"]
+          for r in load("j6_naive_caches.jsonl")}
+    return mh["water-overlapping_pimd_T300K"] / nv[("water-naive", "pimd_T300K")]
+
+
 def j2c(key: str):
     """Realised finite-sample coverage of the gate's conformal constant.
 
@@ -266,6 +302,20 @@ def j8_speedup_spread(B: int = 16):
 # the registry: (macro, source, fn, format, description)
 # --------------------------------------------------------------------------
 MACROS = [
+    # --- numbers that were typed into the prose, now derived ---------------
+    # These three ranges were the only result figures in the manuscript not
+    # backed by a record. Each reproduces the typed value exactly, which is
+    # reassuring but was luck rather than provenance until now.
+    ("fsFreeAurocLo", "j2a_oracle_panel.jsonl", lambda: free_auroc_range(True), "{:.2f}",
+     "lowest AUROC of a free signal over the molecular panel"),
+    ("fsFreeAurocHi", "j2a_oracle_panel.jsonl", lambda: free_auroc_range(False), "{:.2f}",
+     "highest AUROC of a free signal over the molecular panel"),
+    ("fsStableRankLo", "j5_spectrum.json", lambda: stable_rank_range(True), "{:.1f}",
+     "smallest head-space stable rank over the molecular panel"),
+    ("fsStableRankHi", "j5_spectrum.json", lambda: stable_rank_range(False), "{:.1f}",
+     "largest head-space stable rank over the molecular panel"),
+    ("fsNaiveAccuracyRatio", "j5_water_caches.jsonl", lambda: naive_accuracy_ratio(), "{:.1f}",
+     "how much more accurate a matched independent committee is on shifted (PIMD) water"),
     # --- realised coverage of the calibrated gate (j2c) --------------------
     ("fsCovNCalMin", "j2c_conformal_coverage.json", lambda: j2c("n_cal_min"), "{:d}",
      "smallest calibration set over all registered splits (the binding case)"),

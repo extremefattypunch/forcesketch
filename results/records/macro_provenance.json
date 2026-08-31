@@ -118,6 +118,20 @@
   "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
   "value": 0.7373052631578947
  },
+ "fsFreeAurocHi": {
+  "description": "highest AUROC of a free signal over the molecular panel",
+  "formatted": "0.70",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.7015646846714254
+ },
+ "fsFreeAurocLo": {
+  "description": "lowest AUROC of a free signal over the molecular panel",
+  "formatted": "0.60",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.6001684210526316
+ },
  "fsFreeGainHi": {
   "description": "largest such gain",
   "formatted": "0.182",
@@ -258,6 +272,13 @@
   "source_sha256": "2297a2ac56406f515d876881df35e4c0b69d3dfea38c1d9a1d970fbb91c31552",
   "value": 0.548464795517355
  },
+ "fsNaiveAccuracyRatio": {
+  "description": "how much more accurate a matched independent committee is on shifted (PIMD) water",
+  "formatted": "2.7",
+  "source": "j5_water_caches.jsonl",
+  "source_sha256": "10ac038386f59682aa266fab5c75f9ed435bae3f23bde045474d0e478f673021",
+  "value": 2.700150077949352
+ },
  "fsNaiveOverconfLo": {
   "description": "lowest naive-committee overconfidence ratio",
   "formatted": "2.28",
@@ -306,6 +327,20 @@
   "source": "j6_naive_verdict.json",
   "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
   "value": 25.768896366814374
+ },
+ "fsStableRankHi": {
+  "description": "largest head-space stable rank over the molecular panel",
+  "formatted": "4.3",
+  "source": "j5_spectrum.json",
+  "source_sha256": "b5f4ebdd5865ef1971ca624ff9f4d54b54c57a7c983e65165a885dcb8995ce6e",
+  "value": 4.253899128277951
+ },
+ "fsStableRankLo": {
+  "description": "smallest head-space stable rank over the molecular panel",
+  "formatted": "1.2",
+  "source": "j5_spectrum.json",
+  "source_sha256": "b5f4ebdd5865ef1971ca624ff9f4d54b54c57a7c983e65165a885dcb8995ce6e",
+  "value": 1.2121965701723054
  },
  "fsThreeBPASpeedupBSixteen": {
   "description": "3BPA total speedup at B=16, same job and settings as the water run",

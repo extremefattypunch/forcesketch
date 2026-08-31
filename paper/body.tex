@@ -171,7 +171,7 @@ size varies, and why it could not have shown up here.
 
 \subsection{The margin over free signals}
 Head-energy spread costs one forward pass; the norm of the mean force costs
-nothing at all. Both are informative (AUROC 0.60--0.70). Exact global
+nothing at all. Both are informative (AUROC $\fsFreeAurocLo$--$\fsFreeAurocHi$). Exact global
 disagreement beats the better of them by $\fsFreeGainLo$--$\fsFreeGainHi$ AUROC,
 and pairwise the advantage is significant in $\fsFreeSig$ of $\fsFreeSigTotal$
 comparisons. So the backward passes buy something real but not overwhelming---and
@@ -206,7 +206,7 @@ specific to calibrated gates: $c_\alpha$ is fitted to the ratio $S/\hat{S}$, so 
 systematic bias in $\hat{S}$ is absorbed exactly, and only its \emph{variance}
 costs skip fraction. Leading-only is biased low by construction and pays nothing
 for it. Since the head-space spectrum is concentrated---stable rank
-$\approx 1.2$--$4.3$ of a possible $7$---a random projection is being asked to do
+$\approx \fsStableRankLo$--$\fsStableRankHi$ of a possible $7$---a random projection is being asked to do
 the one thing concentration makes hard.
 
 The practical consequence is that the method gets simpler: at fixed budget, spend
@@ -272,7 +272,7 @@ Bulk liquid water ($N=192$, periodic, $D=576$) and a same-temperature
 MD-versus-PIMD pair give a distribution shift in which only quantum nuclear
 effects differ. One caveat must survive contact with the reader: the shift
 regime's striking Factor A is substantially a symptom of \emph{this model family
-failing badly there}. A matched independently-trained committee is $2.7\times$
+failing badly there}. A matched independently-trained committee is $\fsNaiveAccuracyRatio\times$
 more accurate on the shifted data and its Factor A collapses, while a free signal
 retains most of the apparent skill. Shift-regime claims must therefore be quoted
 beside the free-signal baseline and the accuracy gap.
