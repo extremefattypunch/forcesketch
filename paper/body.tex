@@ -45,7 +45,8 @@ evaluate the spread of its predictions, and label where the spread is largest.
 For force-field models the natural spread is over \emph{forces}, and obtaining it
 exactly costs one reverse-mode pass per ensemble member.
 
-A multi-head committee makes that cheaper in principle. Instead of $M$
+A multi-head committee makes that cheaper in
+principle~\citep{beck2025committee}. Instead of $M$
 independent models, one trunk carries $M$ output heads, so a single reverse pass
 through the trunk with an appropriate head-space cotangent yields a projection of
 the per-head force matrix. Whether a small number of such projections suffices to
@@ -99,7 +100,8 @@ as a secondary hypothesis before any of it was run.
 A projection (\emph{lane}) costs one reverse pass and returns $g_k=F w_k$ for a
 head-space direction $w_k$. We compare Haar and Gaussian sketches, head
 subsampling, a low-rank control variate that evaluates $r_0$ leading directions
-exactly and sketches the residual, and a purely deterministic
+exactly and sketches the residual---the split that
+\citet{meyer2021hutchpp} show is optimal for trace estimation---and a purely deterministic
 \emph{leading-only} estimator that spends every lane on exact leading
 eigendirections of the design-set Gram and discards the residual entirely.
 
@@ -268,7 +270,8 @@ beside the free-signal baseline and the accuracy gap.
 The setting the method is actually pitched at is a foundation model with
 committee readouts on a frozen trunk~\citep{batatia2023foundation}. We scan
 \fsMPtrajN\ periodic crystals drawn from MPtraj~\citep{deng2023chgnet},
-spanning 89 elements and 1--444 atoms, with a MACE-MP trunk fine-tuned to carry
+spanning 89 elements and 1--444 atoms, with a
+MACE-MP~\citep{batatia2022mace} trunk fine-tuned to carry
 eight disjoint committee heads. Five predictions were pre-registered; two were
 confirmed.
 
