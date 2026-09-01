@@ -15,6 +15,12 @@
 \input{preamble_iclr}
 \input{macros}
 
+\input{artifact}
+% ICLR is double-blind, so the DOI -- which carries the depositor's name and
+% ORCID on its landing page -- must NOT appear. The anonymised mirror is cited
+% instead, and the DOI is added for the camera-ready.
+\newcommand{\fsArtifactLink}{an anonymised mirror, \url{\fsArtifactAnon}}
+
 \title{When is committee force uncertainty worth computing in MD?\\
 Decision quality, cheap gates, and the baselines that must be beaten}
 

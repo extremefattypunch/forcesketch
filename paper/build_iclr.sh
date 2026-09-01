@@ -40,6 +40,16 @@ rm -f .anoncheck.txt
 [ "$LEAK" -eq 0 ] || { echo "   ERROR: $LEAK identifying string(s) in the rendered PDF"; exit 1; }
 [ "$ANON" -ge 1 ] || { echo "   ERROR: anonymous author block missing"; exit 1; }
 
+# Artifact locator gate. paper/artifact.tex ships placeholders until the deposit
+# exists, and an availability statement pointing at "PLACEHOLDER-..." is worse
+# than one pointing nowhere: it reads as checkable and is not. Checked against
+# the RENDERED pdf, so it catches the value actually typeset.
+pdftotext main_iclr.pdf - > .placeholdercheck.txt
+PH=$(grep -c 'PLACEHOLDER' .placeholdercheck.txt || true)
+rm -f .placeholdercheck.txt
+[ "$PH" -eq 0 ] || { echo "   ERROR: artifact locator is still a PLACEHOLDER in the rendered PDF."; \
+                     echo "          Create the deposit, then fill paper/artifact.tex."; exit 1; }
+
 BODY=0
 for p in $(seq 1 20); do
   pdftotext -f "$p" -l "$p" main_iclr.pdf - > .pagecheck.txt 2>/dev/null || true

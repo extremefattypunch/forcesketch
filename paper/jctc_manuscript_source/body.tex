@@ -423,7 +423,6 @@ speedup claim --- pass everywhere.}
 \end{table}
 
 \section{Wall clock}
-\label{sec:wallclock}
 
 Lane reduction pays only once the backward pass is compute-bound rather than
 launch-bound, and the controlling variable is the total edge count in the batch,
@@ -467,25 +466,7 @@ repository rather than silently overwritten.
 % both names, no duplicated prose.
 \section*{Reproducibility Statement / Data and Software Availability}
 \label{sec:avail}
-
-\paragraph{Where everything is.}
-The complete artifact --- source code, environment lockfile with exact dependency
-versions, dataset acquisition scripts, dataset and checkpoint sha256 hashes, split
-manifests, probe seeds, every raw per-structure prediction and timing record, the
-figure- and table-generation scripts, the test suite and a worked example ---
-is deposited at \fsArtifactLink, released under the MIT licence for code and
-CC~BY~4.0 for the records. File paths named below are relative to its root.
-
-\paragraph{Inputs, which are not ours.}
-The multi-head committee checkpoints and the 3BPA and liquid-water frames this
-work evaluates are the supporting data of \citet{beck2025committee}, archived
-independently at \texttt{\fsUpstreamZenodo}, and the MPtraj structures are those
-distributed with \citet{deng2023chgnet}. We redistribute neither; the acquisition
-scripts fetch them and verify every file against a recorded hash before use, so a
-silently substituted input fails rather than propagates.
-
-\paragraph{Reproducing the numbers.}
-All statistical results regenerate on CPU:
+All statistical results regenerate on CPU from repository-tracked artifacts:
 \texttt{tools/reproduce.py --tier offline} re-derives every headline quantity in
 roughly four minutes with no model execution, no CUDA and no download, and checks
 each against its committed value. \texttt{tools/audit.py} verifies the frozen
@@ -494,15 +475,6 @@ registration record written before that experiment produced any artifact, the
 provenance of every number in this manuscript, the split manifests, and the
 test-access ledger. \texttt{tools/report\_go\_no\_go.py} emits every scored
 verdict as data, alongside the confidence stated for it in advance.
-
-\paragraph{What needs a GPU, and which one.}
-Only the timing experiments. Those were run on A100-SXM4-80GB, H200 and
-RTX~PRO~6000 Blackwell cards under a single pinned toolchain, and the device,
-driver, SM count and clock state of every run are recorded alongside its
-measurements, because the wall-clock conclusions in Section~\ref{sec:wallclock}
-are properties of the hardware as much as of the method. Regenerating the cached
-per-head force matrices needs one GPU and roughly an hour; everything downstream
-of that cache is offline linear algebra.
 
 % MANDATORY for ICLR 2027: https://iclr.cc/Conferences/2027/AIPolicyForAuthors
 % states the disclosure is a required in-paper section and that omitting it can

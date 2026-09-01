@@ -1,0 +1,11 @@
+\begin{tabular}{lccccccc}
+\toprule
+& \multicolumn{2}{c}{verdict} & \multicolumn{4}{c}{pre-registered predictions} & speedup \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-7}\cmidrule(lr){8-8}
+device & v2 & v3 & P1 & P2 & P3 & P4 & water, $B{=}16$ \\
+\midrule
+H200 & \textbf{4/4} & 4/4 & \checkmark & \checkmark & \checkmark & \checkmark & 1.852$\times$ \\
+A100-SXM4-80GB & \textbf{3/4} & 3/4 & \checkmark & \checkmark & $\times$ & \checkmark & 1.880$\times$ \\
+RTX PRO 6000 Blackwell & \textbf{2/4} & 3/4 & \checkmark & \checkmark & $\times$ & $\times$ & 1.894$\times$ \\
+\bottomrule
+\end{tabular}
