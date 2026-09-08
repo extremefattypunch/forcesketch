@@ -1,0 +1,73 @@
+== node holygpu7c1916.rc.fas.harvard.edu partition gpu_requeue job 39421322
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 97887 MiB, Disabled
+{
+ "device_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "compute_capability": "12.0",
+ "sm_count": 188,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.0038399999029934406
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+  B=  1 L=1 serial       10.37 ms  IQR 0.02
+  B=  1 L=1 batched      11.46 ms  IQR 0.03
+  B=  1 L=2 serial       16.14 ms  IQR 0.04
+  B=  1 L=2 batched      11.82 ms  IQR 0.04
+  B=  1 L=3 serial       21.90 ms  IQR 0.06
+  B=  1 L=3 batched      12.10 ms  IQR 0.01
+  B=  1 L=4 serial       27.62 ms  IQR 0.05
+  B=  1 L=4 batched      15.08 ms  IQR 0.02
+  B=  1 L=8 serial       44.81 ms  IQR 0.09
+  B=  1 L=8 batched      25.01 ms  IQR 0.13
+  B=  2 L=1 serial       10.30 ms  IQR 0.03
+  B=  2 L=1 batched      11.41 ms  IQR 0.03
+  B=  2 L=2 serial       16.05 ms  IQR 0.07
+  B=  2 L=2 batched      15.63 ms  IQR 0.01
+  B=  2 L=3 serial       21.76 ms  IQR 0.03
+  B=  2 L=3 batched      22.06 ms  IQR 0.09
+  B=  2 L=4 serial       27.47 ms  IQR 0.06
+  B=  2 L=4 batched      28.03 ms  IQR 0.04
+  B=  2 L=8 serial       44.53 ms  IQR 0.09
+  B=  2 L=8 batched      45.81 ms  IQR 0.45
+  B=  4 L=1 serial       16.09 ms  IQR 0.01
+  B=  4 L=1 batched      17.43 ms  IQR 0.02
+  B=  4 L=2 serial       26.05 ms  IQR 0.03
+  B=  4 L=2 batched      30.03 ms  IQR 0.08
+  B=  4 L=3 serial       36.04 ms  IQR 0.06
+  B=  4 L=3 batched      41.72 ms  IQR 0.39
+  B=  4 L=4 serial       45.81 ms  IQR 0.46
+  B=  4 L=4 batched      53.09 ms  IQR 0.05
+  B=  4 L=8 serial       75.07 ms  IQR 0.15
+  B=  4 L=8 batched      90.12 ms  IQR 0.07
+  B=  8 L=1 serial       32.03 ms  IQR 0.12
+  B=  8 L=1 batched      34.05 ms  IQR 0.03
+  B=  8 L=2 serial       52.75 ms  IQR 0.39
+  B=  8 L=2 batched      57.84 ms  IQR 0.45
+  B=  8 L=3 serial       73.14 ms  IQR 0.12
+  B=  8 L=3 batched      82.49 ms  IQR 0.38
+  B=  8 L=4 serial       94.11 ms  IQR 0.10
+  B=  8 L=4 batched     106.66 ms  IQR 0.36
+  B=  8 L=8 serial      156.25 ms  IQR 0.12
+  B=  8 L=8 batched     179.30 ms  IQR 0.15
+  B= 16 L=1 serial       62.81 ms  IQR 0.47
+  B= 16 L=1 batched      66.10 ms  IQR 0.04
+  B= 16 L=2 serial      105.16 ms  IQR 0.05
+  B= 16 L=2 batched     116.19 ms  IQR 0.10
+  B= 16 L=3 serial      147.56 ms  IQR 0.40
+  B= 16 L=3 batched     164.60 ms  IQR 0.27
+  B= 16 L=4 serial      190.28 ms  IQR 0.07
+  B= 16 L=4 batched     213.35 ms  IQR 0.23
+  B= 16 L=8 serial      317.47 ms  IQR 0.10
+  B= 16 L=8 batched     361.65 ms  IQR 0.22
+  B= 32 L=1 serial      127.86 ms  IQR 0.40
+  B= 32 L=1 batched     134.84 ms  IQR 0.37
+  B= 32 L=2 serial      214.49 ms  IQR 0.31
+  B= 32 L=2 batched     234.71 ms  IQR 0.24
+  B= 32 L=3 serial      301.47 ms  IQR 0.13
+  B= 32 L=3 batched     333.05 ms  IQR 0.41
+  B= 32 L=4 serial      388.50 ms  IQR 0.16
+  B= 32 L=4 batched     432.90 ms  IQR 0.41
+  B= 32 L=8 serial      648.95 ms  IQR 0.21
+  B= 32 L=8 batched     728.72 ms  IQR 0.43
+
+wrote 60 records to results/records/j8_lane_bench_water.jsonl

@@ -1,0 +1,109 @@
+{
+ "protocol_version": 2,
+ "records": "j8_lane_bench_water_NVIDIA_H200.jsonl",
+ "device": "NVIDIA H200",
+ "sm_count": 132,
+ "admissible": true,
+ "admissibility_failures": [
+  "NOTE 1/60 cells (1.7%) excluded as outliers: [(1, 4, 'batched')]"
+ ],
+ "metrics": {
+  "batched_slope": {
+   "1": 0.5308389859656769,
+   "2": 2.4651417993519393,
+   "4": 6.158986222254088,
+   "8": 12.525908711838397,
+   "16": 24.57344640444403,
+   "32": 48.547730929230994
+  },
+  "total_speedup": {
+   "1": 1.1954266059422278,
+   "2": 1.6078399770534904,
+   "4": 1.7264878593721362,
+   "8": 1.8084379398040387,
+   "16": 1.8575518989753697,
+   "32": 1.8677186217328183
+  },
+  "transition_batch": 2,
+  "transition_batch_ratio_vs_3bpa": 0.03125,
+  "serial_slope_min": 8.334998777467911,
+  "serial_fit_r2_min": 0.9972769732597712
+ },
+ "predictions": {
+  "P1": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "batched_slope",
+     "at_batch": 16,
+     "op": "gt",
+     "threshold": 1.0,
+     "value": 24.57344640444403,
+     "passed": true
+    }
+   ],
+   "falsification_clause": true
+  },
+  "P2": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "total_speedup",
+     "at_batch": 16,
+     "op": "ge",
+     "threshold": 1.4,
+     "value": 1.8575518989753697,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P3": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "transition_batch",
+     "at_batch": null,
+     "op": "le",
+     "threshold": 4,
+     "value": 2,
+     "passed": true
+    },
+    {
+     "metric": "transition_batch_ratio_vs_3bpa",
+     "at_batch": null,
+     "op": "between",
+     "threshold": [
+      0.03,
+      0.0625
+     ],
+     "value": 0.03125,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P4": {
+   "passed": false,
+   "criteria": [
+    {
+     "metric": "serial_fit_r2_min",
+     "at_batch": null,
+     "op": "ge",
+     "threshold": 0.95,
+     "value": 0.9972769732597712,
+     "passed": true
+    },
+    {
+     "metric": "serial_slope_min",
+     "at_batch": null,
+     "op": "gt",
+     "threshold": 10.9,
+     "value": 8.334998777467911,
+     "passed": false
+    }
+   ],
+   "falsification_clause": false
+  }
+ }
+}

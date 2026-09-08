@@ -1,0 +1,107 @@
+{
+ "protocol_version": 3,
+ "records": "j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl",
+ "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "sm_count": 188,
+ "admissible": true,
+ "admissibility_failures": [],
+ "metrics": {
+  "batched_slope": {
+   "1": 2.509127776916713,
+   "2": 5.860425727008141,
+   "4": 12.0581981841832,
+   "8": 24.27280595857803,
+   "16": 49.34876031744971,
+   "32": 98.92414772347227
+  },
+  "total_speedup": {
+   "1": 1.844698996795167,
+   "2": 1.8255550559416194,
+   "4": 1.8430830345715543,
+   "8": 1.880158743284493,
+   "16": 1.8910337729514912,
+   "32": 1.8939405492011576
+  },
+  "transition_batch": 1,
+  "transition_batch_ratio_vs_3bpa": 0.015625,
+  "serial_slope_min": 5.720214624927469,
+  "serial_fit_r2_min": 0.999932100441317
+ },
+ "predictions": {
+  "P1": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "batched_slope",
+     "at_batch": 16,
+     "op": "gt",
+     "threshold": 1.0,
+     "value": 49.34876031744971,
+     "passed": true
+    }
+   ],
+   "falsification_clause": true
+  },
+  "P2": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "total_speedup",
+     "at_batch": 16,
+     "op": "ge",
+     "threshold": 1.4,
+     "value": 1.8910337729514912,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P3": {
+   "passed": false,
+   "criteria": [
+    {
+     "metric": "transition_batch",
+     "at_batch": null,
+     "op": "le",
+     "threshold": 4,
+     "value": 1,
+     "passed": true
+    },
+    {
+     "metric": "transition_batch_ratio_vs_3bpa",
+     "at_batch": null,
+     "op": "between",
+     "threshold": [
+      0.03,
+      0.0625
+     ],
+     "value": 0.015625,
+     "passed": false
+    }
+   ],
+   "falsification_clause": false
+  },
+  "P4": {
+   "passed": true,
+   "criteria": [
+    {
+     "metric": "serial_fit_r2_min",
+     "at_batch": null,
+     "op": "ge",
+     "threshold": 0.95,
+     "value": 0.999932100441317,
+     "passed": true
+    },
+    {
+     "metric": "serial_slope_min",
+     "at_batch": null,
+     "op": "gt",
+     "threshold": 5.395990144716551,
+     "value": 5.720214624927469,
+     "passed": true
+    }
+   ],
+   "falsification_clause": false
+  }
+ }
+}

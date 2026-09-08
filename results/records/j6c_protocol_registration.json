@@ -1,0 +1,7 @@
+{
+ "protocol": "protocols/j6c_size_normalisation.yaml",
+ "protocol_sha256": "3979912824746501b18f97f6da42cef296ea8bcd1454fa03059926fc0bcae0c5",
+ "registered_utc": "2026-08-16T04:18:24+00:00",
+ "j6c_records_existing_at_registration": [],
+ "note": "Post-hoc repair: the estimator family, alpha grid, selection procedure and success criteria are fixed here before any normalised quantity was computed."
+}

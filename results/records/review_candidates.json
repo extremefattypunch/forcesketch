@@ -1,0 +1,353 @@
+[
+ {
+  "title": "risk_coverage(reduce=\"max\") normalises by the ANTI-oracle, not by a random selector, so aurc_excess_max is silently deflated in all 136 published j2a records",
+  "file": "src/forcesketch_journal/evaluation/tail_metrics.py",
+  "line": 136,
+  "defect": "For reduce=\"max\", `aurc_random = error.max(dim=-1).values` is the AURC of the worst-possible ordering (descending error makes cummax equal the global max at every coverage, so its mean is exactly error.max()), not the AURC of a random ordering, so `aurc_excess = (aurc - oracle)/(max - oracle)` is normalised against an adversarial reference while the docstring and the key name assert \"1 = worthless\".",
+  "failure_scenario": "results/perstructure/j2a/disjoint_test_1200K.pt, error e_maxcomp (n=2139): the code reports aurc_random=3.3330 (= global max) while a 2000-permutation Monte-Carlo estimate of the true random-ordering AURC is 2.9891 and the oracle is 0.7376. The published aurc_excess_max is 0.823 for the primary oracle exact_maxcomp and 0.823 for random_null \u2014 identical to three decimals \u2014 yet 0.823 reads on the documented scale as \"18% of the way from worthless to perfect\". Correctly normalised, both are 0.949/0.948, i.e. the primary oracle is ~5% better than random, not ~18%. Across the 24 published (cache x error) cells the random_null control lands at 0.656-0.965 instead of ~1.0, so the scale has no anchor; for comparison the mean-reduce variant, whose aurc_random is correct, puts random_null at 0.984-1.046. Feeding the exact anti-oracle signal (-error) returns aurc_excess = 1.000000 exactly, confirming the denominator is the worst-case, not the random-case, reference.",
+  "severity": "major",
+  "evidence": "Ran risk_coverage(reduce=\"max\") on all 10 per-structure caches and compared its aurc_random against a 2000-permutation MC estimate of E[mean_k cummax(error[perm])[k]]; also read results/records/j2a_oracle_panel.jsonl and tabulated aurc_excess_max for random_null vs exact_maxcomp/exact_global/force_norm."
+ },
+ {
+  "title": "auprc has no tie handling: a fully tied (degenerate) signal can score 0.68 average precision when the true value is 0.20",
+  "file": "src/forcesketch_journal/evaluation/tail_metrics.py",
+  "line": 84,
+  "defect": "`signal.argsort(dim=-1, descending=True)` breaks ties by an arbitrary (unstable, backend-dependent) permutation and the running precision is then accumulated within tie groups, so average precision depends on input index order instead of on the score \u2014 unlike `_rank`/`auroc` in the same module, whose docstrings make exact tie handling an explicit design requirement.",
+  "failure_scenario": "signal = torch.zeros(20) (a completely worthless constant signal), positive = 4 True entries. With the positives at indices 16-19 the function returns auprc = 0.6792; with the same signal and the positives at indices 0-3 it returns 0.1400. The tie-correct (sklearn-convention, step over distinct thresholds) answer is 0.2000 in both cases \u2014 an error of up to +0.48. This is latent for the current point estimates (I checked: no exact ties exist in any signal or error tensor in results/perstructure/j2a/*.pt), but it becomes live the moment auprc is used the way the module docstring advertises \u2014 inside a bootstrap, where resampling with replacement guarantees duplicate structures and hence exact ties. Bootstrapping auprc on water-disjoint_pimd_T300K with the project's own moving_block_indices(n=500, 400 reps, block_len=3) gives mean 0.5932 vs a tie-correct 0.6032 (-0.010 bias), with 184 of 400 replicates off by more than 0.01 and a worst-case replicate error of 0.033.",
+  "severity": "major",
+  "evidence": "Wrote a float64 tie-correct AP reference (step over distinct thresholds); it agrees with auprc to 2.2e-16 on 200 untied cases but disagrees on 286/300 heavy-tie cases with max error 0.75. Also ran the bootstrap comparison on the real water cache. Note J2A_ORACLE_PANEL.md line 33 claims auprc was \"verified ... against a hand-computed average-precision example\" \u2014 the example evidently contained no ties."
+ },
+ {
+  "title": "risk_coverage's aurc_excess is order-dependent for a tied signal: a worthless constant signal scores 0.0 (perfect) or 2.57 depending on input index order",
+  "file": "src/forcesketch_journal/evaluation/tail_metrics.py",
+  "line": 127,
+  "defect": "`_curve` orders by `key.argsort(dim=-1)` with no tie handling, so when the signal has ties the selective-risk curve is decided by array index order rather than by the signal, and the same worthless signal can be reported as a perfect or a worse-than-random selector.",
+  "failure_scenario": "error = [1., 2., 3., 4., 100.], signal = zeros(5): risk_coverage returns aurc_excess = 0.0, i.e. indistinguishable from the oracle, for a constant (zero-information) signal. Flip the error array to [100., 4., 3., 2., 1.] with the same constant signal and it returns 2.567. The correct value for a signal carrying no information is 1.0 in both cases. Reachable whenever a screening signal is quantised or gated (many exact zeros/clipped values) or inside a bootstrap where resampling duplicates structures.",
+  "severity": "minor",
+  "evidence": "Direct call to risk_coverage with a constant signal and the two error orderings; the mean-reduce curve was separately validated against a float64 numpy reference (max err 2.2e-16) on untied inputs."
+ },
+ {
+  "title": "auroc returns 0.0 \u2014 a real, plausible-looking AUROC \u2014 for positive sets where AUROC is undefined, including the NaN-error path",
+  "file": "src/forcesketch_journal/evaluation/tail_metrics.py",
+  "line": 79,
+  "defect": "`(n_pos * n_neg).clamp(min=1)` converts the undefined cases n_pos=0 and n_pos=n into a finite 0.0 instead of NaN, so a degenerate positive set is indistinguishable from a perfectly anti-correlated signal.",
+  "failure_scenario": "auroc(signal=[0.1,0.9,0.5,0.3], positive=all-False) returns 0.0, and auroc(same signal, positive=all-True) also returns 0.0; both are undefined. This is reachable through top_p_mask (tail_metrics.py:64-65): a single NaN in the error vector makes `error.sort(descending=True)` put NaN first, so for k<=1 the threshold is NaN and `error >= NaN` is False everywhere \u2014 top_p_mask(torch.tensor([1.,2.,nan,4.]), 0.25) returns an all-False mask (n_pos=0), and the subsequent auroc call returns 0.0 rather than raising or returning NaN. Inside paired_bootstrap that 0.0 would enter the replicate distribution and drag the lower CI bound down without any diagnostic.",
+  "severity": "minor",
+  "evidence": "Direct calls to auroc and top_p_mask with degenerate/NaN inputs; also confirmed _rank ranks NaN as the largest value (scipy returns all-NaN for the same input), so NaN in the signal instead of the error silently yields AUROC = 1.0 for a NaN-carrying positive."
+ },
+ {
+  "title": "risk_coverage's denominator clamp turns an undefined 0/0 normalisation into ~1e27 instead of NaN",
+  "file": "src/forcesketch_journal/evaluation/tail_metrics.py",
+  "line": 137,
+  "defect": "`denom = (aurc_random - aurc_oracle).clamp(min=1e-30)` guards the sign of the denominator but not its scale, so when the error distribution is near-degenerate (aurc_random rounds equal to aurc_oracle) the nonzero numerator is divided by 1e-30 and the function returns an astronomically large number for a quantity documented to lie in [0, 1].",
+  "failure_scenario": "float32 error = [97013.78125, 97013.7890625, 97013.7890625] with signal = [0.6967, 0.633, 0.16]: risk_coverage returns aurc = 97013.7890625, aurc_oracle = aurc_random = 97013.78125, aurc_excess = 7.8125e+27. The same inputs promoted to float64 give aurc_excess = 1.8. A second seeded case (n=4, errors within 2 ULP of 31953.53) gives 1.95e+27 against a float64 answer of 1.54. The current call site (experiments/j2a_oracle_panel.py:108) casts to float64 so this is latent, but risk_coverage carries no dtype guard and would write the garbage straight into a JSON record.",
+  "severity": "minor",
+  "evidence": "Randomised float32 search over near-constant error vectors (200k trials, torch seed 20260902) found blow-ups within a few thousand trials; three cases reproduced deterministically and cross-checked against the float64 result."
+ },
+ {
+  "title": "autocorr_function maps a NaN or inf series to all-zero autocorrelation, so integrated_autocorr_time reports the series as independent instead of failing",
+  "file": "src/forcesketch_journal/evaluation/autocorr.py",
+  "line": 40,
+  "defect": "`return acf / acf[0] if acf[0] > 0 else np.zeros_like(acf)` treats NaN (for which `acf[0] > 0` is False) exactly like a constant series, so a corrupted input silently produces rho = 0 everywhere.",
+  "failure_scenario": "x = a 500-step random walk with x[10] = np.nan: integrated_autocorr_time returns {'tau_int': 1.0, 'window': 5, 'rho_1': 0.0, 'time_ordered': False} \u2014 the exact signature the module docstring designates as \"the ordering was not meaningful\". The clean series returns tau_int = 29.17, rho_1 = 0.976, time_ordered = True. np.inf gives the same false-negative. Because experiments/j1_build_splits.py:45 and j9a_leading_only_ci.py:96 feed this straight into block_length(), a corrupted error series would yield block_len = 2 and silently collapse the moving-block bootstrap into an IID bootstrap (bootstrap_block.py:33 short-circuits to iid_indices for block_len <= 1) and shrink the split guard band to 2, with no warning and no NaN anywhere in the recorded diagnostics.",
+  "severity": "minor",
+  "evidence": "Called integrated_autocorr_time on a random walk with one NaN and with one inf, versus the clean series; only numpy RuntimeWarnings are emitted, and the returned dict is fully finite and self-consistent."
+ },
+ {
+  "title": "Reported 95% bootstrap CIs exclude 19/20 alternative split draws of the same quantity",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j9a_leading_only_ci.py",
+  "line": 97,
+  "defect": "The paired block bootstrap resamples only the test structures while holding the single design/cal/test split draw fixed, so the interval it reports omits the dominant source of variation in the quantity it is presented as an interval for.",
+  "failure_scenario": "Re-run the exact L=5 pipeline (lo_r0=4, cv_r0=2, cv_K=4, alpha=0.05, 10 frozen probe seeds) on rMD17 ethanol with contiguous_block_split(n=1000, tau_int=1.179, guard=3) under 20 alternative split seeds instead of 20260901. Shipped seed gives delta = +0.078 with the published CI [+0.062, +0.093] (J2B_FACTOR_B.md, 'With paired block-bootstrap intervals'); the 20 alternative draws give +0.084 .. +0.131 (mean +0.111, sd 0.014), so 19 of 20 lie outside the published 95% interval. 3BPA disjoint: published [+0.013,+0.029], alternatives +0.005..+0.050, 8/20 outside. 3BPA overlapping: published [-0.009,-0.002], alternatives -0.014..-0.003, 8/20 outside. The point estimates in J2B_FACTOR_B.md section 3 move even more: ethanol leading-only skip fraction is published as 0.724 (L=3) but ranges 0.453-0.784 (sd 0.082) across the 24 other split seeds I tried; 3BPA disjoint 0.813 published, 0.640-0.825 across seeds. The sign of the LO-CV difference is robust (20/20 same sign on all three systems), so the qualitative claim survives, but every interval and every 'significant' flag understates uncertainty by roughly a factor of two to four.",
+  "evidence": "Script /tmp/claude-69101/.../scratchpad/s7.py and s6.py, run with PYTHONPATH=src under the fs-cpu python, reusing acquisition/conformal_c/est_cv/est_leading_only from experiments/j2b_factor_b.py and leading_head_directions from the frozen tree; the shipped-seed reproduction reproduces the published deltas exactly (+0.021 / +0.078 / -0.005), so only the split seed varies.",
+  "severity": "major"
+ },
+ {
+  "title": "coverage_law's Beta(k, n+1-k) band is quoted for the blocked split, where it understates realised spread by ~70%",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/src/forcesketch_journal/data/splits.py",
+  "line": 137,
+  "defect": "Beta(k, n_cal+1-k) is exact only when the calibration scores and the test score are exchangeable, but j1_build_splits.py:59 evaluates it on the contiguous_block split, whose calibration role is one contiguous window of an autocorrelated trajectory, and the resulting band is published as the paper's 'Calibration power' table.",
+  "failure_scenario": "Simulate n=2139 with an AR(1) nonconformity ratio at tau_int = 4.0 (3BPA disjoint's measured 3.96), apply contiguous_block_split(seed=20260901, guard=8) -> n_cal=412, take c_alpha as the ceil((n+1)*0.95)-th order statistic on cal and measure coverage on test, 3000 replicates. Realised coverage: mean 0.9495, sd 0.0179, 90% band [0.9166, 0.9754]. coverage_law(412, 0.05) claims sd 0.0106 and [0.9331, 0.9676] -- exactly the '0.950 [0.932, 0.968]' printed for 3BPA in results/J1_SPLIT_REPAIR.md. Realised P(coverage < 0.90) is 0.011 against the Beta law's 4.65e-5, a factor of 240. On random_frame_split with the same data the law is accurate (realised sd 0.0120 vs law 0.0104), which isolates the contiguous calibration window as the cause. Consistent with this, measured test-split coverage of the shipped leading_only gate over the 10 real caches is 0.946 mean under contiguous_block (6/10 below nominal, min 0.924) versus 0.964 under random_frame (2/10 below, min 0.942).",
+  "evidence": "Scripts /tmp/claude-69101/.../scratchpad/s5.py (simulation) and s4.py (real-cache gate coverage, using experiments/j2b_factor_b.conformal_c and the shipped manifests).",
+  "severity": "major"
+ },
+ {
+  "title": "contiguous_block_split's documented anti-confound safeguard does not occur: calibration is one contiguous window and every test frame precedes every calibration frame",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/src/forcesketch_journal/data/splits.py",
+  "line": 90,
+  "defect": "The block-to-role permutation depends only on (seed, n_blocks) and not on the system, so all ten manifests share one layout, and for the shipped seed that layout is T D T T T T T C C D -- both calibration blocks adjacent -- which is precisely the drift/role confound the docstring at lines 78-82 says the permutation prevents.",
+  "failure_scenario": "np.random.default_rng(20260901).permutation(10) applied to ['design','design','cal','cal','test'*6] yields role layout ['T','D','T','T','T','T','T','C','C','D']. In all 10 shipped manifests/splits/*__contiguous_block.json the cal role is a single contiguous run (cal_contiguous=True everywhere) occupying frames ~0.70n-0.90n, and max(test index) < min(cal index) in every one (e.g. disjoint_test_1200K test [0,1488], cal [1505,1916]; rmd17-disjoint_ethanol test [0,696], cal [703,896]; water-disjoint_md_T300K test [0,345], cal [354,445]). So c_alpha is calibrated on a strictly later 20% window of the trajectory than the entire test set it is applied to, for every system, and the split-conformal exchangeability premise holds only if the trajectory has no drift at all. A KS test of the cal-vs-test nonconformity ratios does not reject on these particular caches (p = 0.13-0.97), so the flaw is latent here rather than actively biasing the published numbers -- but it is the mechanism behind the split-seed sensitivity above, and the docstring asserts a protection the code does not deliver.",
+  "evidence": "Scripts /tmp/claude-69101/.../scratchpad/s3.py, s6.py (layout + run structure), s11.py (KS test on real caches). The contiguous-run decomposition of each role was read directly from the shipped manifests.",
+  "severity": "major"
+ },
+ {
+  "title": "Percentile block-bootstrap intervals labelled 95% attain ~90% coverage at the project's own block-length rule",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/src/forcesketch_journal/evaluation/bootstrap_block.py",
+  "line": 94,
+  "defect": "paired_difference/paired_bootstrap emit a plain percentile interval at nominal alpha and a boolean `significant` flag, but with block_len = ceil(2*tau_int) (autocorr.py:69) the interval attains only ~0.90 coverage when tau_int is materially above 1, so `significant` is a ~10%-level test rather than the 5% one every table treats it as.",
+  "failure_scenario": "AR(1) with phi=0.6 (tau_int = 4.0, the value measured for 3BPA disjoint), statistic = sample mean, 1500 replicates, n_boot=400, block_len taken from block_length(integrated_autocorr_time(x)): coverage of the nominal-95% interval is 0.913 at n=1259, 0.903 at n=500, 0.905 at n=2139 (MC se 0.008); doubling the block gives 0.922-0.928 and quadrupling 0.918-0.933, so the deficit is the block-length rule plus the un-studentised percentile method, not Monte-Carlo noise. iid scheme on the same draws covers 0.67-0.69. Concretely: a paired_difference call on a tau_int=4 series that reports ci_lo=+0.001, ci_hi=+0.060 and significant=True is being read as a 5% test but its true type-I rate is ~10%. results/J1_SPLIT_REPAIR.md already records the 89.0% measurement, but nothing downstream adjusts -- every record still writes ci_lo/ci_hi at alpha=0.05 and J2A/J2B count '19/24 significant' and '5 of 6 systems' at face value.",
+  "evidence": "Scripts /tmp/claude-69101/.../scratchpad/s2.py, s9.py, s10.py calling the shipped paired_bootstrap directly. moving_block_indices itself is correct -- I verified circular contiguity within blocks and uniform marginals (0.0098-0.0100 against a 0.0099 target over 20000 draws at n=101, b=7) -- so the defect is the block-length rule and the interval type, not the resampler.",
+  "severity": "major"
+ },
+ {
+  "title": "conformal_c silently clamps the order-statistic index instead of returning +inf when alpha is infeasible for n_cal",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j2b_factor_b.py",
+  "line": 115,
+  "defect": "`k = min(n, max(1, ceil((n+1)*(1-alpha))))` clamps to the maximum observed ratio when ceil((n+1)(1-alpha)) > n_cal, producing an anti-conservative gate, and splits.alpha_feasible -- which exists to catch exactly this and mandates recording the cell as `underpowered` -- is never called anywhere outside tests/test_splits.py.",
+  "failure_scenario": "Run j2b_factor_b.py --alpha 0.01 on any water cache: n_cal is 92-94, so alpha_feasible(92, 0.01) = (False, k=93) and coverage_law returns {'feasible': False}, but conformal_c clamps k to 92 and returns a finite c_alpha; the emitted record carries \"alpha\": 0.01 with no feasibility field and the gate is reported as a valid 99% gate. Measured on exchangeable Uniform(0,1) ratios, 20000 trials: n_cal=50/alpha=0.01 gives 0.9800 coverage against nominal 0.99; n_cal=15/alpha=0.05 gives 0.9379 against nominal 0.95; n_cal=92/alpha=0.01 gives 0.9895. All shipped records use alpha=0.05 where every n_cal (92-428) is feasible, so no published number is affected -- this is latent. grep confirms `alpha_feasible(` appears in no experiment: j1_build_splits.py imports it at line 26 and never calls it, and no record in results/records/*.jsonl carries a feasible/underpowered field.",
+  "evidence": "Script /tmp/claude-69101/.../scratchpad/s8.py section A, calling the shipped conformal_c and alpha_feasible; grep -n 'alpha_feasible(' over experiments/ returns nothing outside the import line.",
+  "severity": "minor"
+ },
+ {
+  "title": "paired_bootstrap/paired_difference default to scheme=\"block\" with block_len=1, silently performing an IID bootstrap while recording scheme=\"block\"",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/src/forcesketch_journal/evaluation/bootstrap_block.py",
+  "line": 48,
+  "defect": "The default arguments are scheme=\"block\", block_len=1, and moving_block_indices short-circuits to iid_indices for block_len <= 1, so a caller that supplies the scheme but forgets the block length gets the IID resampler with a record that claims the block scheme.",
+  "failure_scenario": "paired_difference(auroc, sig_a, sig_b, pos) on a trajectory with tau_int = 4 returns {\"scheme\": \"block\", \"block_len\": 1, ...} while having run the IID bootstrap, whose coverage on that data I measured at 0.67-0.69 against the nominal 0.95. An auditor reading the record's scheme field concludes the autocorrelation-robust scheme was used. The block_len field does expose it, but the scheme field contradicts it, and the module docstring's entire argument is that the IID scheme is invalid for trajectory data. The shipped j2a/j5 CI records do carry block_len 2/3/5, so no published number is affected.",
+  "evidence": "Read of bootstrap_block.py lines 33-34 and 47-48/78-79; confirmed by calling paired_bootstrap(mean_metric, x, scheme=\"block\") with defaults and observing identical indices to iid_indices under the same generator seed.",
+  "severity": "minor"
+ },
+ {
+  "title": "beta_noise's `shared` branch is distributionally identical to `indep`, so J3's \"coordinate coupling is irrelevant\" conclusion rests on a comparison with zero power",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j3_extreme_value.py",
+  "line": 94,
+  "defect": "The `shared=True` branch draws each coordinate's head-space direction `A[s,d,:]` independently and isotropically, so conditional on the shared frame `O` the D projection fractions are i.i.d. Beta(K/2,(r-K)/2) and independent of O \u2014 mathematically the exact same law as the `shared=False` branch \u2014 meaning the shared random subspace induces no coordinate coupling whatsoever and the two arms cannot differ except by Monte-Carlo noise.",
+  "failure_scenario": "Run `beta_noise(v, r=7, K=4, shared=True)` and `shared=False` on any v: both return i.i.d. Beta(2, 1.5) fractions. Because the whole point of Step 2 is that `shared` is \"what the real estimator does\" and `indep` is \"the marginal model\", J3_EXTREME_VALUE.md's bolded conclusion **\"Coordinate coupling is irrelevant... shared and indep agree to within ~0.02\"** is an artefact: it is reporting agreement between two draws from one distribution. The real estimator does have coupling, so the simulation is also silently mis-specified in the direction the doc attributes to an unexplained \"+0.03 optimism\".",
+  "evidence": "(1) Equivalence: on v=ones(4000,81), r=7, K=4 the two branches give mean/var 0.5710/0.05450 vs 0.5717/0.05442 (Beta analytic 0.5714/0.05442), two-sample KS on 100k values p=0.38; mean cross-coordinate correlation of `frac` is 0.00012 (shared) vs 0.00015 (indep). (2) Zero power: rerunning Step 2 on head_forces_disjoint_test_1200K.pt with n_rep=200 instead of 10 gives shared-minus-indep = -0.0036 / +0.0053 / -0.0017 at K=3/4/6, i.e. ~0; the per-replicate sd is 0.030-0.040 so the SE of each arm at the shipped n_rep=10 is ~0.011, which fully accounts for the 0.018-0.034 differences the shipped record shows (e.g. same_test_1200K K=4: 0.656 vs 0.622; ethanol K=6: 0.744 vs 0.714). (3) Mis-specification: the real Haar estimator on the same cache has mean cross-coordinate correlation of v_hat/v equal to 0.035, ~300x the simulation's 0.0001; consequently the across-structure sd of the within-structure mean of v_hat/v is 0.0506 measured vs 0.0259 for i.i.d. Beta (sqrt(0.0544/81)) \u2014 the simulation understates the structure-level noise by 2x. (4) `M = r + 1` and `Qc = helmert_basis(M, ...)` on lines 92-93 are computed and never used, i.e. the intended construction (route the directions through the same centred basis the estimator uses) was left unfinished. (5) Rerunning the script reproduces results/records/j3_extreme_value.json byte-identically, so this is the code that produced the published table.",
+  "severity": "major"
+ },
+ {
+  "title": "risk_coverage(reduce=\"max\") normalises by the global max instead of the expected random-ordering AURC, so `aurc_excess_max` is deflated ~10% and its documented \"1 = worthless\" scale is false",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/src/forcesketch_journal/evaluation/tail_metrics.py",
+  "line": 136,
+  "defect": "For `reduce=\"max\"` the random reference is set to `error.max()`, but the expected AURC of a genuinely random acceptance ordering under a running-max curve is the mean over coverage of E[max of the first k], which is strictly below the global max; the denominator is therefore too large and every signal's `aurc_excess_max` is pulled toward 0 (i.e. toward \"oracle\").",
+  "failure_scenario": "j2a_oracle_panel.py:111 stores `aurc_excess_max` for all 232 records under a docstring that states the scale is \"0 = perfect, 1 = worthless\". Feed it the `random_null` signal (a worthless signal by construction) on head_forces_disjoint_test_1200K.pt and it returns 0.933, not 1.0; on rmd17-disjoint_azobenzene it returns 0.736. A reader comparing exact_global's 0.70 against a nominal worthless value of 1.0 concludes the signal recovers 30% of the oracle gap on the safety-relevant worst-case metric, when the correctly normalised figure is 22%.",
+  "evidence": "On head_forces_disjoint_test_1200K.pt with e_max: aurc(random null)=3.3744, aurc_oracle=0.8677, aurc_random as coded (global max)=3.5531, but E[AURC_max] over 300 random permutations = 3.2768. Correctly normalised, the random null scores 1.041 (as it should) versus the 0.933 the code reports; exact_global scores 0.781 correctly versus the 0.701 stored in the records. The bias grows with n and with tail heaviness. The `reduce=\"mean\"` branch is correct (random null gives 0.958-1.027 across all ten caches), which is why the error is invisible in the metric that the docs actually quote.",
+  "severity": "minor"
+ },
+ {
+  "title": "j9a fixes the control variate at cv_r0=2 for every lane budget while leading-only gets r0 = lanes-1, inflating the reported skip-fraction advantage by up to 2.6x",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j9a_leading_only_ci.py",
+  "line": 50,
+  "defect": "`--cv-r0` defaults to 2 and is never scaled with `--lanes`, so the \"matched budget\" head-to-head compares a leading-only estimator whose rank is tuned to the budget against a control variate whose exact-subspace rank is frozen at 2 \u2014 even though r0 is fitted on the design split and is therefore free to be chosen per budget under the same split discipline.",
+  "failure_scenario": "At L=6 on rMD17 ethanol, j9a reports skip_lo=0.941, skip_cv=0.894, delta=+0.047 [+0.034,+0.061]. Run the same 6-lane budget with the control variate's own design-fitted r0=4 (K=5) and its skip fraction is 0.9227, so the true matched-budget margin is +0.018 \u2014 2.6x smaller than the published interval, whose lower bound (+0.034) excludes it. The sign is preserved on every system, but the effect sizes quoted in J2B_FACTOR_B.md (\"+0.014 to +0.158\") are systematically overstated at the larger budgets.",
+  "evidence": "j2b's own sweep records already contain the better configuration: sweep_global_r04.jsonl has control_variate K=5, r0=4, uq_lanes=6, 10 seeds, mean frac_exact_skipped=0.9227, while sweepcv_global_K5.jsonl has control_variate K=5, r0=2, uq_lanes=6, mean 0.8936 \u2014 same total lane budget. Same pattern on aspirin at 7 lanes (CV r0=5: 0.912 vs CV r0=2: 0.885) and azobenzene at 7 lanes (0.899 vs 0.866). Verified LO/CV lane accounting matches: leading_only uq_lanes = r0+1, control_variate uq_lanes = K+1.",
+  "severity": "minor"
+ },
+ {
+  "title": "j9a's output filename omits the cache set, so a water run silently overwrote the record backing the published L=5 table",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j9a_leading_only_ci.py",
+  "line": 113,
+  "defect": "The output path is keyed only on `--score` and `--lanes`, not on `--cache-dirs`, and there is no `--out` override, so two runs at the same lane budget over different system sets collide on one filename and the later run destroys the earlier record.",
+  "failure_scenario": "Running `j9a_leading_only_ci.py --lanes 5` on the frozen caches and then again with `--cache-dirs results/processed` (water) leaves only the water rows. That has already happened: results/records/j9a_leading_only_ci_global_L5.json contains exactly ['water-disjoint_md_T300K','water-disjoint_pimd_T300K','water-overlapping_md_T300K','water-overlapping_pimd_T300K'], while J2B_FACTOR_B.md's L=5 CI column publishes the six frozen systems (3BPA disjoint +0.021 [+0.013,+0.029], ethanol +0.078 [+0.062,+0.093], ...). No record file in results/records/ contains those six L=5 rows, so a published table has no surviving machine-readable provenance.",
+  "evidence": "Listed the `system` field of each j9a record: L4 and L6 hold the six frozen systems, L5 holds only the four water systems. Re-running `--score global --lanes 5` on the default (frozen) cache dir reproduces the doc's six L=5 rows exactly (0.929/0.909/+0.021 [+0.013,+0.029] for disjoint_test_1200K, etc.) and rewrites the same path, confirming the collision.",
+  "severity": "minor"
+ },
+ {
+  "title": "The `lanes=8` cell silently ran only 7 lanes in every J8 benchmark on every GPU",
+  "file": "experiments/j8_lane_bench.py",
+  "line": 124,
+  "severity": "critical",
+  "defect": "`exact_seed_bundle(M, B).seeds` has shape [M-1, B, M] = [7, B, 8] for this M=8 committee, so `.seeds[:L]` silently returns 7 rows for L=8 (Python slicing does not error on an over-long slice), meaning every cell recorded as `lanes: 8` measured a 7-lane VJP.",
+  "failure_scenario": "Inputs: the 3BPA/water MACE committee (M=8, recorded as `\"M\": 8` in every record) and `--lanes 1 2 3 4 8`. Wrong output: 48 records across five jsonl files carry `\"lanes\": 8` with a 7-lane timing. Downstream, (a) every least-squares fit places a 7-lane measurement at x=8, biasing every published slope low by exactly the OLS factor 24.8/29.2 = 0.849 -- 3BPA serial 10.92 -> 12.86 ms/lane, 3BPA batched B=64 8.08 -> 9.48, water B=16 batched 49.76 -> 58.57, water B=32 serial 94.27 -> 110.99, and the derived constants 0.0196 / 0.026 ms per (edge/SM) per lane -> 0.0231 / 0.0306; (b) every 'exact (L=8)' entry is short by one lane (the LaneBudget for exact is 7 UQ + 1 mean = 8), so the R5 speedup table understates itself: 3BPA B=64 1.58x -> 1.77x, water B=16 1.63x -> 1.84x, water B=32 1.65x -> 1.86x, and the 5-lane gate 1.38x -> 1.49x (3BPA B=64), 1.41x -> 1.52x (water B=16).",
+  "evidence": "Ran `exact_seed_bundle(8, 4, dtype=torch.float32)`: seeds.shape = (7, 4, 8), K = 7, LaneBudget(uq_lanes=7, mean_lanes=1); `seeds[:8].shape[0] == 7` while `seeds[:7].shape[0] == 7`. Ran j8_lane_bench.py myself on an available A100 MIG slice with `--lanes 1 2 3 4 5 6 7 8`: at B=64 batched the L->L+1 increments are 23.94, 24.85, 25.98, 25.34, 25.78, 25.95 and then **-0.35** for 7->8 (T(7)=212.25 vs T(8)=211.90); same at B=64 serial (201.58 vs 200.48) and B=1 serial (156.32 vs 157.60). The signature is already present in the published records: (T8-T4)/(T4-T3) = 3.00 +/- 0.15 across all 25 lane-proportional cells on three GPUs (3BPA A100 [3.00,3.24,3.00,3.16,3.04,3.16,2.92,3.01]; water [2.95,2.90,3.36,2.62,2.82,2.97,3.00,3.07,2.99,3.02]; Blackwell [2.97,3.85,2.97,2.89,2.92,2.99,2.76]) where 4.00 is required if 8 lanes had run. Refitting every cell with the L=8 point relabelled x=7 raises R^2 from 0.988-0.994 to 0.9995-1.0000 and multiplies every slope by 1/0.849 (observed ratios 0.848-0.853 in every lane-proportional cell). The frozen workshop script scripts/02b_lane_scaling.py:102 builds seeds as `torch.randn(L, B, M)` and does run 8 real lanes (its docstring: 'Exact force UQ needs L = M = 8 (one mean lane + M-1 centered directions)'), so the journal rewrite introduced the regression and J8_SMOKE_A100.md:22's 'agrees with the laptop's [11.78] to within 8%' compares a 15%-biased slope with an unbiased one."
+ },
+ {
+  "title": "The verdict script loads the pre-registered protocol and never uses it; all thresholds and admission conditions are Python literals",
+  "file": "experiments/j8_water_verdict.py",
+  "line": 46,
+  "severity": "major",
+  "defect": "`proto = yaml.safe_load(...)` (line 46) and `T = load(THREEBPA)` (line 45) are dead: every prediction threshold, the lane set, the batch set, the iteration counts and the hardware condition are hardcoded in Python, and the 3BPA reference figures on lines 64-65 are a literal string, so the script cannot detect any divergence between the records it scores and the protocol it claims to score them against.",
+  "failure_scenario": "Input: rewrite protocols/j8_water_prediction.yaml so P1 reads 'exceeds 500 ms/lane', P2 '>= 9.0x', P3 'transition occurs at B >= 1000', P4 'serial slope is BELOW 1 ms/lane', primary_metric a fit over L in {1..8}, config {iters: 5000, dtype: float64, batch_sizes: [999], lanes: [7]}, hardware 'H200, MIG required'. Wrong output: byte-identical run, still 'VERDICT: 4/4 pre-registered predictions confirmed'. Same output when the file is replaced with `nothing: here`. Concretely this let a MIG-slice record -- which j8_lane_bench.py:115 itself flags '*** WARNING: MIG device. Timings are NOT publishable. ***', with lanes {1,2,4,8} instead of the pre-registered {1,2,3,4,8} and iters=20/warmup=10 instead of 50/25 -- be scored '4/4 confirmed'.",
+  "evidence": "grep shows `proto` appears only at line 46 and inside string literals; `T` only at line 45. Ran the script from a scratchpad copy against the mutated and the stubbed YAML: identical output both times. Re-ran it with results/records/j8_water_verdict_source_MIG.jsonl in place of the water record: it printed 4/4 PASS and reproduced results/records/j8_water_verdict_MIG.json exactly (speedup_B16 = 1.627743062173085, transition_batch = 1) -- the run J8_WATER_VERDICT.md:10-11 cites as independent corroboration. The output JSON records no provenance at all (no device_name, is_mig, source path, iters), and both the MIG and A100 verdicts are written to the same fixed filename results/records/j8_water_verdict.json."
+ },
+ {
+  "title": "`fit()` silently drops OOM cells and accepts 2-point fits, so the pre-registered primary metric can be scored off a truncated lane set",
+  "file": "experiments/j8_water_verdict.py",
+  "line": 29,
+  "severity": "major",
+  "defect": "The fit filters on `status == \"ok\"` and only requires `len(pts) >= 2`, so an OOM at the largest L -- always the highest-leverage point -- removes it from the least-squares fit without changing the reported quantity, the printed table (which shows no n) or the pass/fail, even though protocols/j8_water_prediction.yaml declares the primary metric to be 'a least-squares fit over L in {1,2,3,4,8}'.",
+  "failure_scenario": "Input: results/records/j8_water_verdict_source_MIG.jsonl, whose B=16/L=8/batched cell OOM'd ('Tried to allocate 9.15 GiB'). Wrong output: the B=16 batched fit is computed from L in {1,2,4} only (n=3, r2=1.0000 by near-construction) and P1 -- the protocol's falsification clause -- is printed 'measured: 149.59 ms/lane -> PASS' with no indication the primary metric was not evaluated as specified. The sensitivity is decisive, not cosmetic: dropping the L=8 point from the accepted A100 water record flips the B=1 batched slope from +1.33 to -0.05 ms/lane (sign flip, 27x magnitude) and B=2 from 2.49 to 0.54, i.e. it flips both P1's and P3's criterion in the cells that carry them.",
+  "evidence": "Reproduced results/records/j8_water_verdict_MIG.json exactly; its B=16 batched entry is `\"slope\": 149.59, \"n\": 3, \"r2\": 0.99996` while every other entry has n=4. Recomputed the accepted water fits with and without L=8: B=1 batched 1.33 -> -0.05, B=2 2.49 -> 0.54, B=4 11.23 -> 9.19. The OOM record also lacks peak_alloc_bytes/peak_reserved_bytes (set difference against an ok record: iqr_ms, iters, median_ms, min_ms, peak_alloc_bytes, peak_reserved_bytes, warmup), contradicting j8_lane_bench.py's docstring lines 15-17 that 'the memory boundary appears in the data instead of as a gap'."
+ },
+ {
+  "title": "P3's pass/fail tests only the weak half of the pre-registered statement; the quantified half fails under the script's own rule",
+  "file": "experiments/j8_water_verdict.py",
+  "line": 96,
+  "severity": "major",
+  "defect": "Protocol P3 states 'the transition occurs at B <= 4, i.e. at roughly 1/16 to 1/33 of 3BPA's transition batch size, tracking edges rather than structures', but the script tests only `trans <= 4` and never computes 3BPA's transition batch under the same rule (the 3BPA record is loaded and discarded), so the quantified clause is unscored.",
+  "failure_scenario": "Applying the script's own criterion (first B whose batched slope exceeds 1 ms/lane) to results/records/j8_lane_bench_NVIDIA_A100-SXM4-80GB.jsonl gives 3BPA transition = B 64 (slopes 0.52, 0.51, 0.57, 8.08); water gives B 1. The ratio is 64x, outside the pre-registered 16-33x band, yet P3 prints PASS. J8_WATER_VERDICT.md:52-55 instead quotes 'a 16x reduction in the batch size required', which is derived from a different rule entirely (first B at which the R5 speedup reaches ~1.5x, i.e. B=4), so the document silently switches definitions of 'transition batch size' between line 17 (B=1) and line 55 (B=4) and reports the one that lands inside the pre-registered band.",
+  "evidence": "Computed both transitions from the records with the script's own `fit()` and `> 1.0` rule: 3BPA -> 64, water -> 1, ratio 64.0x. results/records/j8_water_verdict.json records `\"transition_batch\": 1` while J8_WATER_VERDICT.md:55 claims 16x."
+ },
+ {
+  "title": "The slope that produces `transition_batch: 1` and the paper's ~10^4-edge rule is not statistically distinguishable from the criterion, and no uncertainty is propagated anywhere",
+  "file": "results/J8_WATER_VERDICT.md",
+  "line": 62,
+  "severity": "major",
+  "defect": "`fit()` returns only intercept/slope/r2/n; no standard error is computed, reported or used, and the water B=1 batched slope of 1.33 ms/lane -- the sole basis for '~10^4 total edges is the threshold' -- has a 95% CI of [0.18, 2.47] against a 1 ms/lane criterion, while the underlying data are flat over the whole deployable lane range.",
+  "failure_scenario": "Input: the five B=1 batched medians 61.24, 61.18, 61.18, 61.08, 70.02 ms at L = 1,2,3,4,8. The path is flat-to-decreasing over L=1..4 (fitted slope -0.05 ms/lane); the entire 1.33 comes from the single L=8 point, which is itself a 7-lane measurement (see the seeds[:L] finding). Wrong output: `transition_batch: 1` in results/records/j8_water_verdict.json, 'first B with slope > 1 is B = 1 -> PASS' for P3, and J8_WATER_VERDICT.md:57-68 promoting 17,150 edges to 'a threshold a practitioner can check against their own system'. Restricting the fit to the lane range the gate actually operates in (L <= 4) moves water's first crossing of 1 ms/lane from B=1 (17,150 edges) to B=4 (68,600 edges), a 4x move in the headline threshold.",
+  "evidence": "OLS with 3 dof on the B=1 batched cell: slope 1.33, residual s = 1.95 ms, se(b) = 0.36, t = (1.33-1.0)/0.36 = 0.90 (one-sided p ~ 0.21), 95% CI [0.18, 2.47]; R^2 = 0.818 with a systematic convex residual pattern +1.75, +0.36, -0.97, -2.39, +1.25. B=2 is the same shape (R^2 = 0.884). Every other water cell has R^2 >= 0.978. The IQRs on those four flat points are 0.62-1.48 ms while the points span 0.16 ms in total."
+ },
+ {
+  "title": "The water run's dispersion is misreported by up to 10x, and the misstatement is what dismisses co-tenancy",
+  "file": "results/J8_WATER_VERDICT.md",
+  "line": 4,
+  "severity": "major",
+  "defect": "Line 4 states 'IQRs 0.6-1.3 ms i.e. under 1% of medians' and the caveat at line 115 uses 'IQRs are under 1% of medians' to conclude 'co-tenancy cannot alter any conclusion', but the quoted range is read off the B=16 row alone and is false for the record as a whole.",
+  "failure_scenario": "Input: the 60 cells of results/records/j8_lane_bench_water.jsonl. Actual IQR range is 0.27-7.17 ms and 0.11%-10.70% of the median, with 34 of 60 cells above 1%; median-min reaches 12.9% (B=4 L=2 batched: min 56.09, median 63.35). The worst-dispersion cells (6.9-10.7%: B=8 L=1 serial, B=2 L=1 batched, B=1 L=1/L=2/L=3 serial, B=4 L=1 serial) are exactly the small-B, low-L cells whose 0.1-0.2 ms separations carry the transition/threshold claim, so the dismissal of co-tenancy is unsupported precisely where it is needed. For contrast the exclusive-node 3BPA A100 run has IQR <= 1.15% and median-min <= 1.3% everywhere.",
+  "evidence": "Computed IQR/median and (median-min)/min over all cells of all three records. Also: the water record's slurm_partition is `gpu_requeue`, not the protocol's 'exclusive node, MIG disabled'; and its `nvidia_smi` field is a single line '575.57.08, 210 MHz, 1593 MHz, 60.64 W, 0x0000000000000001' -- one sample taken at process start with the GPU idle (throttle bit 0x1 = GpuIdle, SM clock at the 210 MHz idle floor), containing no utilisation or process fields, so 'co-tenancy recorded' on line 4 is not backed by anything in the record."
+ },
+ {
+  "title": "The 5-lane gate is the one configuration never measured, and the interpolation used instead over-states its speedup by ~4%",
+  "file": "experiments/j8_lane_bench.py",
+  "line": 102,
+  "severity": "major",
+  "defect": "`--lanes` defaults to [1,2,3,4,8] and the pre-registered config repeats that set, so L=5 -- the deployed gate configuration whose speedup is the headline of both result documents -- was never run on any of the three GPUs; T(5) is instead linearly interpolated on the [4,8] interval, which (because the L=8 cell really ran 7 lanes) has a chord slope only 3/4 of the true per-lane cost.",
+  "failure_scenario": "Inputs: T(4) = 51.47 ms and 'T(8)' = 81.39 ms (3BPA A100 B=64, R5-selected). Interpolated T(5) = 58.95 ms -> published gate speedup 1.38x. I measured L=5 directly: at B=64 batched, T(5) = 160.52 ms against a chord interpolation of 154.36 ms from the same run's T(4) and T(8) -- the interpolation under-estimates T(5) by 4.0% and therefore over-states the gate speedup by 4.0% (1.373x interpolated vs 1.320x measured). The same bias applies to every '5-lane gate' figure published: 3BPA 1.05/1.05/1.05/1.38x and water 1.11/1.35/1.41/1.42x, all of which are reported in tables where every other column is measured.",
+  "evidence": "Ran j8_lane_bench.py with `--lanes 1 2 3 4 5 6 7 8` on an available A100 MIG slice. B=64 batched T(L) = 60.4, 84.4, 109.2, 135.2, 160.5, 186.3, 212.3, 211.9 -- linear with increment ~25.5 ms/lane through L=7, so T(5) sits 4.0% above the chord drawn from T(4) to the (mislabelled) L=8 point. The bias is systematic and present in every published cell: (T8-T4)/4 divided by (T4-T3) = 0.66-0.84 (median 0.75) across all 26 published fits on three GPUs, i.e. the interpolation interval always carries 3 lanes of work priced as 4."
+ },
+ {
+  "title": "P4's scoring rule (mean of serial slopes) appears nowhere in the protocol and its value is an artefact of the batch grid",
+  "file": "experiments/j8_water_verdict.py",
+  "line": 104,
+  "severity": "minor",
+  "defect": "The script scores P4 as `mean(serial slope over all measured B) > 10.9`, but protocol P4 makes two claims -- 'the serial path remains approximately affine in L' AND 'its slope will be LARGER than 3BPA's ~10.9 ms/lane' -- and specifies no aggregation; the affinity clause is never tested, and averaging is meaningless here because water's serial slope is strongly batch-dependent while the 3BPA constant it is compared against is not.",
+  "failure_scenario": "Input: water serial slopes 17.26, 17.74, 18.86, 25.40, 47.98, 94.27 ms/lane over B = 1..32 (a 5.5x range), compared against 3BPA's 10.92-11.07 over B = 1..64 (a 1.4% range). Wrong output: 'measured: mean 36.92 ms/lane' presented as the value of a prediction that never mentions a mean; the same script prints 'mean 47.33' when handed the MIG record whose grid stops at B=16, and would print 17.95 if the grid stopped at B=4 -- three different 'measured' values for one pre-registered quantity, differing only by which batch sizes happened to run.",
+  "evidence": "Ran the script against both record files: the accepted water record prints 'mean 36.92 (range 17.26-94.27)', the MIG record prints 'mean 47.33 (range 11.52-118.22)'. Recomputed partial means from the accepted record: B<=4 gives 17.95, B<=8 gives 19.82, all B gives 36.92."
+ },
+ {
+  "title": "The pre-registered primary metric is measured on the implementation that rule R5 discards at the batch sizes in question",
+  "file": "experiments/j8_water_verdict.py",
+  "line": 72,
+  "severity": "minor",
+  "defect": "P1 and P3 are defined on the *batched* slope, but for water the R5 rule (fastest correct implementation selected independently per cell) selects *serial* at every lane count for B >= 8, including B=16 where P1 -- the falsification clause -- is evaluated, so the mechanism claim and the deployed cost path are not the same code path.",
+  "failure_scenario": "Input: the 30 water cells at B in {8,16,32}. Serial beats batched in all 15 of them (e.g. B=16 L=8: serial 438.74 vs batched 457.60; B=32 L=1: 181.97 vs 190.66). Wrong output: P1 reports the batched slope 49.76 ms/lane at B=16 while the R5-selected implementation there has slope 47.98, and J8_WATER_VERDICT.md section 2 derives the paper's transferable '~10^4 edge' rule entirely from batched slopes even though section 3 of the same document concludes 'For water at B >= 8, serial wins.' A reader applying the rule would characterise a code path the paper's own R5 selection rejects. Relatedly, section 3's R5 summary row '2-4 | batched at L>=4, serial at L=1' is wrong: at B=4 batched already wins at L=2 (63.35 vs 80.69) and L=3 (71.19 vs 101.83).",
+  "evidence": "Built the full R5 winner map from results/records/j8_lane_bench_water.jsonl: batched wins all 5 lanes at B=1; serial only at L=1 for B=2 and B=4 (batched at L=2,3,4,8); serial at all 5 lanes for B=8, 16 and 32."
+ },
+ {
+  "title": "J8 water R5 table quotes a serial baseline (76.7 ms) that appears in no record; the real value is 183.6 ms",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_WATER_VERDICT.md",
+  "line": 80,
+  "defect": "The \u00a73 row `| 1 | batched (70.0 vs 76.7) |` reports the B=1, L=8 serial baseline as 76.7 ms, but `j8_lane_bench_water.jsonl` records 183.58 ms for that cell, and no cell in any j8 record has a median within 0.3 ms of 76.7.",
+  "failure_scenario": "A reader checking the B=1 R5 decision reads \"batched wins by 9%\" (70.0 vs 76.7). The record says batched wins by 62% (70.02 vs 183.58 ms). Any cost model, figure, or referee-facing claim built on the quoted 76.7 ms is wrong by 2.4x, and the number cannot be traced to any source.",
+  "severity": "critical",
+  "evidence": "Loaded results/records/j8_lane_bench_water.jsonl and indexed by (batch_size, lanes, impl): (1,8,'serial') median_ms = 183.58, (1,8,'batched') = 70.02. Scanned all four j8_*.jsonl files for any median_ms within 0.3 ms of 76.7 -> zero matches (only 70.02 batched B=1 L=8, and 69.79 from the discarded MIG run)."
+ },
+ {
+  "title": "J8 water IQR claim understates dispersion ~10x and is used to dismiss co-tenancy for conclusions resting on 2-5% effects",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_WATER_VERDICT.md",
+  "line": 5,
+  "defect": "\"IQRs 0.6-1.3 ms i.e. under 1% of medians\" (repeated at line 115 as the reason \"co-tenancy cannot alter any conclusion\") is the range for B in {16,32} only; over the full 60-cell grid the IQR range is 0.274-7.171 ms and 34 of 60 cells exceed 1% of their median, peaking at 10.7%.",
+  "failure_scenario": "Section 3's headline R5 flip (\"For water at B >= 8, serial wins ... batched is 3-5% slower\", line 82) is a 2.1-5.4% effect measured at B=8, where the serial B=8 L=1 cell has IQR = 6.34 ms = 10.70% of its median. The stated caveat certifies that co-tenancy cannot affect that conclusion, while the records show the run-to-run spread is twice the effect being claimed.",
+  "severity": "major",
+  "evidence": "Computed iqr_ms and iqr_ms/median_ms for all 60 rows of j8_lane_bench_water.jsonl: full range 0.274-7.171 ms, 0.11%-10.70%; 34/60 cells above 1%. Restricting to B in {16,32}: 0.631-1.316 ms, 0.11-1.30% - i.e. the quoted \"0.6-1.3 ms\" covers only 20 of the 60 cells."
+ },
+ {
+  "title": "P3's evidence \"first B with slope > 1 is B = 1\" is an artifact of the single L=8 point; water is launch-bound at B=1",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_WATER_VERDICT.md",
+  "line": 17,
+  "defect": "The 1.33 ms/lane batched slope at B=1 (quoted at line 17 as P3's evidence and at line 62 as the \"1.33 at 17,150 edges\" crossing point) comes from a 5-point fit with R2 = 0.818 whose L=1..4 medians are 61.24, 61.18, 61.18, 61.08 ms - a slope of -0.05 ms/lane, i.e. perfectly flat.",
+  "failure_scenario": "Section 2 concludes \"Total edges in the batch is the controlling variable ... ~10^4 edges is a threshold a practitioner can check\" by pairing 3BPA's crossing bracket [8,320, 33,280 edges] with water's claimed crossing at 17,150 edges. Refitting water over L<=4 gives -0.05 (B=1), +0.54 (B=2), +9.19 (B=4) ms/lane, so water actually crosses 1 ms/lane between 34,300 and 68,600 edges; the two brackets then barely overlap and the ~10^4-edge threshold that \u00a74 sells as the paper's transferable systems rule is unsupported.",
+  "severity": "major",
+  "evidence": "Least-squares fits on j8_lane_bench_water.jsonl batched medians. L in {1,2,3,4,8}: B=1 slope 1.326 (R2 0.818), B=2 2.485 (R2 0.884). L in {1,2,3,4}: B=1 -0.050, B=2 0.541, B=4 9.187. The R2 values 0.818/0.884 are present in results/records/j8_water_verdict.json but omitted from this doc's fitted-cost-model table, which does carry an R2 column in the analogous J8_SMOKE_A100.md table."
+ },
+ {
+  "title": "\"batched is the faster exact baseline on all three GPUs\" is falsified by the Blackwell record at B=64, and the A100 doc's \"8 GB artifact\" explanation was never corrected",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_SM120_CONTROL.md",
+  "line": 93,
+  "defect": "Line 88 asserts \"Every qualitative feature holds on all three GPUs\" and line 93 lists \"batched the faster exact baseline for 3BPA at L >= 2\", but this document's own device record shows serial faster than batched at every lane count at B=64 (16.32 vs 18.90, 22.12 vs 26.04, 27.92 vs 34.03, 45.31 vs 56.10 ms).",
+  "failure_scenario": "J8_SMOKE_A100.md:98 states \"'Batched loses to serial at B = 64' was an 8 GB memory artifact; on 80 GB batched still wins at B = 64 (81.4 vs 100.4 ms)\", and the sm_120 control exists precisely to separate architecture from size. On the 102 GB Blackwell batched loses at B=64 by 24%, refuting the memory-artifact explanation - yet neither the SM120 correction section nor J8_SMOKE_A100.md carries that correction, and the SM120 doc instead lists the opposite as an invariant.",
+  "severity": "major",
+  "evidence": "j8_lane_bench_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition.jsonl, all 40 cells status='ok', total_memory_bytes = 101.98 GB: at B=64 serial medians (10.54, 16.32, 22.12, 27.92, 45.31) are below batched (11.36, 18.90, 26.04, 34.03, 56.10) at L = 1,2,3,4,8. At B<=16 batched does win for L>=2, so the failure is specific to B=64."
+ },
+ {
+  "title": "The J2b L=5 CI table has no surviving record: j9a builds its output path from --score and --lanes only, so the water run clobbered the molecular run",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j9a_leading_only_ci.py",
+  "line": 113,
+  "defect": "The output filename is `j9a_leading_only_ci_{score}_L{lanes}.json` and ignores `--cache-dirs`, so the water L=5 invocation overwrote the six-molecular-system L=5 record; J2B_FACTOR_B.md cites both tables but only one can exist on disk.",
+  "failure_scenario": "J2B_FACTOR_B.md lines 148-153 tabulate the L=5 column (+0.021, +0.036, -0.005, +0.078, +0.060, +0.059 with CIs) for the six molecular systems, and lines 179-188 tabulate the L=5 water deltas (-0.006, -0.009, +0.582, +0.336). As shipped, results/records/j9a_leading_only_ci_global_L5.json holds only the four water rows, so the molecular L=5 column - the budget at which the ablation's headline is stated - is unreproducible from records; regenerating it silently destroys the water record the correction section depends on.",
+  "severity": "major",
+  "evidence": "Ran `python experiments/j9a_leading_only_ci.py --score global --lanes 5`: it reproduced the molecular table exactly (+0.021 [+0.013,+0.029] disjoint ... +0.078 [+0.062,+0.093] ethanol) and rewrote j9a_leading_only_ci_global_L5.json from 1542 B (4 water rows) to 2323 B (6 molecular rows). Re-running with --cache-dirs pointing at the four water caches restored the original file and values exactly. The L4 and L6 records contain the six molecular systems; only L5 was overwritten."
+ },
+ {
+  "title": "\"stable rank 2.91-3.08 of 7\" excludes two of the six systems it describes, whose values are 1.21 and 4.18",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/STAGE1_GO_NO_GO.md",
+  "line": 48,
+  "defect": "STAGE1 line 48 and J3_EXTREME_VALUE.md line 126 quote the project's measured stable rank as \"2.91-3.08 of 7\", a range that comes from the frozen tree's four spectrum_*.json files, while results/records/j5_spectrum.json gives 1.212 for 3BPA overlapping and 4.175 for 3BPA same - two of the same six systems the claims cover.",
+  "failure_scenario": "STAGE1:48 uses that narrow range to argue the leading-only advantage \"follows from the project's own spectral measurement\", and STAGE1:124 calls the corpus \"one spectral regime\". J2B's later correction establishes that the sign of the leading-only advantage is controlled by exactly this variable, with the separation at srank ~ 2.5 running through the omitted values - 3BPA overlapping at 1.212 is the single molecular system where the control variate wins. Reported as 2.91-3.08 the six systems look homogeneous; measured, they span 1.21-4.18 and already contained the counterexample. Neither STAGE1 nor J3 was updated after j5_spectrum.json was written.",
+  "severity": "major",
+  "evidence": "results/records/j5_spectrum.json stable_rank_FQ: disjoint 2.993, overlapping 1.212, same 4.175, ethanol 3.079, aspirin 2.918, azobenzene 2.908 (water 1.500-4.254). The frozen tree contains spectrum JSONs for only four systems (disjoint, ethanol, aspirin, azobenzene) = 2.908-3.079, the source of the quoted range."
+ },
+ {
+  "title": "\"+0.088 to +0.230 over the best free signal\" reuses the per-signal range; the best-free-signal gains are +0.067 to +0.182",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/STAGE1_GO_NO_GO.md",
+  "line": 85,
+  "defect": "STAGE1:85 and J5_WATER.md:75 and :158 attach the interval +0.088 to +0.230 to the gain over the *best* free signal, but those endpoints are the min and max of the ten individual signal-by-signal comparisons in j2a_free_signal_ci.json; the gain over the best free signal per system is +0.067 to +0.182.",
+  "failure_scenario": "A referee recomputing the headline from J2A_ORACLE_PANEL.md's own \u00a73 table (gains 0.136, 0.182, 0.146, 0.067, 0.093, 0.169) finds neither endpoint of the quoted interval. The upper bound is inflated by 26%: +0.230 is the azobenzene-vs-force_norm delta, but on azobenzene the better free signal is energy_std (0.662), giving +0.169. J5_WATER.md then uses the inflated interval as the molecular reference against which water's +0.023 to +0.033 is judged \"materially harsher\".",
+  "severity": "major",
+  "evidence": "From j2a_oracle_panel.jsonl, per system max(energy_std, force_norm) vs exact_global on e_max: 0.6373->0.7731 (+0.1358), 0.6063->0.7879 (+0.1815), 0.7016->0.8476 (+0.1460), 0.6699->0.7373 (+0.0674), 0.6669->0.7597 (+0.0927), 0.6618->0.8303 (+0.1686). j2a_free_signal_ci.json significant deltas: 0.0876, 0.0927, 0.1358, 0.1410, 0.1460, 0.1686, 0.1815, 0.2302 -> min 0.088, max 0.230."
+ },
+ {
+  "title": "The recommended headline \"84-87% of exact evaluations avoided\" is the frozen banned-split number; the journal's held-out replication gives 79-84%",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_SMOKE_A100.md",
+  "line": 93,
+  "defect": "Both J8 documents propose \"84-87% of exact evaluations avoided\" as the paper's hardware-free headline, but that range comes from the frozen tree's table_gate_baselines.md (0.844/0.836/0.851/0.872), produced by scripts/07_gate_baselines.py - the file whose split implementation J1 permanently bans - while the journal's own re-run of exactly that configuration on the hashed blocked manifests gives 0.7875-0.8408.",
+  "failure_scenario": "A reader looking for 84-87% in results/records/ finds nothing. j2b_factor_b_maxcomp.jsonl (control_variate, K=4, r0=2, alpha=0.05, 5 lanes - the identical configuration, since 07_gate_baselines.py defaults to score=maxcomp, r0=2, alpha=0.05) gives disjoint 0.8315, ethanol 0.8408, aspirin 0.7875, azobenzene 0.8290. Aspirin alone drops 6.4 points. The count the paper is told to lead with is therefore 3-4 points optimistic relative to the journal's own measurement, and J8_WATER_VERDICT.md:108 repeats it after J2b had already replaced it.",
+  "severity": "major",
+  "evidence": "forcesketch/results/processed/table_gate_baselines.md control-variate K=4 exact-skipped column: 0.844, 0.836, 0.851, 0.872 -> 84-87%. forcesketch/scripts/07_gate_baselines.py:172-175 defaults score=maxcomp, alpha=0.05, r0=2; its split is the `int(0.2*S)` torch.randperm variant banned by tests/test_splits.py. Journal replication from j2b_factor_b_maxcomp.jsonl (mean over 10 probe seeds): 0.8315/0.8408/0.7875/0.8290 = 79-84%."
+ },
+ {
+  "title": "\"control variate whose recall varies by up to 0.035 across seeds\" contradicts the table three lines above it (0.979 mean vs 0.895 worst)",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J2B_FACTOR_B.md",
+  "line": 105,
+  "defect": "The stated seed-to-seed recall variation of 0.035 is contradicted by the document's own L=5 table at lines 95-101 (ethanol CV recall 0.979 mean, 0.895 worst seed) and by the records, where the max spread of high_uq_recall across the 10 probe seeds at L=5 is 0.105.",
+  "failure_scenario": "The sentence is the quantitative statement of \"the risk a single deployment draw actually carries\" - the argument for preferring the deterministic estimator. A deployment sizing its safety margin from 0.035 under-provisions by 3x: on ethanol at L=5 the worst of the 10 frozen seeds loses 10.5 percentage points of high-uncertainty recall relative to the best, and 8.4 points relative to the seed mean the table reports.",
+  "severity": "major",
+  "evidence": "sweepcv_global_K4.jsonl (CV, K=4, r0=2, 5 lanes), high_uq_recall over the 10 probe seeds: ethanol min 0.8947 max 1.0000 (spread 0.1053, sd 0.0368); azobenzene and same 0.0500; disjoint 0.0385; aspirin 0.0303; overlapping 0.0000. No quantity at L=5 equals 0.035; the closest is azobenzene's gate_error_recall spread of 0.0333."
+ },
+ {
+  "title": "J1's \"report alpha=0.01\" recommendation was not revisited after water made alpha=0.01 infeasible in the same record file",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J1_SPLIT_REPAIR.md",
+  "line": 103,
+  "defect": "J1 concludes \"report alpha=0.01, but report its skip fraction with an interval\", but results/records/j1_splits.json - regenerated at 12:24, after the four water systems were added - marks alpha_0.01 as `feasible: false` for all four water systems, and the J1 calibration table still lists only the six molecular systems.",
+  "failure_scenario": "Following J1's recommendation on water: n_cal = 92 gives k = ceil(93 x 0.99) = 93 > 92, so no finite conformal constant exists and the gate has no alpha=0.01 setting at all. The document that owns the calibration-power analysis states the opposite without qualification, and neither J5_WATER.md nor STAGE1 records the exception.",
+  "severity": "minor",
+  "evidence": "j1_splits.json: water-disjoint_md n_cal 92 -> alpha_0.01 {feasible: false, k: 93}; water-disjoint_pimd / water-overlapping_md / water-overlapping_pimd n_cal 94 -> {feasible: false, k: 95}. All six molecular systems are feasible; the doc's table at lines 90-93 covers only 3BPA and rMD17."
+ },
+ {
+  "title": "J3's \"mean absolute error of ~0.03-0.05\" does not match the records under any grouping, and the table omits the worst-fitting cell",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J3_EXTREME_VALUE.md",
+  "line": 58,
+  "defect": "The quoted MAE range is 0.03-0.05, but the records give overall MAE 0.0283 (shared) / 0.0305 (indep), per-system MAE 0.010-0.049 and per-K MAE 0.012-0.038; separately, the \u00a72 table shows 11 of the 18 computed cells and the omitted seven include the single largest prediction error.",
+  "failure_scenario": "A reader recomputing fit quality from j3_extreme_value.json gets 0.028, below the stated lower bound, while the omitted azobenzene K=3 cell (measured 0.402, predicted 0.490, error +0.088) is 36% larger than the worst error shown in the table. The presented subset is both more accurate on average (MAE 0.0273 vs 0.0299 for the omitted rows) and free of the largest miss, so neither the quoted range nor the displayed table characterises the full result.",
+  "severity": "minor",
+  "evidence": "j3_extreme_value.json, 18 recall_prediction rows: overall MAE_shared 0.0283, MAE_indep 0.0305. Per system: ethanol 0.0100, same 0.0181, aspirin 0.0193, disjoint 0.0265, overlapping 0.0474, azobenzene 0.0487. Per K: 0.0357 / 0.0377 / 0.0116. Rows absent from the doc table: overlapping K=3 and K=6, aspirin K=3 and K=6, azobenzene K=3, same K=3 and K=6."
+ },
+ {
+  "title": "J8 water R5 summary understates where batched wins at B=2-4",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J8_WATER_VERDICT.md",
+  "line": 81,
+  "defect": "The row \"| 2-4 | batched at L>=4, serial at L=1 |\" is wrong: in j8_lane_bench_water.jsonl batched is faster from L=2 upward at both B=2 and B=4, and the companion claim \"batched is 3-5% slower\" at B>=8 (line 82) is actually 2.1-5.4%.",
+  "failure_scenario": "An implementer applying rule R5 from this table at B=4, L=2 selects serial (80.69 ms) when batched is correct (63.35 ms), a 21% penalty on the exact baseline - exactly the error \u00a73 says a paper that fixed one implementation would make.",
+  "severity": "minor",
+  "evidence": "j8_lane_bench_water.jsonl serial vs batched medians: B=2 L=2 82.55/61.20, L=3 102.37/62.38; B=4 L=2 80.69/63.35, L=3 101.83/71.19 - batched wins all four. Serial-vs-batched ratios at B=8/16/32, L=8: 241.86/236.82 = 1.021, 457.60/438.74 = 1.043, 893.74/847.86 = 1.054."
+ },
+ {
+  "title": "J2a still carries a stale caveat saying confidence intervals are not attached, in a document that reports them twice",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J2A_ORACLE_PANEL.md",
+  "line": 182,
+  "defect": "The caveat \"Confidence intervals are not yet attached ... the differences in \u00a72 need it before the 24/24 claim is stated in a manuscript\" contradicts \u00a71 (a full block-bootstrap CI table) and \u00a72 (\"19/24 significant at 95%\") of the same file.",
+  "failure_scenario": "A referee reading the caveat list concludes the 24/24 global-vs-max-component result is not interval-backed and must be held back, while \u00a72 of the same document reports the intervals and j2a_global_vs_maxcomp_ci.json contains all 24 of them (24 positive, 19 significant). The document makes two mutually exclusive statements about the evidence status of its own decisive finding.",
+  "severity": "minor",
+  "evidence": "j2a_global_vs_maxcomp_ci.json: 24 rows, all delta > 0, 19 significant; non-significant deltas 0.0157, 0.0178, 0.0205, 0.0236, 0.0461 - matching the \"+0.016 to +0.046\" quoted at J2A line 93. j2a_free_signal_ci.json 'absolute' block matches the \u00a71 CI table to three decimals for all six systems."
+ },
+ {
+  "title": "\"Ten out of ten on the sign\" counts two water deltas whose own bootstrap intervals include zero",
+  "file": "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/results/J2B_FACTOR_B.md",
+  "line": 192,
+  "defect": "The correction section calls the srank ~ 2.5 separation \"perfect\" and claims ten out of ten on the sign, but two of the three negative-sign systems (water-disjoint PIMD -0.006, water-overlapping PIMD -0.009) are recorded with significant=false and ci_hi = 0.0000.",
+  "failure_scenario": "The sign test carries the whole mechanism claim (\"for a calibrated gate, prefer a biased low-variance estimator over an unbiased high-variance one\"). Two of the ten signs are statistically indistinguishable from a tie, so the concentrated group actually contains one resolved negative (3BPA overlapping) and two unresolved cells; a 10/10 sign test on 8 resolved observations overstates the evidence.",
+  "severity": "minor",
+  "evidence": "results/records/j9a_leading_only_ci_global_L5.json: water-disjoint_pimd delta -0.0062, ci [-0.0155, 0.0000], significant false; water-overlapping_pimd delta -0.0089, ci [-0.0203, 0.0000], significant false. The srank and skip-delta columns of the ten-row table otherwise reproduce exactly from j5_spectrum.json plus the L=5 CI records."
+ }
+]

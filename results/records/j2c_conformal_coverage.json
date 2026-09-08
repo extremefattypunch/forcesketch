@@ -1,0 +1,48 @@
+{
+  "experiment_id": "j2c_conformal_coverage",
+  "git_commit": "cf90cd2e32b77675dd0293bf321339b7e06eb735",
+  "alpha": 0.05,
+  "n_trials": 20000,
+  "seed": 0,
+  "n_cal_min": 84,
+  "n_cal_max": 428,
+  "n_cal_min_split": "water-disjoint_md_T300K__contiguous_block",
+  "n_splits": 28,
+  "coverage": {
+    "min": {
+      "n_cal": 84,
+      "alpha": 0.05,
+      "k": 81,
+      "realised": 0.9518,
+      "beta_mean": 0.9529411764705882,
+      "n_trials": 20000
+    },
+    "max": {
+      "n_cal": 428,
+      "alpha": 0.05,
+      "k": 408,
+      "realised": 0.9514,
+      "beta_mean": 0.951048951048951,
+      "n_trials": 20000
+    }
+  },
+  "feasibility": {
+    "alpha_0.05": {
+      "n_infeasible": 0,
+      "infeasible": []
+    },
+    "alpha_0.01": {
+      "n_infeasible": 6,
+      "infeasible": [
+        "water-disjoint_md_T300K__contiguous_block",
+        "water-disjoint_pimd_T300K__contiguous_block",
+        "water-naive_md_T300K__contiguous_block",
+        "water-naive_pimd_T300K__contiguous_block",
+        "water-overlapping_md_T300K__contiguous_block",
+        "water-overlapping_pimd_T300K__contiguous_block"
+      ]
+    }
+  },
+  "c_alpha_infeasible_is_inf": true,
+  "note": "Calibration sizes read from manifests/splits, not typed. Corrects calibration/conformal.py's stated minimum of 92: the manifests give 84. Conclusion unchanged -- every split is feasible at alpha=0.05."
+}

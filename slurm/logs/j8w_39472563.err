@@ -1,0 +1,10 @@
+/n/holylabs/hekstra_lab/Everyone/ianpoon/envs/fs-gpu/lib/python3.12/site-packages/e3nn/o3/_wigner.py:10: UserWarning: Environment variable TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD detected, since the`weights_only` argument was not explicitly passed to `torch.load`, forcing weights_only=False.
+  _Jd, _W3j_flat, _W3j_indices = torch.load(os.path.join(os.path.dirname(__file__), 'constants.pt'))
+Traceback (most recent call last):
+  File "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j8_lane_bench.py", line 165, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/n/lab_storage/hekstra_lab/people/ian_poon/HPCxBIO-journal-collab-with-Manpreet-2026/forcesketchJournalReady/experiments/j8_lane_bench.py", line 129, in main
+    ms = mean_seed(M, B).to(dtype=torch.float32, device=ad.device)
+         ^^^^^^^^^^^^^^^
+TypeError: mean_seed() missing 1 required keyword-only argument: 'dtype'

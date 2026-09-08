@@ -1,0 +1,11 @@
+== node holygpu8a31402.rc.fas.harvard.edu partition gpu_requeue job 39472563
+NVIDIA A100-SXM4-80GB, 81920 MiB, Disabled
+{
+ "device_name": "NVIDIA A100-SXM4-80GB",
+ "compute_capability": "8.0",
+ "sm_count": 108,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.007504000095650554
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.

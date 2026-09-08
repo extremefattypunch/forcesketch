@@ -1,0 +1,38 @@
+[
+ {
+  "system": "3bpa-naive-same_test_1200K",
+  "stable_rank_FQ": 4.997555783601667,
+  "stable_rank_A": 3.7816878097539637,
+  "effective_rank": 6.604343104629621,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.20009781647285868,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "3bpa-naive_test_1200K",
+  "stable_rank_FQ": 4.5143679971093595,
+  "stable_rank_A": 3.151616666608776,
+  "effective_rank": 6.466369666477898,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.22151494974275912,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "water-naive_md_T300K",
+  "stable_rank_FQ": 3.8883361662901037,
+  "stable_rank_A": 2.4316841766840818,
+  "effective_rank": 6.217566527367285,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.25717940970986286,
+  "n_for_90pct": 6.0
+ },
+ {
+  "system": "water-naive_pimd_T300K",
+  "stable_rank_FQ": 1.2747042639537634,
+  "stable_rank_A": 1.0220954573052865,
+  "effective_rank": 1.5897448217075658,
+  "isotropic_top1_fraction": 0.14285714285714285,
+  "top1_fraction": 0.7844956891399183,
+  "n_for_90pct": 3.0
+ }
+]

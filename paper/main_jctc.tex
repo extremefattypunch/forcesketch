@@ -1,0 +1,75 @@
+% JCTC build, on the real ACS class. Shares body.tex verbatim with main.tex and
+% main_iclr.tex, so a correction to the science reaches every manuscript at once.
+%
+% preamble.tex says achemso "is NOT installed in this TeX Live 2018 tree" and that
+% swapping to it is a two-line change. That was true where the manuscript was
+% originally built; achemso.cls and achemso.bst are both present in this tree, so
+% the swap is made here rather than deferred to submission time. main.tex is kept
+% as the plain-article build for reading and diffing.
+%
+% journal=jctcce is the ACS journal code for J. Chem. Theory Comput.
+\documentclass[journal=jctcce,manuscript=article]{achemso}
+
+% achemso loads natbib, hyperref, geometry and the ACS bibliography style itself.
+% Only what the shared body actually needs is added.
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+% ACS sets a narrower single column than the ICLR class, and the availability and
+% disclosure sections carry unbreakable \texttt{} paths (tools/paper_numbers.py,
+% results/REVIEW_FINDINGS.md) that overflow it. Letting TeX stretch the line is
+% the right fix here: the alternative is hyphenating file paths, which makes them
+% ambiguous to anyone typing them in.
+\setlength{\emergencystretch}{6em}
+
+% achemso typesets the e-mail through \url with \acs@email@list@font set to
+% \sf (achemso.cls:920, 923). Computer Modern Sans has no underscore glyph, so
+% "ian_poon@..." silently rendered as "ian poon@..." -- the character was simply
+% absent, which is invisible in a screenshot and extracts as 0x20. Escaping it
+% printed a literal backslash instead, and the underscore package did not help
+% because the loss happens at the font, not the catcode. Switching that font to
+% typewriter is the fix; it is also how addresses are normally set.
+%
+% Diagnosed by hexdumping the extracted text and confirming that underscores
+% elsewhere in the SAME pdf (tools/paper_numbers.py) extract correctly, which
+% ruled out pdftotext as the culprit.
+\makeatletter
+\renewcommand*\acs@email@list@font{\ttfamily}
+\makeatother
+
+% Defined in preamble.tex, which this build does not load. The ACS class sets the
+% author block itself, so \authorblock is a no-op here.
+\providecommand{\authorblock}[2]{}
+\providecommand{\note}[1]{\textcolor{gray}{\small[#1]}}
+
+\input{macros}
+
+\input{artifact}
+% Named venues cite the persistent DOI, which is the form ACS asks for: a
+% mutable repository URL alone is not a durable locator.
+\newcommand{\fsArtifactLink}{\texttt{\fsArtifactDoi}}
+
+\author{Ian Poon}
+\affiliation{Department of Cellular and Molecular Biology, Harvard University,
+Cambridge, Massachusetts 02138, United States}
+\email{ian_poon@fas.harvard.edu}
+
+\title{When is committee force uncertainty worth computing in MD?
+Decision quality, cheap gates, and the baselines that must be beaten}
+
+% ACS numbers sections in research articles; the shared body relies on
+% \ref{sec:...} cross-references, which need numbers to resolve to something
+% meaningful rather than to a blank.
+\SectionNumbersOn
+
+\begin{document}
+
+\input{body}
+
+\bibliography{references}
+
+\end{document}

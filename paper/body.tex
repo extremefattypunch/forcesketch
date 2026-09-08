@@ -1,0 +1,542 @@
+\begin{abstract}
+\noindent
+Molecular dynamics with a machine-learned potential requires repeatedly choosing
+which structures to label with expensive quantum chemistry. The usual signal is
+disagreement among an ensemble of models, and cheap approximations of that signal
+are validated by how closely they match the full ensemble. We instead evaluate the
+ensemble against the model's actual error, and evaluate cheap approximations of it
+separately. Three results follow.
+
+The acquisition rule in common use sums over coordinates, so it grows with molecule
+size whether or not the model is uncertain. It is harmless at fixed size and
+misleading when sizes vary, where it selects large structures rather than difficult
+ones. A deterministic choice of probe directions beats random sampling, skipping
+$\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of the expensive work without changing a
+decision. On a realistic materials dataset the magnitude of the predicted
+forces---free, already computed---identifies the worst structures as well as the
+ensemble does, and the ensemble adds nothing significant on top of it. Ensemble
+uncertainty is unnecessary where that free signal suffices, and is the baseline
+future methods should be measured against.
+\end{abstract}
+
+\section{Introduction}
+
+Machine-learned interatomic potentials (MLIPs) are trained on labels that cost
+orders of magnitude more than the model does to evaluate, so which structures get
+labelled matters more than almost any modelling choice. The dominant selection
+heuristic is query-by-committee~\citep{seung1992query}: train an ensemble,
+evaluate the spread of its predictions, and label where the spread is largest.
+For force-field models the natural spread is over \emph{forces}, and obtaining it
+exactly costs one reverse-mode pass per ensemble member.
+
+A multi-head committee makes that cheaper in
+principle~\citep{beck2025committee}. Instead of $M$
+independent models, one trunk carries $M$ output heads, so a single reverse pass
+through the trunk with an appropriate head-space cotangent yields a projection of
+the per-head force matrix. Whether a small number of such projections suffices to
+reproduce the acquisition decisions of the exact committee is the question that a
+sketching analysis is usually asked to answer.
+
+We argue that this is the second question, and that asking it first has hidden a
+weakness in the whole approach. The literature validates a cheap estimator
+against the \emph{exact committee}, treating the committee as ground truth. But
+the committee is itself a proxy---for the model's error against the reference
+method---and it is that error a practitioner wants to find. So we decompose:
+
+\begin{itemize}
+\item \textbf{Factor A, oracle quality.} Does exact committee force disagreement
+rank reference-force error? This is answerable offline from cached per-head
+forces and requires no sketching at all.
+\item \textbf{Factor B, preservation.} Given whichever oracle one has chosen, how
+many of its decisions does a cheap gate reproduce, and at what cost?
+\end{itemize}
+
+Factor B is logically independent of Factor A: \emph{whatever you decided to
+trust, we reproduce it more cheaply} is a claim that survives Factor A being
+mediocre. Reporting them together, rather than reporting only the sketch fidelity,
+is the paper's main methodological contribution, and it is what surfaces the
+result in Section~\ref{sec:foundation}---that on a realistic materials pool the
+committee loses to a signal that costs nothing.
+
+Every numeric claim below is derived programmatically from a committed record;
+none is transcribed. Section~\ref{sec:avail} describes the reproduction path.
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Committee uncertainty for atomistic models.}
+Query-by-committee~\citep{seung1992query} is the standard selection rule for
+interatomic potentials, and the standard critique of force-field evaluation is
+that aggregate error metrics hide the failures that matter~\citep{kovacs2021beyond}.
+\citet{christensen2020role} show that gradient information changes what a model
+learns, which is part of why force disagreement rather than energy disagreement is
+the quantity acquisition consumes. Multi-head committees~\citep{beck2025committee}
+amortise the energy spread across one trunk and are the construction we take as
+given; our contribution is not a better estimator of their statistic but a
+different question about it. Where that work validates a cheap approximation
+against the exact committee, we ask first whether the exact committee is worth
+approximating.
+
+\paragraph{Estimating a trace from few products.}
+The centred head-space statistic is a trace, so the natural tools are randomised.
+\citet{meyer2021hutchpp} establish that splitting a fixed budget between an exact
+leading subspace and a sketched residual is optimal for trace estimation, and our
+control variate is that construction. Our negative result is not a contradiction
+of it: their guarantee is on the trace's \emph{value}, while acquisition consumes
+a \emph{ranking} across structures, and Section~\ref{sec:theory} shows the
+finite-sample noise that is harmless for the former is decisive for the latter.
+
+\paragraph{Distribution-free calibration.}
+The gate's constant is the split-conformal
+one~\citep{vovk2005algorithmic,lei2018distribution}, which buys a finite-sample
+guarantee under exchangeability alone. Exchangeability is the assumption a
+molecular dynamics trajectory violates, which is why every split here is blocked
+with guard bands sized from a measured autocorrelation time rather than drawn at
+random.
+
+\paragraph{Foundation models and real pools.}
+Universal potentials trained on materials
+trajectories~\citep{deng2023chgnet,batatia2023foundation} are the setting the
+method is pitched at, and the setting in which we find its motivating premise
+weakest: a pool spanning composition and size is exactly where an extensive
+statistic misbehaves and where a free force-magnitude signal is already close to
+saturated.
+
+\section{Method}
+
+\subsection{Centred head space}
+Let $F(x)\in\mathbb{R}^{3N\times M}$ hold the forces predicted by $M$ committee
+heads for a structure $x$ with $N$ atoms. Acquisition scores depend only on the
+spread across heads, so the mean-force direction is separated out: with $Q_c$ an
+$M\times r$ orthonormal (Helmert) basis of the centred subspace, $r=M-1$, the
+quantity of interest is $A(x)=Q_c^{\top}F(x)^{\top}F(x)Q_c$, an $r\times r$
+matrix independent of $N$. The per-coordinate variance is
+$v_d=\lVert Q_c^{\top}F_d\rVert^2/(M-1)$.
+
+\subsection{Three acquisition statistics}
+Prior work ranks structures by the largest per-coordinate standard deviation,
+$\max_d\sqrt{v_d}$ (\emph{max-component}). We also consider the largest per-atom
+value (\emph{max-atom}) and the sum $\sum_d v_d$ (\emph{global}). The global
+statistic is a trace of $A(x)$ and so is by far the easiest to estimate from few
+projections; whether it is also the better physical predictor was pre-registered
+as a secondary hypothesis before any of it was run.
+
+\subsection{Estimators}
+A projection (\emph{lane}) costs one reverse pass and returns $g_k=F w_k$ for a
+head-space direction $w_k$. We compare Haar and Gaussian sketches, head
+subsampling, a low-rank control variate that evaluates $r_0$ leading directions
+exactly and sketches the residual---the split that
+\citet{meyer2021hutchpp} show is optimal for trace estimation---and a purely deterministic
+\emph{leading-only} estimator that spends every lane on exact leading
+eigendirections of the design-set Gram and discards the residual entirely.
+
+\subsection{The calibrated gate}
+The gate skips the exact computation when a cheap score $\hat{S}$ times a
+calibration constant falls below a threshold. The constant is the
+split-conformal one: $c_\alpha$ is the
+$\lceil (n+1)(1-\alpha)\rceil$-th order statistic of the calibration ratios
+$S/\hat{S}$~\citep{vovk2005algorithmic,lei2018distribution}. When
+$\lceil (n+1)(1-\alpha)\rceil > n$ no order statistic carries the finite-sample
+guarantee and the implementation returns $+\infty$, which makes the gate skip
+nothing---the safe failure. Realised coverage is verified against the
+$\mathrm{Beta}(k,n{+}1{-}k)$ law by simulation rather than asserted, at the
+smallest and largest calibration sets ($n=\fsCovNCalMin$ and $n=\fsCovNCalMax$) among
+the $\fsCovSplits$ registered splits.
+The guarantee is weakest at the smallest, $n=\fsCovNCalMin$, and there realised
+coverage is $\fsCovRealisedMin$ against the $\fsCovBetaMin$ the law predicts;
+$\fsCovInfeasible$ of $\fsCovSplits$ splits lack a feasible order statistic at
+the $\alpha$ we ship.
+
+What the gate costs when it does \emph{not} skip is worth stating explicitly,
+because it is the obvious way to flatter such a method. There is no partial
+credit: a structure the gate declines to skip is evaluated exactly and in full,
+so the $K{+}1$ lanes already spent on its cheap score are pure overhead rather
+than a down payment on the exact basis. The skip fractions below are therefore
+counts of structures that avoided the exact computation altogether, and the
+estimators are compared at matched lane budgets.
+
+Design, calibration and test roles are disjoint contiguous blocks with guard
+bands sized from a measured integrated autocorrelation time; every split is
+content-hashed and recomputes from its recorded seed. Confidence intervals use a
+paired moving-block bootstrap~\citep{kunsch1989jackknife}.
+
+\section{Does committee disagreement predict reference-force error?}
+\label{sec:factora}
+
+Across six molecular systems---3BPA~\citep{kovacs2021beyond} at 1200\,K under
+three committee constructions, and three rMD17
+molecules~\citep{christensen2020role}---exact global disagreement ranks the
+top-5\% highest-error structures at AUROC $\fsFactorALo$--$\fsFactorAHi$, with a
+random null at chance. The oracle is \emph{moderate}: useful, and far from
+perfect. Nothing is fitted in this analysis, so there is no leakage risk.
+
+
+\begin{figure}[t]
+\centering\includegraphics[width=\linewidth]{figures/fig1_factor_a.pdf}
+\caption{\textbf{Exact committee disagreement ranks reference-force error, and the
+global statistic ranks it best at fixed system size.} AUROC for detecting the
+top-5\% highest-error structures, by signal, on the six molecular systems. The
+dashed line is the random null; every signal carries a distinct marker so the
+comparison survives grayscale printing. The two \emph{free} signals cost no
+backward pass, and the margin over the better of them is
+$\fsFreeGainLo$--$\fsFreeGainHi$ AUROC.}
+\label{fig:factora}
+\end{figure}
+
+\subsection{The global statistic wins---at fixed system size}
+The global statistic beats max-component in $\fsGlobalWins$ of $\fsGlobalCells$
+(system $\times$ error-score) cells, $\fsGlobalWinsSig$ of them significantly at
+95\%, and in no cell is it significantly worse (Figure~\ref{fig:factora}). Because the global statistic is
+also the one a sketch estimates most easily, the negative result about small
+sketches (Section~\ref{sec:theory}) applies to the statistic one should not have
+been using.
+
+This holds \emph{at fixed $N$}, and the qualifier is load-bearing rather than
+cosmetic; Section~\ref{sec:extensivity} shows the ordering reverse when system
+size varies, and why it could not have shown up here.
+
+\subsection{The margin over free signals}
+Head-energy spread costs one forward pass; the norm of the mean force costs
+nothing at all. Both are informative (AUROC $\fsFreeAurocLo$--$\fsFreeAurocHi$). Exact global
+disagreement beats the better of them by $\fsFreeGainLo$--$\fsFreeGainHi$ AUROC,
+and pairwise the advantage is significant in $\fsFreeSig$ of $\fsFreeSigTotal$
+comparisons. So the backward passes buy something real but not overwhelming---and
+Section~\ref{sec:foundation} shows a regime where they buy nothing.
+
+\section{What the cheap gate costs}
+\label{sec:factorb}
+
+Evaluated on held-out test blocks, the gate skips
+$\fsLOSkipLo$--$\fsLOSkipHi$ of exact evaluations while reproducing the exact
+policy's decisions. We report this count rather than a speedup because it is
+independent of hardware, autodiff backend and batching.
+
+
+\begin{figure}[t]
+\centering\includegraphics[width=\linewidth]{figures/fig2_gate_forest.pdf}
+\caption{\textbf{Randomisation does not earn its lanes.} Difference in the
+fraction of exact evaluations skipped between the deterministic leading-only
+estimator and the randomised control variate, at three matched lane budgets, with
+95\% paired block-bootstrap intervals. Positive is leading-only better. It wins
+significantly on $\fsLOBeatsCV$ of $\fsLOSystems$ systems at every budget; the
+single exception is 3BPA overlapping, in a regime where both estimators already
+skip more than 93\%.}
+\label{fig:gate}
+\end{figure}
+
+\subsection{Randomisation does not earn its lanes}
+At matched lane budget the deterministic leading-only estimator beats the
+randomised control variate on $\fsLOBeatsCV$ of $\fsLOSystems$ systems, at every
+budget tested, and has zero probe-seed variance by construction (Figure~\ref{fig:gate}). The mechanism is
+specific to calibrated gates: $c_\alpha$ is fitted to the ratio $S/\hat{S}$, so a
+systematic bias in $\hat{S}$ is absorbed exactly, and only its \emph{variance}
+costs skip fraction. Leading-only is biased low by construction and pays nothing
+for it. Since the head-space spectrum is concentrated---stable rank
+$\approx \fsStableRankLo$--$\fsStableRankHi$ of a possible $7$---a random projection is being asked to do
+the one thing concentration makes hard.
+
+The practical consequence is that the method gets simpler: at fixed budget, spend
+every lane on exact leading directions.
+
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.52\linewidth]{figures/fig5_beta_law.pdf}
+\caption{\textbf{The finite-sample law predicts the negative result with no free
+parameters.} Predicted against measured top-5\% recall for six systems at three
+sketch budgets. Using the real head-space geometry gives a mean absolute error of
+$\fsBetaMAE$; the isotropic null is both worse and systematically optimistic,
+which is why coordinate coupling cannot be neglected.}
+\label{fig:beta}
+\end{figure}
+
+\section{Theory: the negative result is predictable}
+\label{sec:theory}
+
+For a Haar sketch of $K$ of the $r$ centred directions, the ratio of estimated to
+true per-coordinate variance is distributed exactly as
+$\hat{v}_d/v_d \sim (r/K)\,\mathrm{Beta}(K/2,(r-K)/2)$. Injecting precisely this
+noise into the exact variances and recomputing top-5\% recall reproduces the
+measured recall across six systems and three budgets to a mean absolute error of
+$\fsBetaMAE$, with no free parameters (Figure~\ref{fig:beta}).
+
+Two corrections to the mechanism previously offered follow. First, a common
+multiplicative bias cannot change a rank statistic, so the damage is estimator
+\emph{variance}, not bias. Second, the coordinate directions cannot be treated as
+isotropic: using the real head-space geometry roughly halves the prediction error
+relative to an isotropic null, so coordinate coupling matters.
+
+A Chernoff bound makes the result structural rather than incidental: uniform
+componentwise accuracy at $\varepsilon=0.1$ requires $K$ of order
+$10^3$--$10^4$, against an available budget of $K\le r=7$. The gap is two to
+three orders of magnitude, so no amount of tuning recovers the max-component rule
+from a small sketch.
+
+\section{Generality}
+
+\subsection{Committee size}
+Enumerating \emph{all} $247$ subcommittees of every size across 20 systems,
+halving the committee to $m=4$ retains $\fsMFourRetained$ of Factor A on average.
+But the worst individual four-member subcommittee retains only
+$\fsMFourWorstSubset$, and at $m=2$, $\fsMTwoWorstSubset$. Committee size buys
+\emph{insurance}, not accuracy: going from four heads to eight moves the mean by
+three points and the floor by twenty-seven.
+
+\subsection{Independently trained committees}
+Eight separately trained models, matched to shared-trunk counterparts on training
+data and evaluation frames, confirm the global-statistic recommendation---so it is
+a property of committees, not of the multi-head architecture. They are also far
+better calibrated in magnitude: overconfidence $\fsNaiveOverconfLo\times$ against
+$\fsSharedOverconfHi\times$ for the matched shared-trunk committee. The
+\emph{acceleration}, by contrast, does not transfer at all, and we state this as a
+derivation rather than a measurement: with no shared trunk, obtaining $Fw$
+requires all $M$ columns of $F$, so no sketch can be cheaper than the exact
+quantity. Of five pre-registered predictions in this experiment,
+$\fsNaivePassed$ were confirmed.
+
+\subsection{Condensed phase and distribution shift}
+Bulk liquid water ($N=192$, periodic, $D=576$) and a same-temperature
+MD-versus-PIMD pair give a distribution shift in which only quantum nuclear
+effects differ. One caveat must survive contact with the reader: the shift
+regime's striking Factor A is substantially a symptom of \emph{this model family
+failing badly there}. A matched independently-trained committee is $\fsNaiveAccuracyRatio\times$
+more accurate on the shifted data and its Factor A collapses, while a free signal
+retains most of the apparent skill. Shift-regime claims must therefore be quoted
+beside the free-signal baseline and the accuracy gap.
+
+\section{Foundation models, real pools, and the baseline that must be beaten}
+\label{sec:foundation}
+
+The setting the method is actually pitched at is a foundation model with
+committee readouts on a frozen trunk~\citep{batatia2023foundation}. We scan
+\fsMPtrajN\ periodic crystals drawn from MPtraj~\citep{deng2023chgnet},
+spanning 89 elements and 1--444 atoms, with a
+MACE-MP~\citep{batatia2022mace} trunk fine-tuned to carry
+eight disjoint committee heads. Five predictions were pre-registered; two were
+confirmed.
+
+\subsection{Factor A transfers}
+Exact committee disagreement reaches AUROC $\fsMPtrajGlobal$ here against a
+random null of $\fsMPtrajRandom$. Committee force uncertainty is not an artefact
+of small organic molecules.
+
+
+\begin{figure}[t]
+\centering\includegraphics[width=\linewidth]{figures/fig3_extensivity.pdf}
+\caption{\textbf{The global statistic is extensive, and normalisation restores
+parity rather than superiority.} (a) Median atom count of the acquired set on the
+MPtraj pool. The global statistic and the two quantities that inherit its
+extensivity acquire far larger structures than the pool median; the intensive
+statistics and the free signal do not. (b) Held-out AUROC of
+$S_\alpha=(\sum_d v_d)/(3N)^\alpha$ against the exponent $\alpha$, with the
+design-selected $\alpha^*$ starred. The curve peaks near max-component's level,
+not above it.}
+\label{fig:extensivity}
+\end{figure}
+
+\subsection{Extensivity, and why the global statistic reverses}
+\label{sec:extensivity}
+The global statistic sums $v_d$ over $3N$ coordinates, so it grows with system
+size whether or not the model is uncertain. Acquiring by it returns structures
+whose median atom count is $\fsMPtrajExtensivity\times$ that of the
+max-component selection, and the ordering of Section~\ref{sec:factora} reverses
+on all four error scores (Figure~\ref{fig:extensivity}a, Table~\ref{tab:mptraj}). Every system in Section~\ref{sec:factora} has fixed
+$N$, where an extensive and an intensive statistic differ by one constant and the
+pathology \emph{cannot} appear: the recommendation was never wrong where it was
+measured, it was measured only where it could not fail.
+
+The repair is a size normalisation, $S_\alpha=(\sum_d v_d)/(3N)^\alpha$, with
+$\alpha$ chosen on a design split and every reported number taken from the
+disjoint remainder. The selected $\alpha=\fsAlphaStar$ raises held-out AUROC from
+$\fsNormAurocZero$ to $\fsNormAurocStar$ (Figure~\ref{fig:extensivity}b), and at fixed $N$ it changes nothing
+exactly---so it can be adopted globally at no cost. We report the outcome
+precisely: across four error scores the normalised statistic achieves
+$\fsNormWins$ significant wins, one tie, and $\fsNormLosses$ significant loss
+against max-component. This restores \emph{parity}, not superiority, and
+$\alpha$ is pool- and target-dependent rather than universal.
+
+
+\begin{table}[t]
+\centering
+\caption{\textbf{On a real materials pool a free signal outranks every committee
+statistic.} AUROC on $\fsMPtrajN$ MPtraj crystals under a frozen foundation-model
+trunk. The last two columns are post-hoc diagnostics: AUROC recomputed within
+atom-count quartiles and within force-magnitude quintiles, so neither the
+extensivity confound nor force magnitude itself can explain the ordering.
+$\|\bar{f}\|$ is bold because it is the signal that costs nothing.}
+\label{tab:mptraj}
+\small
+\input{tables/table_mptraj}
+\end{table}
+
+\subsection{The free signal wins here, and is not complemented}
+The max mean-force norm reaches AUROC $\fsMPtrajFree$ against the committee's
+$\fsMPtrajGlobal$---a signal that is already computed in the forward pass
+outranking eight backward passes (Table~\ref{tab:mptraj}). The advantage survives stratification by atom
+count and, within force-magnitude quintiles, the committee still beats chance,
+so it does carry information beyond force magnitude; a free proxy is simply at
+least as good.
+
+Because the free signal is free, the decision a practitioner faces is not
+``committee or free signal'' but ``free signal, or free signal \emph{plus} eight
+backward passes''. Nested models fitted on a design split and scored on held-out
+data give AUROC $\fsCompFree$ for the free signal alone and $\fsCompBoth$ with the
+committee added---a marginal of $\fsCompMarginal$, not significant. On
+fixed-composition systems the same comparison gives significant gains on
+$\fsCompFixedSig$ of $\fsCompFixedN$ systems, spanning
+$\fsCompFixedLo$--$\fsCompFixedHi$. The committee is redundant \emph{here}, not
+in general, and the discriminating variable is how close the free signal already
+is to saturation.
+
+\subsection{The selection-overlap bound is unavailable}
+One can hope to bound the downstream active-learning difference without
+retraining, by showing the gate acquires nearly the same set as the exact
+statistic. It does not: Jaccard overlap is $\fsMPtrajJaccard$ at a realistic
+acquisition rate, short of the pre-registered threshold. Overlap statistics must
+always be reported with their acquisition rate, since any two rankings agree when
+a large fraction of the pool is taken.
+
+
+\begin{figure}[t]
+\centering\includegraphics[width=\linewidth]{figures/fig4_speedup.pdf}
+\caption{\textbf{Lane reduction pays once the backward pass is compute-bound, and
+the batch size at which that happens rises with machine speed.} Total speedup
+against batch size for (a) water and (b) 3BPA, measured with both systems in a
+single exclusive job per device. Water converges to
+$\fsWaterSpeedupBSixteen\times$--$\fsWaterSpeedupBSixteenBlk\times$ by $B=16$ on
+all three architectures; 3BPA stays near $\fsThreeBPASpeedupBSixteen\times$
+except on Blackwell. The H200 is the fastest machine and is still launch-bound at
+$B=1$.}
+\label{fig:speedup}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Pre-registered systems predictions, scored per device on matched
+pairs.} Water and 3BPA measured in one exclusive job per device at identical
+settings. v2 is the frozen pre-registered protocol; v3 is a post-hoc repair that
+derives its reference from the matched 3BPA run rather than a fixed constant, and
+it changes the score only on Blackwell. P1 and P2 --- the predictions carrying the
+speedup claim --- pass everywhere.}
+\label{tab:pairs}
+\small
+\input{tables/table_pairs}
+\end{table}
+
+\section{Wall clock}
+\label{sec:wallclock}
+
+Lane reduction pays only once the backward pass is compute-bound rather than
+launch-bound, and the controlling variable is the total edge count in the batch,
+not the number of structures. Measuring both systems in a single exclusive job at
+identical settings, water reaches $\fsWaterSpeedupBOne\times$ at $B=1$ rising to
+$\fsWaterSpeedupBSixteen\times$ at $B=16$ on an A100,
+$\fsWaterSpeedupBSixteenHTwo\times$ on an H200 and
+$\fsWaterSpeedupBSixteenBlk\times$ on an RTX PRO 6000 Blackwell---three GPU
+generations agreeing to $\fsWaterSpeedupSpread$\%---against
+$\fsThreeBPASpeedupBSixteen\times$ for 3BPA in the same job (Figure~\ref{fig:speedup}, Table~\ref{tab:pairs}). Because the
+threshold is a property of the machine as well as the system, the batch size at
+which lane reduction begins to pay \emph{increases} with how fast the GPU is.
+
+Acceleration is deliberately not the headline. The count of avoided exact
+evaluations is hardware-independent and survives every timing outcome.
+
+\section{Recommendations and limitations}
+
+\begin{enumerate}
+\item \textbf{Score committee uncertainty against the free mean-force norm}, not
+against a random null. On some system classes it wins by a wide margin; on others
+it adds nothing measurable.
+\item \textbf{Use the global statistic at fixed system size}; normalise by
+$(3N)^{\alpha}$ for variable size and refit $\alpha$ per pool and per target.
+\item \textbf{Prefer a deterministic leading subspace to a randomised sketch}, at
+equal budget.
+\item \textbf{Committee size buys insurance.} To fix magnitude calibration,
+change the construction, not $M$.
+\end{enumerate}
+
+Limitations. One architecture family; $M=8$ with subcommittee interpolation and
+no trained $M=16$ control. No retraining was performed, so no claim is made about
+downstream model quality---only about which structures are selected. The
+selection-overlap bound is unavailable, so that gap cannot be closed cheaply.
+$\alpha$ is pool-dependent. Finally, several results here correct earlier
+statements of our own; the record of those corrections is retained in the
+repository rather than silently overwritten.
+
+% Titled to satisfy both venues at once: ICLR asks for a "Reproducibility
+% Statement", ACS journals for "Data and Software Availability". One section,
+% both names, no duplicated prose.
+\section*{Reproducibility Statement / Data and Software Availability}
+\label{sec:avail}
+
+\paragraph{Where everything is.}
+The complete artifact --- source code, environment lockfile with exact dependency
+versions, dataset acquisition scripts, dataset and checkpoint sha256 hashes, split
+manifests, probe seeds, every raw per-structure prediction and timing record, the
+figure- and table-generation scripts, the test suite and a worked example ---
+is deposited at \fsArtifactLink, released under the MIT licence for code and
+CC~BY~4.0 for the records. File paths named below are relative to its root.
+
+\paragraph{Inputs, which are not ours.}
+The multi-head committee checkpoints and the 3BPA and liquid-water frames this
+work evaluates are the supporting data of \citet{beck2025committee}, archived
+independently at \texttt{\fsUpstreamZenodo}, and the MPtraj structures are those
+distributed with \citet{deng2023chgnet}. We redistribute neither; the acquisition
+scripts fetch them and verify every file against a recorded hash before use, so a
+silently substituted input fails rather than propagates.
+
+\paragraph{Reproducing the numbers.}
+All statistical results regenerate on CPU:
+\texttt{tools/reproduce.py --tier offline} re-derives every headline quantity in
+roughly four minutes with no model execution, no CUDA and no download, and checks
+each against its committed value. \texttt{tools/audit.py} verifies the frozen
+prior-work tree, the sha256 binding of every pre-registered protocol to a
+registration record written before that experiment produced any artifact, the
+provenance of every number in this manuscript, the split manifests, and the
+test-access ledger. \texttt{tools/report\_go\_no\_go.py} emits every scored
+verdict as data, alongside the confidence stated for it in advance.
+
+\paragraph{What needs a GPU, and which one.}
+Only the timing experiments. Those were run on A100-SXM4-80GB, H200 and
+RTX~PRO~6000 Blackwell cards under a single pinned toolchain, and the device,
+driver, SM count and clock state of every run are recorded alongside its
+measurements, because the wall-clock conclusions in Section~\ref{sec:wallclock}
+are properties of the hardware as much as of the method. Regenerating the cached
+per-head force matrices needs one GPU and roughly an hour; everything downstream
+of that cache is offline linear algebra.
+
+% MANDATORY for ICLR 2027: https://iclr.cc/Conferences/2027/AIPolicyForAuthors
+% states the disclosure is a required in-paper section and that omitting it can
+% lead to desk rejection. It does not count toward the page limit. ACS journals
+% have no equivalent requirement, but the statement is true at either venue and
+% is left in both builds rather than maintained as a variant.
+%
+% AUTHOR: please check this against your own recollection of the division of
+% labour before submitting. It is written from what the repository evidences,
+% which is not the same thing as what you remember doing.
+\section*{Use of Large Language Models}
+\label{sec:llm}
+LLM-based coding agents were used substantially throughout this work: for
+research ideation, for implementing the experiment scripts and analysis code, for
+the adversarial review described below, and for drafting and revising this
+manuscript. The author directed the work, chose which questions to ask, and is
+responsible for its contents.
+
+Because that exposure is broad, the verification is mechanical rather than a
+matter of inspection. Every number in this paper is generated from a committed
+record by \texttt{tools/paper\_numbers.py} and re-checked by
+\texttt{tools/audit.py}; none is transcribed, so an agent cannot introduce a figure
+by typing one. Each experiment's protocol was registered, and hash-bound to a
+record written before that experiment produced any artifact, so a hypothesis
+cannot be adjusted after seeing the outcome. Split roles are content-hashed and
+recompute from recorded seeds.
+
+That machinery exists because agent-written prose did fail in exactly the way one
+would predict. An adversarial review, itself agent-driven and documented in
+\texttt{results/REVIEW\_FINDINGS.md}, confirmed 22 real defects, two of them
+critical: a benchmark that silently measured seven lanes where it reported eight,
+and a filename collision that destroyed a result file. A separate cross-document
+audit found roughly 70 quantitative claims in the supporting documents that a
+record contradicts, nearly all of them stale copies left behind by corrections
+that were made in one place and not propagated. The macro-derived numbers --- the
+ones in this manuscript --- were not among the failures, which is the entire
+argument for deriving them.

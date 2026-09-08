@@ -1,0 +1,269 @@
+{
+ "beta_law": [
+  {
+   "r": 7,
+   "K": 1,
+   "n_draws": 200000,
+   "empirical_mean": 0.14293300577452564,
+   "analytic_mean": 0.14285714285714285,
+   "empirical_var": 0.02725847958549114,
+   "analytic_var": 0.027210884353741496
+  },
+  {
+   "r": 7,
+   "K": 2,
+   "n_draws": 200000,
+   "empirical_mean": 0.28631877726124505,
+   "analytic_mean": 0.2857142857142857,
+   "empirical_var": 0.0454172663738557,
+   "analytic_var": 0.045351473922902494
+  },
+  {
+   "r": 7,
+   "K": 3,
+   "n_draws": 200000,
+   "empirical_mean": 0.4284703607235792,
+   "analytic_mean": 0.42857142857142855,
+   "empirical_var": 0.05454974669347672,
+   "analytic_var": 0.05442176870748299
+  },
+  {
+   "r": 7,
+   "K": 4,
+   "n_draws": 200000,
+   "empirical_mean": 0.5715063712736327,
+   "analytic_mean": 0.5714285714285714,
+   "empirical_var": 0.05437101679837792,
+   "analytic_var": 0.05442176870748299
+  },
+  {
+   "r": 7,
+   "K": 5,
+   "n_draws": 200000,
+   "empirical_mean": 0.7152953643030548,
+   "analytic_mean": 0.7142857142857143,
+   "empirical_var": 0.045332616945559026,
+   "analytic_var": 0.045351473922902494
+  },
+  {
+   "r": 7,
+   "K": 6,
+   "n_draws": 200000,
+   "empirical_mean": 0.8569326765269818,
+   "analytic_mean": 0.8571428571428571,
+   "empirical_var": 0.027308624520093125,
+   "analytic_var": 0.027210884353741496
+  }
+ ],
+ "recall_prediction": [
+  {
+   "system": "disjoint_test_1200K",
+   "D": 81,
+   "K": 3,
+   "measured": 0.4841121495327102,
+   "shared_real": 0.4841121495327103,
+   "shared_iso": 0.5121495327102803,
+   "indep": 0.5018691588785046
+  },
+  {
+   "system": "disjoint_test_1200K",
+   "D": 81,
+   "K": 4,
+   "measured": 0.5644859813084111,
+   "shared_real": 0.5682242990654205,
+   "shared_iso": 0.5887850467289719,
+   "indep": 0.6
+  },
+  {
+   "system": "disjoint_test_1200K",
+   "D": 81,
+   "K": 6,
+   "measured": 0.7934579439252336,
+   "shared_real": 0.7887850467289719,
+   "shared_iso": 0.8121495327102803,
+   "indep": 0.8084112149532711
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "D": 81,
+   "K": 3,
+   "measured": 0.6401869158878505,
+   "shared_real": 0.625233644859813,
+   "shared_iso": 0.702803738317757,
+   "indep": 0.6915887850467289
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "D": 81,
+   "K": 4,
+   "measured": 0.6925233644859813,
+   "shared_real": 0.6971962616822429,
+   "shared_iso": 0.7598130841121495,
+   "indep": 0.742056074766355
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "D": 81,
+   "K": 6,
+   "measured": 0.8598130841121495,
+   "shared_real": 0.8532710280373832,
+   "shared_iso": 0.8934579439252337,
+   "indep": 0.8859813084112149
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "D": 63,
+   "K": 3,
+   "measured": 0.45199999999999996,
+   "shared_real": 0.442,
+   "shared_iso": 0.45599999999999996,
+   "indep": 0.462
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "D": 63,
+   "K": 4,
+   "measured": 0.5,
+   "shared_real": 0.512,
+   "shared_iso": 0.568,
+   "indep": 0.584
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "D": 63,
+   "K": 6,
+   "measured": 0.772,
+   "shared_real": 0.8019999999999999,
+   "shared_iso": 0.78,
+   "indep": 0.78
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "D": 72,
+   "K": 3,
+   "measured": 0.402,
+   "shared_real": 0.388,
+   "shared_iso": 0.47000000000000003,
+   "indep": 0.454
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "D": 72,
+   "K": 4,
+   "measured": 0.504,
+   "shared_real": 0.45,
+   "shared_iso": 0.542,
+   "indep": 0.554
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "D": 72,
+   "K": 6,
+   "measured": 0.76,
+   "shared_real": 0.744,
+   "shared_iso": 0.798,
+   "indep": 0.746
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "D": 27,
+   "K": 3,
+   "measured": 0.372,
+   "shared_real": 0.40800000000000003,
+   "shared_iso": 0.418,
+   "indep": 0.40800000000000003
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "D": 27,
+   "K": 4,
+   "measured": 0.48600000000000004,
+   "shared_real": 0.47000000000000003,
+   "shared_iso": 0.512,
+   "indep": 0.47400000000000003
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "D": 27,
+   "K": 6,
+   "measured": 0.738,
+   "shared_real": 0.718,
+   "shared_iso": 0.75,
+   "indep": 0.752
+  },
+  {
+   "system": "same_test_1200K",
+   "D": 81,
+   "K": 3,
+   "measured": 0.5364485981308411,
+   "shared_real": 0.5205607476635514,
+   "shared_iso": 0.5626168224299064,
+   "indep": 0.5495327102803738
+  },
+  {
+   "system": "same_test_1200K",
+   "D": 81,
+   "K": 4,
+   "measured": 0.6317757009345794,
+   "shared_real": 0.639252336448598,
+   "shared_iso": 0.639252336448598,
+   "indep": 0.6579439252336449
+  },
+  {
+   "system": "same_test_1200K",
+   "D": 81,
+   "K": 6,
+   "measured": 0.8336448598130841,
+   "shared_real": 0.8224299065420559,
+   "shared_iso": 0.8467289719626168,
+   "indep": 0.836448598130841
+  }
+ ],
+ "budget": [
+  {
+   "system": "ethanol",
+   "N": 9,
+   "D": 27,
+   "K_eps50": 224,
+   "K_eps20": 1397,
+   "K_eps10": 5588,
+   "K_available": 7
+  },
+  {
+   "system": "aspirin",
+   "N": 21,
+   "D": 63,
+   "K_eps50": 251,
+   "K_eps20": 1567,
+   "K_eps10": 6266,
+   "K_available": 7
+  },
+  {
+   "system": "azobenzene",
+   "N": 24,
+   "D": 72,
+   "K_eps50": 255,
+   "K_eps20": 1594,
+   "K_eps10": 6373,
+   "K_available": 7
+  },
+  {
+   "system": "3BPA",
+   "N": 27,
+   "D": 81,
+   "K_eps50": 259,
+   "K_eps20": 1617,
+   "K_eps10": 6467,
+   "K_available": 7
+  },
+  {
+   "system": "water (J5)",
+   "N": 192,
+   "D": 576,
+   "K_eps50": 322,
+   "K_eps20": 2009,
+   "K_eps10": 8036,
+   "K_available": 7
+  }
+ ]
+}

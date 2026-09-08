@@ -1,0 +1,401 @@
+{
+ "fsAlphaStar": {
+  "description": "design-selected size-normalisation exponent",
+  "formatted": "0.75",
+  "source": "j6c_size_normalisation.json",
+  "source_sha256": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b",
+  "value": 0.75
+ },
+ "fsBetaMAE": {
+  "description": "mean absolute error of the Beta-law recall prediction (shared_real)",
+  "formatted": "0.015",
+  "source": "j3_extreme_value_v2.json",
+  "source_sha256": "846b6de75bd46b49b67ff9ab8e94d2a0b473993306a7283d90de676f712a3bbc",
+  "value": 0.015397715472481841
+ },
+ "fsCompBoth": {
+  "description": "MPtraj AUROC of free signal plus committee",
+  "formatted": "0.9427",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 0.9426991542580954
+ },
+ "fsCompFixedHi": {
+  "description": "largest fixed-N marginal",
+  "formatted": "0.243",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 0.2431791221826809
+ },
+ "fsCompFixedLo": {
+  "description": "smallest fixed-N marginal",
+  "formatted": "0.022",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 0.021980676328502424
+ },
+ "fsCompFixedN": {
+  "description": "fixed-N systems tested",
+  "formatted": "10",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 10
+ },
+ "fsCompFixedSig": {
+  "description": "fixed-N systems where the committee adds significantly",
+  "formatted": "8",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 8
+ },
+ "fsCompFree": {
+  "description": "MPtraj AUROC of the free signal alone",
+  "formatted": "0.9425",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 0.9424970164581047
+ },
+ "fsCompMarginal": {
+  "description": "marginal value of the committee over the free signal on MPtraj",
+  "formatted": "0.0002",
+  "source": "j6d_complementarity.json",
+  "source_sha256": "1786f1163307eb61aec5e37ee9fd29431692b6cec1dca6e93b157d97666aa1b4",
+  "value": 0.00020213779999067594
+ },
+ "fsCovBetaMin": {
+  "description": "Beta(k,n+1-k) mean the theory predicts at that calibration set",
+  "formatted": "0.953",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 0.9529411764705882
+ },
+ "fsCovInfeasible": {
+  "description": "splits with no feasible order statistic at the shipped alpha",
+  "formatted": "0",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 0
+ },
+ "fsCovNCalMax": {
+  "description": "largest calibration set over all registered splits",
+  "formatted": "428",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 428
+ },
+ "fsCovNCalMin": {
+  "description": "smallest calibration set over all registered splits (the binding case)",
+  "formatted": "84",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 84
+ },
+ "fsCovRealisedMin": {
+  "description": "realised coverage at the smallest calibration set, alpha=0.05",
+  "formatted": "0.952",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 0.9518
+ },
+ "fsCovSplits": {
+  "description": "registered splits the coverage check covers",
+  "formatted": "28",
+  "source": "j2c_conformal_coverage.json",
+  "source_sha256": "08a2713d5b9e1ded13443fed1a77b031ad75bc0471e6bf0691e5702cf995a7eb",
+  "value": 28
+ },
+ "fsFactorAHi": {
+  "description": "highest exact-global AUROC over the six molecular systems",
+  "formatted": "0.848",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.847588122746339
+ },
+ "fsFactorALo": {
+  "description": "lowest exact-global AUROC (top-5% e_max) over the six molecular systems",
+  "formatted": "0.737",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.7373052631578947
+ },
+ "fsFreeAurocHi": {
+  "description": "highest AUROC of a free signal over the molecular panel",
+  "formatted": "0.70",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.7015646846714254
+ },
+ "fsFreeAurocLo": {
+  "description": "lowest AUROC of a free signal over the molecular panel",
+  "formatted": "0.60",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.6001684210526316
+ },
+ "fsFreeGainHi": {
+  "description": "largest such gain",
+  "formatted": "0.182",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.18150250202369567
+ },
+ "fsFreeGainLo": {
+  "description": "smallest AUROC gain of exact global over the BEST free signal",
+  "formatted": "0.067",
+  "source": "j2a_oracle_panel.jsonl",
+  "source_sha256": "97b3203a6fb5988814c31f93a1396caf66526df00ea5dde5dc9aa08612a3fa22",
+  "value": 0.06738947368421044
+ },
+ "fsFreeSig": {
+  "description": "free-signal comparisons where exact global wins significantly",
+  "formatted": "9",
+  "source": "j2a_free_signal_ci.json",
+  "source_sha256": "6783f4c2d274d3fbde77825371d43a54bc1b215123752bb65857c275d7536210",
+  "value": 9
+ },
+ "fsFreeSigTotal": {
+  "description": "free-signal comparisons made",
+  "formatted": "10",
+  "source": "j2a_free_signal_ci.json",
+  "source_sha256": "6783f4c2d274d3fbde77825371d43a54bc1b215123752bb65857c275d7536210",
+  "value": 10
+ },
+ "fsGlobalCells": {
+  "description": "total system x error-score cells",
+  "formatted": "24",
+  "source": "j2a_global_vs_maxcomp_ci.json",
+  "source_sha256": "b1a6c14510843727e9d1e8cd2647b62be42bb537400f655b1174293c71d4253a",
+  "value": 24
+ },
+ "fsGlobalWins": {
+  "description": "cells where global beats max-component",
+  "formatted": "24",
+  "source": "j2a_global_vs_maxcomp_ci.json",
+  "source_sha256": "b1a6c14510843727e9d1e8cd2647b62be42bb537400f655b1174293c71d4253a",
+  "value": 24
+ },
+ "fsGlobalWinsSig": {
+  "description": "of those, significant at 95%",
+  "formatted": "19",
+  "source": "j2a_global_vs_maxcomp_ci.json",
+  "source_sha256": "b1a6c14510843727e9d1e8cd2647b62be42bb537400f655b1174293c71d4253a",
+  "value": 19
+ },
+ "fsLOBeatsCV": {
+  "description": "systems where leading-only significantly beats the control variate",
+  "formatted": "5",
+  "source": "j9a_leading_only_ci_global_L5.json",
+  "source_sha256": "490cb8f82d9be4181b18d7d2a4880d580620a315f7fc699ec2ef90c0c796637c",
+  "value": 5
+ },
+ "fsLOSkipHi": {
+  "description": "highest such fraction",
+  "formatted": "0.943",
+  "source": "j2b_r0_4.jsonl",
+  "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
+  "value": 0.9427001569858713
+ },
+ "fsLOSkipHiPct": {
+  "description": "largest share of exact evaluations skipped, percent",
+  "formatted": "94",
+  "source": "j2b_r0_4.jsonl",
+  "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
+  "value": 94.27001569858713
+ },
+ "fsLOSkipLo": {
+  "description": "lowest fraction of exact evaluations skipped, leading-only r0=4 at 5 lanes",
+  "formatted": "0.822",
+  "source": "j2b_r0_4.jsonl",
+  "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
+  "value": 0.8215488215488216
+ },
+ "fsLOSkipLoPct": {
+  "description": "smallest share of exact evaluations skipped, percent",
+  "formatted": "82",
+  "source": "j2b_r0_4.jsonl",
+  "source_sha256": "754981bdfa4a9604a05d6920595d1bf9deff2ae5f06fb60a0174978938282b3b",
+  "value": 82.15488215488216
+ },
+ "fsLOSystems": {
+  "description": "systems compared",
+  "formatted": "6",
+  "source": "j9a_leading_only_ci_global_L5.json",
+  "source_sha256": "490cb8f82d9be4181b18d7d2a4880d580620a315f7fc699ec2ef90c0c796637c",
+  "value": 6
+ },
+ "fsMFourRetained": {
+  "description": "mean fraction of Factor A retained at m=4 relative to m=8",
+  "formatted": "0.970",
+  "source": "j4_m_sweep.jsonl",
+  "source_sha256": "2297a2ac56406f515d876881df35e4c0b69d3dfea38c1d9a1d970fbb91c31552",
+  "value": 0.970206798220311
+ },
+ "fsMFourWorstSubset": {
+  "description": "worst single 4-member subcommittee, as a fraction of its m=8 committee",
+  "formatted": "0.732",
+  "source": "j4_m_sweep.jsonl",
+  "source_sha256": "2297a2ac56406f515d876881df35e4c0b69d3dfea38c1d9a1d970fbb91c31552",
+  "value": 0.7323090185340129
+ },
+ "fsMPtrajExtensivity": {
+  "description": "ratio of median acquired atom count, global over max-component",
+  "formatted": "2.50",
+  "source": "j6b_foundation_verdict.json",
+  "source_sha256": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+  "value": 2.5
+ },
+ "fsMPtrajFree": {
+  "description": "free mean-force-norm AUROC on MPtraj",
+  "formatted": "0.943",
+  "source": "j6b_foundation_verdict.json",
+  "source_sha256": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+  "value": 0.9427330623250633
+ },
+ "fsMPtrajGlobal": {
+  "description": "exact global AUROC on MPtraj",
+  "formatted": "0.798",
+  "source": "j6b_foundation_verdict.json",
+  "source_sha256": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+  "value": 0.7977634176009787
+ },
+ "fsMPtrajJaccard": {
+  "description": "gate/exact acquisition overlap at budget 8000",
+  "formatted": "0.794",
+  "source": "j6b_foundation_verdict.json",
+  "source_sha256": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+  "value": 0.7941242431038349
+ },
+ "fsMPtrajN": {
+  "description": "MPtraj candidate structures scanned",
+  "formatted": "136,923",
+  "source": "j6b_foundation_verdict.json",
+  "source_sha256": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+  "value": 136923
+ },
+ "fsMPtrajRandom": {
+  "description": "random null on MPtraj, the sanity check",
+  "formatted": "0.499",
+  "source": "j6b_foundation_verdict.json",
+  "source_sha256": "ea531a0bec178ba15dedc58952c57abf5595aef9a5baa3e78a8adbd1855f302c",
+  "value": 0.49924373767683944
+ },
+ "fsMTwoWorstSubset": {
+  "description": "worst single 2-member subcommittee",
+  "formatted": "0.548",
+  "source": "j4_m_sweep.jsonl",
+  "source_sha256": "2297a2ac56406f515d876881df35e4c0b69d3dfea38c1d9a1d970fbb91c31552",
+  "value": 0.548464795517355
+ },
+ "fsNaiveAccuracyRatio": {
+  "description": "how much more accurate a matched independent committee is on shifted (PIMD) water",
+  "formatted": "2.7",
+  "source": "j5_water_caches.jsonl",
+  "source_sha256": "10ac038386f59682aa266fab5c75f9ed435bae3f23bde045474d0e478f673021",
+  "value": 2.700150077949352
+ },
+ "fsNaiveOverconfLo": {
+  "description": "lowest naive-committee overconfidence ratio",
+  "formatted": "2.28",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 2.275669722007112
+ },
+ "fsNaivePassed": {
+  "description": "pre-registered naive-committee predictions confirmed, of five",
+  "formatted": "3",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 3
+ },
+ "fsNormAurocStar": {
+  "description": "held-out e_max AUROC at alpha*",
+  "formatted": "0.821",
+  "source": "j6c_size_normalisation.json",
+  "source_sha256": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b",
+  "value": 0.8211624608327689
+ },
+ "fsNormAurocZero": {
+  "description": "held-out e_max AUROC of the unnormalised global statistic",
+  "formatted": "0.797",
+  "source": "j6c_size_normalisation.json",
+  "source_sha256": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b",
+  "value": 0.797211475654763
+ },
+ "fsNormLosses": {
+  "description": "error scores where it significantly loses",
+  "formatted": "1",
+  "source": "j6c_size_normalisation.json",
+  "source_sha256": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b",
+  "value": 1
+ },
+ "fsNormWins": {
+  "description": "error scores where alpha* significantly beats max-component",
+  "formatted": "2",
+  "source": "j6c_size_normalisation.json",
+  "source_sha256": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b",
+  "value": 2
+ },
+ "fsSharedOverconfHi": {
+  "description": "highest matched shared-trunk overconfidence ratio",
+  "formatted": "25.77",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 25.768896366814374
+ },
+ "fsStableRankHi": {
+  "description": "largest head-space stable rank over the molecular panel",
+  "formatted": "4.3",
+  "source": "j5_spectrum.json",
+  "source_sha256": "b5f4ebdd5865ef1971ca624ff9f4d54b54c57a7c983e65165a885dcb8995ce6e",
+  "value": 4.253899128277951
+ },
+ "fsStableRankLo": {
+  "description": "smallest head-space stable rank over the molecular panel",
+  "formatted": "1.2",
+  "source": "j5_spectrum.json",
+  "source_sha256": "b5f4ebdd5865ef1971ca624ff9f4d54b54c57a7c983e65165a885dcb8995ce6e",
+  "value": 1.2121965701723054
+ },
+ "fsThreeBPASpeedupBSixteen": {
+  "description": "3BPA total speedup at B=16, same job and settings as the water run",
+  "formatted": "1.10",
+  "source": "j8_lane_bench_NVIDIA_A100-SXM4-80GB_pair.jsonl",
+  "source_sha256": "f936e9244c385b7bbf515335f0e6343fd7fd985c1b49dec04485fe19f937dd97",
+  "value": 1.1042465866802207
+ },
+ "fsWaterSpeedupBOne": {
+  "description": "water total speedup at B=1, clean A100 matched pair",
+  "formatted": "1.53",
+  "source": "j8_lane_bench_water_NVIDIA_A100-SXM4-80GB_pair.jsonl",
+  "source_sha256": "3f5668f9b48b12559b40ea645069586cc018fba322272236acd7f4e8d5ec0435",
+  "value": 1.5265890888424676
+ },
+ "fsWaterSpeedupBSixteen": {
+  "description": "water total speedup at B=16, clean A100 matched pair",
+  "formatted": "1.88",
+  "source": "j8_lane_bench_water_NVIDIA_A100-SXM4-80GB_pair.jsonl",
+  "source_sha256": "3f5668f9b48b12559b40ea645069586cc018fba322272236acd7f4e8d5ec0435",
+  "value": 1.879530139302942
+ },
+ "fsWaterSpeedupBSixteenBlk": {
+  "description": "water total speedup at B=16, clean Blackwell matched pair",
+  "formatted": "1.89",
+  "source": "j8_lane_bench_water_NVIDIA_RTX_PRO_6000_Blackwell_Server_Edition_pair.jsonl",
+  "source_sha256": "29894410ede325964ebbe34bd4acd81c59adc9e17bd696a1e4c66dce53f952af",
+  "value": 1.8937545972432057
+ },
+ "fsWaterSpeedupBSixteenHTwo": {
+  "description": "water total speedup at B=16, clean H200 matched pair",
+  "formatted": "1.85",
+  "source": "j8_lane_bench_water_NVIDIA_H200_pair.jsonl",
+  "source_sha256": "3a47be0935671fa324ff38478b9692efab6a165b9edfdef09b21bf4a734eda85",
+  "value": 1.8518517972062438
+ },
+ "fsWaterSpeedupSpread": {
+  "description": "percent spread of the B=16 water speedup across the clean matched pairs",
+  "formatted": "2.3",
+  "source": "j8_lane_bench_water_NVIDIA_H200_pair.jsonl",
+  "source_sha256": "3a47be0935671fa324ff38478b9692efab6a165b9edfdef09b21bf4a734eda85",
+  "value": 2.2627512687666287
+ }
+}

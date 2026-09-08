@@ -1,0 +1,76 @@
+== node holygpu8a27301.rc.fas.harvard.edu partition seas_gpu job 39408005
+name, driver_version, memory.total [MiB], mig.mode.current
+NVIDIA A100-SXM4-80GB, 575.57.08, 81920 MiB, Disabled
+NVIDIA A100-SXM4-80GB, 575.57.08, 81920 MiB, Disabled
+NVIDIA A100-SXM4-80GB, 575.57.08, 81920 MiB, Disabled
+NVIDIA A100-SXM4-80GB, 575.57.08, 81920 MiB, Disabled
+
+=== fuser_ON_(upstream_default) ===
+  texpr_enabled                    True
+  n_success                        2
+  first_failing_call_index         2
+  max_rel_err_vs_serial_fp64       None
+  first error                      RuntimeError: The following operation failed in the TorchScript interpreter.
+Traceback of TorchScript (most recent call last):
+RuntimeError: Cannot access data pointer of Ten
+
+=== fuser_OFF_(shipped_fix) ===
+  texpr_enabled                    False
+  n_success                        12
+  first_failing_call_index         None
+  max_rel_err_vs_serial_fp64       3.198846342643016e-15
+
+fuser_needed=True  fix_sufficient=True
+VERDICT: fix still needed AND sufficient -- workshop result stands
+wrote j0b_guard_NVIDIA_A100-SXM4-80GB_torch2.13.0+cu129.json
+{
+ "device_name": "NVIDIA A100-SXM4-80GB",
+ "compute_capability": "8.0",
+ "sm_count": 108,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.007648000027984381
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+  B=  1 L=1 serial       23.07 ms  IQR 0.20
+  B=  1 L=1 batched      25.92 ms  IQR 0.09
+  B=  1 L=2 serial       35.63 ms  IQR 0.08
+  B=  1 L=2 batched      26.56 ms  IQR 0.08
+  B=  1 L=3 serial       48.53 ms  IQR 0.18
+  B=  1 L=3 batched      27.00 ms  IQR 0.06
+  B=  1 L=4 serial       61.44 ms  IQR 0.12
+  B=  1 L=4 batched      27.61 ms  IQR 0.08
+  B=  1 L=8 serial      100.09 ms  IQR 0.56
+  B=  1 L=8 batched      29.60 ms  IQR 0.10
+  B=  4 L=1 serial       22.92 ms  IQR 0.05
+  B=  4 L=1 batched      25.83 ms  IQR 0.11
+  B=  4 L=2 serial       35.65 ms  IQR 0.13
+  B=  4 L=2 batched      26.52 ms  IQR 0.04
+  B=  4 L=3 serial       48.55 ms  IQR 0.09
+  B=  4 L=3 batched      27.16 ms  IQR 0.07
+  B=  4 L=4 serial       61.43 ms  IQR 0.20
+  B=  4 L=4 batched      27.72 ms  IQR 0.05
+  B=  4 L=8 serial      100.04 ms  IQR 0.37
+  B=  4 L=8 batched      29.48 ms  IQR 0.07
+  B= 16 L=1 serial       22.78 ms  IQR 0.04
+  B= 16 L=1 batched      25.85 ms  IQR 0.05
+  B= 16 L=2 serial       35.77 ms  IQR 0.06
+  B= 16 L=2 batched      26.67 ms  IQR 0.05
+  B= 16 L=3 serial       48.79 ms  IQR 0.25
+  B= 16 L=3 batched      27.32 ms  IQR 0.06
+  B= 16 L=4 serial       61.72 ms  IQR 0.09
+  B= 16 L=4 batched      27.95 ms  IQR 0.05
+  B= 16 L=8 serial      100.97 ms  IQR 0.58
+  B= 16 L=8 batched      29.93 ms  IQR 0.09
+  B= 64 L=1 serial       22.81 ms  IQR 0.06
+  B= 64 L=1 batched      25.93 ms  IQR 0.30
+  B= 64 L=2 serial       35.64 ms  IQR 0.05
+  B= 64 L=2 batched      31.54 ms  IQR 0.02
+  B= 64 L=3 serial       48.63 ms  IQR 0.21
+  B= 64 L=3 batched      41.54 ms  IQR 0.03
+  B= 64 L=4 serial       61.85 ms  IQR 0.12
+  B= 64 L=4 batched      51.47 ms  IQR 0.03
+  B= 64 L=8 serial      100.40 ms  IQR 0.44
+  B= 64 L=8 batched      81.39 ms  IQR 0.03
+
+wrote 40 records to results/records/j8_lane_bench_NVIDIA_A100-SXM4-80GB.jsonl

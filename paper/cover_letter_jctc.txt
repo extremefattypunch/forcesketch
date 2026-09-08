@@ -1,0 +1,90 @@
+Ian Poon
+Department of Cellular and Molecular Biology
+Harvard University
+Cambridge, Massachusetts 02138, United States
+ian_poon@fas.harvard.edu
+
+31 August 2026
+
+Prof. Laura Gagliardi
+Editor-in-Chief
+Journal of Chemical Theory and Computation
+
+Dear Prof. Gagliardi,
+
+I am submitting the manuscript "When is committee force uncertainty worth
+computing in MD? Decision quality, cheap gates, and the baselines that must be
+beaten" for consideration as an Article in the Journal of Chemical Theory and
+Computation.
+
+Ensembles of machine-learned interatomic potentials are the standard way to decide
+which structures to label next in an active-learning cycle, and a substantial
+literature now builds cheap approximations to the ensemble's force disagreement.
+That literature validates each approximation by checking that it reproduces the
+exact ensemble. The manuscript argues that this is the wrong target, because the
+ensemble is itself only a proxy for the model's error against the reference
+calculation, and it separates the two questions that the validation conflates:
+whether exact committee disagreement predicts reference-force error at all, and
+what a cheap gate costs relative to whichever oracle one has adopted. The second
+answer is independent of the first, so it survives the first being disappointing.
+
+Three findings seem worth the journal's attention.
+
+First, the acquisition rule used in prior work sums per-coordinate variance over
+all coordinates and is therefore extensive. It wins on every comparison we ran at
+fixed system size and then reverses once system size varies, acquiring structures
+whose median atom count is 2.5 times larger rather than structures that are harder.
+The recommendation was never wrong where it had been measured; it had only been
+measured where the pathology cannot appear. We give a size normalisation, fitted on
+a design split and reported on the disjoint remainder, that restores parity at
+variable size and changes nothing at fixed size.
+
+Second, a deterministic leading-subspace estimator outperforms a randomised
+low-rank sketch at matched cost on five of six systems, and an exact finite-sample
+law predicts the randomised estimator's failure to a mean absolute error of 0.015
+with no free parameters. This is a negative result for randomisation in a setting
+where randomisation is the default choice.
+
+Third, and least flattering to the method the work began by trying to accelerate:
+on 136,923 MPtraj crystals evaluated with a frozen foundation-model trunk, the
+maximum mean-force norm - which costs nothing, being already computed in the
+forward pass - reaches AUROC 0.943 against the committee's 0.798, and adding the
+committee on top of it changes that by 0.0002, which is not significant. The
+advantage survives stratification by atom count and by force-magnitude quintile,
+so neither confound explains it. On fixed-composition systems the committee does
+add significantly. Committee uncertainty is therefore not redundant in general; it
+is redundant where a free signal is already near-saturated, and we argue that
+future claims in this area should be scored against that free signal rather than
+against chance.
+
+The work fits the journal's stated interest in artificial intelligence and data
+science for chemical theory and computation, and in molecular dynamics
+methodology. It is not an application of an established method to a single system
+class: the systems span 9- to 24-atom organic molecules, bulk liquid water with an
+MD-versus-PIMD distribution shift, and periodic crystals spanning 89 elements and
+1 to 444 atoms.
+
+On reproducibility, which the manuscript treats as a first-class concern: every
+numeric value in the text is generated from a committed experimental record rather
+than transcribed, and a procedural audit verifies that each still derives, that
+every pre-registered protocol is hash-bound to a registration record written before
+that experiment produced any artifact, and that every data split recomputes from
+its recorded seed. All statistical results regenerate on CPU in roughly four
+minutes with no model execution and no downloads. The manuscript also contains a
+section disclosing the use of large language models in this work, along with the
+verification machinery that disclosure makes necessary.
+
+The manuscript is not under consideration elsewhere. A shorter version of the
+earlier, workshop-scale portion of this work has been submitted to machine-learning
+workshops, all of which are non-archival and none of which publishes proceedings;
+the present manuscript supersedes that material and contains substantial results
+not present in it, including the foundation-model and crystal experiments, the
+extensivity analysis, the deterministic estimator, and the finite-sample law. I am
+happy to provide further detail on that relationship if it would be useful.
+
+I have no competing financial interests to declare. Thank you for considering the
+manuscript.
+
+Sincerely,
+
+Ian Poon

@@ -1,0 +1,136 @@
+experiment_id: j6b_foundation_acquisition
+version: 1
+status: pre-registered
+# =============================================================================
+# Written BEFORE any pool structure was scored. Only these were consulted first:
+# the archive's file listing, the published configs, the atom-count distributions
+# of the published training sets, and which published selections map back into
+# the candidate pool. No committee had been run on any pool structure.
+#
+# gpt_plan calls active learning "J6"; this repository's J6 is the
+# naive-committee control, so the acquisition work is J6B. Same experiment the
+# plan describes: the selection-overlap bound, not 120 retrainings.
+# =============================================================================
+
+setting: >
+  MACE-MP `agnesi_medium` fine-tuned with 8 disjoint committee heads and
+  `optimize_readouts_only: true` -- a frozen foundation trunk with committee
+  readouts. This is the deployment scenario the method actually targets, and it
+  is a far harder generality test than anything in the project so far: 136,923
+  periodic MPtraj crystals spanning 89 elements and 1-444 atoms, against the
+  9-192 atom fixed-composition systems used everywhere else.
+
+scoring_model: qbc/dataset_8000/MACE_qbc_max_selection_stagetwo.model
+scoring_model_rationale: >
+  Chosen because the pool is 100% held out for it, and for no other candidate.
+  The pool file is `mp_traj_qbc_79th_not_selected.xyz` -- the COMPLEMENT of the
+  QBC selection -- so none of that model's 8,000 training structures appear in
+  it (verified by content hash: 0 of 8,000 match). The alternatives are
+  contaminated: `random`'s training set has 7,498 of 8,000 structures inside the
+  pool and `max_mean_force` 6,236, so scoring the pool with either would score
+  thousands of structures the committee was fitted on.
+
+known_limit: >
+  Because the pool is the complement of the QBC selection, we CANNOT compare our
+  acquired set against the published QBC acquisition -- their picks are excluded
+  from the pool by construction. Head-to-head against a published acquisition
+  baseline is therefore not available and is not claimed. What remains available
+  is the plan's actual proposal (the selection-overlap bound, which compares our
+  own estimators to each other) plus Factor A on a new class of systems.
+
+predictions:
+  - id: Q1
+    statement: >
+      Factor A transfers to periodic crystals under a frozen foundation trunk:
+      AUROC of the exact global statistic for the top-5% highest-e_max structures
+      is at least 0.70.
+    confidence: medium
+    note: >
+      Genuinely uncertain. Every system measured so far is a single chemistry at
+      a single composition; this is 89 elements at 136,923 compositions, and the
+      committee heads are readouts on a frozen trunk rather than a jointly
+      trained model.
+
+  - id: Q2
+    statement: >
+      The global statistic beats the max-component statistic at ranking
+      reference-force error here too, as it did in 24 of 24 shared-trunk cells
+      and 15 of 16 naive cells.
+    confidence: medium
+    criteria:
+      - metric: auroc_global_minus_maxcomp
+        op: gt
+        threshold: 0.0
+        require: at_least_3_of_4_error_scores
+
+  - id: Q3
+    statement: >
+      EXTENSIVITY. The global statistic is a sum over 3N coordinates and is
+      therefore extensive, so acquiring the top-N by global statistic will be
+      biased toward large structures. Specifically, the median atom count of the
+      top-8000 selected by the global statistic will exceed that of the top-8000
+      selected by max-component by at least 25%.
+    confidence: high
+    note: >
+      This prediction is the reason the experiment is worth running. The
+      published acquisitions already show the effect: max_mean_force selects a
+      median of 28 atoms and QBC 30, against 20 for random selection. An
+      extensive score can look excellent on a ranking metric while acquiring a
+      set whose only distinguishing feature is size, and the project has so far
+      only measured the ranking metric -- on fixed-size systems, where the
+      pathology is invisible by construction.
+    criteria:
+      - metric: median_atoms_ratio_global_over_maxcomp
+        op: ge
+        threshold: 1.25
+
+  - id: Q4
+    statement: >
+      The cheap gate reproduces the expensive decision: the top-8000 acquired by
+      the 5-lane leading-only estimator has Jaccard overlap of at least 0.90 with
+      the top-8000 acquired by the exact global statistic.
+    confidence: medium
+    note: >
+      This is the plan's selection-overlap bound. A high overlap bounds the
+      downstream active-learning difference without retraining anything, which is
+      the entire reason for preferring it to 120 retrainings.
+    criteria:
+      - metric: jaccard_leading_only_vs_exact_global
+        op: ge
+        threshold: 0.90
+
+  - id: Q5
+    statement: >
+      Committee UQ earns its backward passes here, beating the best free signal
+      (max mean-force norm, which is also a published acquisition baseline in
+      this very experiment) by at least +0.05 AUROC.
+    confidence: low
+    note: >
+      Stated at low confidence on purpose. On water the committee beat the free
+      signal by only +0.012 to +0.033, and `max_mean_force` was good enough that
+      the original authors shipped it as a baseline. A failure here is a
+      publishable scoping result, not a disappointment.
+    criteria:
+      - metric: auroc_global_minus_best_free
+        op: ge
+        threshold: 0.05
+
+analysis:
+  cache_script: experiments/j6b_foundation_scan.py
+  scoring_script: experiments/j6b_foundation_verdict.py
+  settings:
+    error_p: 0.05
+    budgets: [1000, 8000]
+    lanes: 5
+    lo_r0: 4
+    precision: float64
+    subsample_seed: 20260816
+  compression_note: >
+    Structures are ragged (1-444 atoms), so no [S, A, 3, M] cache is possible.
+    Instead each structure is reduced on the fly to its r x r centred head-space
+    Gram A_s = Qc^T (sum_d F_d F_d^T) Qc, which is 7x7 regardless of atom count.
+    Every global-statistic estimator is a function of A_s alone: the exact global
+    statistic is tr(A_s)/(M-1), and the leading-only estimate with basis Q_r0 is
+    tr(Q_r0^T A_s Q_r0)/(M-1). Max-component is not a function of A_s and is
+    accumulated separately. This identity is asserted against the direct
+    computation on an existing fixed-N cache before the pool is scanned.

@@ -1,0 +1,55 @@
+{
+ "experiment_id": "j1_split_comparison",
+ "error_p": 0.05,
+ "systems": [
+  {
+   "experiment_id": "j1_split_comparison",
+   "system": "disjoint_test_1200K",
+   "blocked": 0.7671913172333694,
+   "random": 0.8056039786710418,
+   "difference": -0.03841266143767241
+  },
+  {
+   "experiment_id": "j1_split_comparison",
+   "system": "overlapping_test_1200K",
+   "blocked": 0.783816425120773,
+   "random": 0.7648559269893355,
+   "difference": 0.01896049813143752
+  },
+  {
+   "experiment_id": "j1_split_comparison",
+   "system": "same_test_1200K",
+   "blocked": 0.8472155863460211,
+   "random": 0.8674246308449549,
+   "difference": -0.020209044498933793
+  },
+  {
+   "experiment_id": "j1_split_comparison",
+   "system": "rmd17-disjoint_ethanol",
+   "blocked": 0.7597927333292209,
+   "random": 0.7067251461988304,
+   "difference": 0.0530675871303905
+  },
+  {
+   "experiment_id": "j1_split_comparison",
+   "system": "rmd17-disjoint_aspirin",
+   "blocked": 0.741503349044902,
+   "random": 0.7435672514619883,
+   "difference": -0.0020639024170863163
+  },
+  {
+   "experiment_id": "j1_split_comparison",
+   "system": "rmd17-disjoint_azobenzene",
+   "blocked": 0.8361209964412811,
+   "random": 0.8072514619883041,
+   "difference": 0.02886953445297702
+  }
+ ],
+ "summary": {
+  "mean_abs_difference": 0.02693053801141626,
+  "max_abs_difference": 0.0530675871303905,
+  "n_positive": 3,
+  "n_negative": 3,
+  "n_systems": 6
+ }
+}

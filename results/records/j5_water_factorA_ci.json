@@ -1,0 +1,90 @@
+[
+ {
+  "system": "water-disjoint_md_T300K",
+  "auroc": {
+   "point": 0.6885894736842105,
+   "ci_lo": 0.5822315789473684,
+   "ci_hi": 0.7990799999999999,
+   "boot_sd": 0.05606154390204406,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 2
+  },
+  "gap_vs_force_norm": {
+   "delta": 0.06896842105263157,
+   "ci_lo": -0.08219368421052638,
+   "ci_hi": 0.25372842105263155,
+   "boot_sd": 0.08533715167342343,
+   "significant": false,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 2
+  }
+ },
+ {
+  "system": "water-disjoint_pimd_T300K",
+  "auroc": {
+   "point": 0.9702736842105263,
+   "ci_lo": 0.9552795853510896,
+   "ci_hi": 0.9856842105263158,
+   "boot_sd": 0.007912700847247657,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  "gap_vs_force_norm": {
+   "delta": 0.022821052631578964,
+   "ci_lo": 0.006736842105263152,
+   "ci_hi": 0.03521583901330738,
+   "boot_sd": 0.007346487373050311,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ },
+ {
+  "system": "water-overlapping_md_T300K",
+  "auroc": {
+   "point": 0.6466526315789474,
+   "ci_lo": 0.5398694736842105,
+   "ci_hi": 0.7674968421052631,
+   "boot_sd": 0.05856588802560448,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  "gap_vs_force_norm": {
+   "delta": 0.01187368421052637,
+   "ci_lo": -0.12833760638207012,
+   "ci_hi": 0.19284421052631567,
+   "boot_sd": 0.08217468455350761,
+   "significant": false,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ },
+ {
+  "system": "water-overlapping_pimd_T300K",
+  "auroc": {
+   "point": 0.9756631578947368,
+   "ci_lo": 0.9600840526828268,
+   "ci_hi": 0.9893513596026843,
+   "boot_sd": 0.007570399307100367,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  "gap_vs_force_norm": {
+   "delta": 0.0327578947368421,
+   "ci_lo": 0.01385830050814134,
+   "ci_hi": 0.053797794803464416,
+   "boot_sd": 0.010360681308164466,
+   "significant": true,
+   "n_boot": 10000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ }
+]

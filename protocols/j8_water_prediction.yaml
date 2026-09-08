@@ -1,0 +1,131 @@
+experiment_id: j8_lane_bench_water
+version: 3
+status: post-hoc-methodology-fix
+# ============================== READ THIS FIRST ==============================
+# v3 was written AFTER the matched Blackwell pair was scored under v2. It fixes
+# two METHODOLOGICAL defects; it does not change any prediction's meaning. But it
+# was authored with knowledge of the v2 outcome, so **a v3 PASS is not a
+# pre-registered confirmation**. The v2 file is frozen verbatim at
+# `protocols/j8_water_prediction_v2_frozen.yaml` and its verdict (2/4) stands as
+# the pre-registered result. Both are reported side by side, always.
+#
+# Defect 1 -- frozen cross-device constants. The `reference` block held A100
+#   values, but every prediction is a ratio against 3BPA measured on the SAME
+#   device. Scored on Blackwell, P4 compared water's slope to an A100 number and
+#   failed for that reason rather than a scientific one. v3 derives every
+#   reference value from the supplied matched 3BPA run.
+#   NOTE: this fix is expected to flip P4 FAIL -> PASS, which is exactly why it is
+#   labelled post-hoc rather than folded in silently.
+#
+# Defect 2 -- whole-run admissibility gate on the MAXIMUM relative IQR. One
+#   transient cell out of 40-60 invalidated an otherwise clean run (H200: median
+#   relative IQR 0.11-0.32%, but 1-3 cells above 3%). v3 excludes outlier cells
+#   and gates on the fraction excluded, and additionally refuses if any cell a
+#   prediction actually depends on was excluded.
+# =============================================================================
+status_v2_verdict: "2/4 (P1 PASS, P2 PASS, P3 FAIL, P4 FAIL) on the matched Blackwell pair"
+# v1 was written BEFORE any water timing existed and stated the same four
+# predictions in prose. v2 changes NO prediction and NO threshold -- it only makes
+# the criteria machine-readable, after an adversarial review found that
+# `j8_water_verdict.py` loaded this file and never used it (every threshold was
+# hardcoded in the scorer, so the two could drift silently), and that P3 and P4
+# each state TWO conditions of which the scorer tested only one.
+#
+# The v1 prose is preserved verbatim in `statement` for every prediction so the
+# pre-registration is auditable against what was actually written first.
+
+hypothesis:
+  primary: >
+    Lane reduction pays only when the backward pass is compute-bound rather than
+    launch-bound. Water carries ~17,150 edges per structure against 3BPA's 520
+    (33x), so at equal batch size water does ~33x the work. If the mechanism
+    inferred from 3BPA is right, water should enter the lane-proportional regime
+    at a batch size roughly 33x smaller than 3BPA did.
+
+# 3BPA reference values, measured on the same GPU class before water ran.
+reference:
+  # v3: DERIVED from the supplied matched 3BPA run, not frozen. The values below
+  # are the A100 originals, retained only as a fallback and for the record.
+  derive_from_reference_run: true
+  threebpa_serial_slope_aggregator: median   # fixed here, before rescoring
+  threebpa_batched_slope_flat: 0.57
+  threebpa_serial_slope: 10.9
+  threebpa_speedup_at_B16: 1.07
+  threebpa_transition_batch: 64
+
+predictions:
+  - id: P1
+    statement: >
+      Water's batched slope exceeds 1 ms/lane at B = 16, i.e. it is already
+      lane-proportional there, unlike 3BPA which was flat at 0.57 ms/lane.
+    confidence: high
+    falsification_clause: true      # if this fails, drop acceleration entirely
+    criteria:
+      - metric: batched_slope
+        at_batch: 16
+        op: gt
+        threshold: 1.0
+
+  - id: P2
+    statement: >
+      Water's total speedup (exact L=8 vs K=3 at L=4) at B = 16 is >= 1.4x,
+      versus 3BPA's 1.07x at the same batch size.
+    confidence: high
+    criteria:
+      - metric: total_speedup
+        at_batch: 16
+        op: ge
+        threshold: 1.4
+
+  - id: P3
+    statement: >
+      The launch-bound-to-compute-bound transition for water occurs at B <= 4,
+      i.e. at roughly 1/16 to 1/33 of 3BPA's transition batch size, tracking
+      edges rather than structures.
+    confidence: medium
+    criteria:
+      # both halves are tested: the batch threshold AND the ratio-to-3BPA claim
+      - metric: transition_batch
+        op: le
+        threshold: 4
+      - metric: transition_batch_ratio_vs_3bpa
+        op: between
+        threshold: [0.030, 0.0625]     # 1/33 to 1/16
+
+  - id: P4
+    statement: >
+      The serial path remains approximately affine in L. Its slope will be
+      LARGER than 3BPA's ~10.9 ms/lane, because at ~17k edges per structure the
+      per-lane backward is no longer purely launch-latency-bound.
+    confidence: medium
+    criteria:
+      # both halves: affine-in-L (fit quality) AND slope larger than 3BPA's
+      - metric: serial_fit_r2_min
+        op: ge
+        threshold: 0.95
+      - metric: serial_slope_min
+        op: gt
+        threshold: from_reference:threebpa_serial_slope
+
+primary_metric: batched slope (ms per lane) from a least-squares fit over L in {1,2,3,4,8}
+secondary_metrics: [total_speedup, transition_batch, serial_slope, serial_fit_r2_min]
+
+falsification: >
+  If water's batched slope at B = 16 is still below 1 ms/lane, the edge-count
+  explanation of the launch-bound regime is wrong and the J8 mechanism must be
+  restated. That outcome would also remove the last route to a positive
+  acceleration claim at deployable batch sizes, and acceleration should then be
+  dropped from the paper entirely rather than scoped.
+
+admissibility:
+  require_non_mig: true
+  require_exclusive_node: true
+  cell_relative_iqr_limit: 0.03       # a CELL above this is excluded, not the run
+  max_excluded_cell_fraction: 0.10    # but the run fails if >10% of cells are excluded
+  forbid_excluded_load_bearing_cells: true   # and fails if a scored cell was excluded
+  min_lanes_measured: [1, 2, 3, 4, 8]
+
+hardware: A100-SXM4-80GB, exclusive node, MIG disabled
+config: {iters: 50, warmup: 25, dtype: float32, batch_sizes: [1,2,4,8,16,32], lanes: [1,2,3,4,8]}
+analysis_script: experiments/j8_lane_bench.py
+scoring_script: experiments/j8_water_verdict.py

@@ -1,0 +1,197 @@
+{
+ "protocol_sha256": "3979912824746501b18f97f6da42cef296ea8bcd1454fa03059926fc0bcae0c5",
+ "alpha_star": 0.75,
+ "design_auroc": {
+  "0.0": 0.799682820985219,
+  "0.25": 0.8124634741876777,
+  "0.5": 0.8235877480907249,
+  "0.75": 0.8294823842748346,
+  "1.0": 0.8263609881035422,
+  "1.25": 0.8119988170322662,
+  "1.5": 0.7870875817008135
+ },
+ "held_out_auroc": {
+  "S_alpha=0.0": {
+   "e_max": 0.797211475654763,
+   "e_rmse": 0.7681519038798761,
+   "e_maxcomp": 0.7920899069809304,
+   "e_q95": 0.7593914125977171
+  },
+  "S_alpha=0.25": {
+   "e_max": 0.8088255799365476,
+   "e_rmse": 0.7860000846877785,
+   "e_maxcomp": 0.803320573525065,
+   "e_q95": 0.7770025308382272
+  },
+  "S_alpha=0.5": {
+   "e_max": 0.8179793221034722,
+   "e_rmse": 0.8033896232031249,
+   "e_maxcomp": 0.8121832842810442,
+   "e_q95": 0.7944411794486256
+  },
+  "S_alpha=0.75": {
+   "e_max": 0.8211624608327689,
+   "e_rmse": 0.8169482610156513,
+   "e_maxcomp": 0.815319797045764,
+   "e_q95": 0.8083967693894264
+  },
+  "S_alpha=1.0": {
+   "e_max": 0.8145898965772478,
+   "e_rmse": 0.8222338668610698,
+   "e_maxcomp": 0.8090492209909613,
+   "e_q95": 0.814312294996682
+  },
+  "S_alpha=1.25": {
+   "e_max": 0.7965365393454703,
+   "e_rmse": 0.8164231488256236,
+   "e_maxcomp": 0.7915746425938565,
+   "e_q95": 0.8091514182850451
+  },
+  "S_alpha=1.5": {
+   "e_max": 0.7691415027229965,
+   "e_rmse": 0.8004514762969773,
+   "e_maxcomp": 0.7648539143168892,
+   "e_q95": 0.7938082404701734
+  },
+  "exact_maxcomp": {
+   "e_max": 0.82016906648226,
+   "e_rmse": 0.806928935229123,
+   "e_maxcomp": 0.821094543707498,
+   "e_q95": 0.8041061146347642
+  },
+  "exact_maxatom": {
+   "e_max": 0.8345004587864608,
+   "e_rmse": 0.8184831237255368,
+   "e_maxcomp": 0.8232362634120831,
+   "e_q95": 0.8056093975587413
+  },
+  "force_norm (free)": {
+   "e_max": 0.9424970164581047,
+   "e_rmse": 0.932561937627759,
+   "e_maxcomp": 0.9419303671667663,
+   "e_q95": 0.9298520326850909
+  }
+ },
+ "fixed_n_invariance": {
+  "n_cache_files": 23,
+  "n_distinct_systems": 20,
+  "invariance_fixed_n_max_abs_auroc_change": 0.0,
+  "invariance_is_a_derivation_not_a_test": true,
+  "n_undefined_auroc_skipped": 0,
+  "reference_max_relerr_variable_n": 3.876609622228264e-16,
+  "mutation_caught": {
+   "precedence": true,
+   "wrong_N": true,
+   "absent": true
+  },
+  "mutation_test_has_teeth": true
+ },
+ "corr_error_natoms": {
+  "e_max": 0.1846002815527493,
+  "e_rmse": 0.12273844598700116,
+  "e_maxcomp": 0.17474564722161948,
+  "e_q95": 0.11163901403427787
+ },
+ "n_test": 123231,
+ "n_design": 13692,
+ "gate_jaccard_unnormalised": {
+  "1000": 0.718213058419244,
+  "8000": 0.7941242431038349
+ },
+ "gate_jaccard_normalised": {
+  "1000": 0.7513134851138353,
+  "8000": 0.7412123190771575
+ },
+ "acquisition_median_atoms": {
+  "S_0 (global)|1000": 80.0,
+  "S_alpha*=0.75|1000": 36.0,
+  "exact_maxcomp|1000": 32.0,
+  "force_norm (free)|1000": 28.0,
+  "S_0 (global)|8000": 70.0,
+  "S_alpha*=0.75|8000": 32.0,
+  "exact_maxcomp|8000": 28.0,
+  "force_norm (free)|8000": 30.0
+ },
+ "ci_vs_S0": {
+  "delta": 0.023950985178005868,
+  "ci_lo": 0.021564240528570883,
+  "ci_hi": 0.026550246338161644,
+  "boot_sd": 0.0013003399142701136,
+  "significant": true,
+  "n_boot": 1000,
+  "scheme": "iid",
+  "block_len": 1
+ },
+ "ci_vs_maxcomp": {
+  "delta": 0.000993394350508936,
+  "ci_lo": -0.0012848700097134818,
+  "ci_hi": 0.003213781061430667,
+  "boot_sd": 0.00125332513039266,
+  "significant": false,
+  "n_boot": 1000,
+  "scheme": "iid",
+  "block_len": 1
+ },
+ "ci_vs_force_norm": {
+  "delta": -0.1213345556253358,
+  "ci_lo": -0.12572112084231768,
+  "ci_hi": -0.11689136404419388,
+  "boot_sd": 0.0022868211352723724,
+  "significant": true,
+  "n_boot": 1000,
+  "scheme": "iid",
+  "block_len": 1
+ },
+ "vs_maxcomp_all_scores": {
+  "e_max": {
+   "delta": 0.000993394350508936,
+   "ci_lo": -0.0012848700097134818,
+   "ci_hi": 0.003213781061430667,
+   "boot_sd": 0.00125332513039266,
+   "significant": false,
+   "n_boot": 1000,
+   "scheme": "iid",
+   "block_len": 1
+  },
+  "e_rmse": {
+   "delta": 0.01001932578652831,
+   "ci_lo": 0.00759055901474468,
+   "ci_hi": 0.012304488969019598,
+   "boot_sd": 0.0012253965186723047,
+   "significant": true,
+   "n_boot": 1000,
+   "scheme": "iid",
+   "block_len": 1
+  },
+  "e_maxcomp": {
+   "delta": -0.005774746661734054,
+   "ci_lo": -0.008497259187542091,
+   "ci_hi": -0.003554090915804539,
+   "boot_sd": 0.0012912196300938496,
+   "significant": true,
+   "n_boot": 1000,
+   "scheme": "iid",
+   "block_len": 1
+  },
+  "e_q95": {
+   "delta": 0.004290654754662171,
+   "ci_lo": 0.0019155261720836647,
+   "ci_hi": 0.006699498395955225,
+   "boot_sd": 0.0012410854814322247,
+   "significant": true,
+   "n_boot": 1000,
+   "scheme": "iid",
+   "block_len": 1
+  }
+ },
+ "N4_note": "scored as a bare point comparison per the registered criterion; the e_max margin is +0.001 with a CI straddling zero, and a significant deficit survives on e_maxcomp. Read as parity on e_max, not as a repair across the panel.",
+ "passed": {
+  "N1": true,
+  "N2": true,
+  "N3": true,
+  "N4": true,
+  "N5": true,
+  "N6": false
+ },
+ "n_passed": 5
+}

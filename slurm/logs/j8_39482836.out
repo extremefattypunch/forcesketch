@@ -1,0 +1,76 @@
+== node holygpu8a16304.rc.fas.harvard.edu partition seas_gpu job 39482836
+name, driver_version, memory.total [MiB], mig.mode.current
+NVIDIA H200, 575.57.08, 143771 MiB, Disabled
+NVIDIA H200, 575.57.08, 143771 MiB, Disabled
+NVIDIA H200, 575.57.08, 143771 MiB, Disabled
+NVIDIA H200, 575.57.08, 143771 MiB, Disabled
+
+=== fuser_ON_(upstream_default) ===
+  texpr_enabled                    True
+  n_success                        2
+  first_failing_call_index         2
+  max_rel_err_vs_serial_fp64       None
+  first error                      RuntimeError: The following operation failed in the TorchScript interpreter.
+Traceback of TorchScript (most recent call last):
+RuntimeError: Cannot access data pointer of Ten
+
+=== fuser_OFF_(shipped_fix) ===
+  texpr_enabled                    False
+  n_success                        12
+  first_failing_call_index         None
+  max_rel_err_vs_serial_fp64       3.758085213734451e-15
+
+fuser_needed=True  fix_sufficient=True
+VERDICT: fix still needed AND sufficient -- workshop result stands
+wrote j0b_guard_NVIDIA_H200_torch2.13.0+cu129.json
+{
+ "device_name": "NVIDIA H200",
+ "compute_capability": "9.0",
+ "sm_count": 132,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.005247999913990498
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+  B=  1 L=1 serial       15.91 ms  IQR 0.06
+  B=  1 L=1 batched      17.81 ms  IQR 0.09
+  B=  1 L=2 serial       24.28 ms  IQR 0.09
+  B=  1 L=2 batched      18.41 ms  IQR 0.06
+  B=  1 L=3 serial       32.76 ms  IQR 0.15
+  B=  1 L=3 batched      18.76 ms  IQR 0.07
+  B=  1 L=4 serial       41.10 ms  IQR 0.21
+  B=  1 L=4 batched      19.08 ms  IQR 0.08
+  B=  1 L=8 serial       74.74 ms  IQR 0.31
+  B=  1 L=8 batched      20.53 ms  IQR 0.13
+  B=  4 L=1 serial       16.03 ms  IQR 0.06
+  B=  4 L=1 batched      16.67 ms  IQR 0.03
+  B=  4 L=2 serial       22.66 ms  IQR 0.04
+  B=  4 L=2 batched      18.45 ms  IQR 0.06
+  B=  4 L=3 serial       30.75 ms  IQR 0.12
+  B=  4 L=3 batched      17.64 ms  IQR 1.32
+  B=  4 L=4 serial       38.71 ms  IQR 0.10
+  B=  4 L=4 batched      19.17 ms  IQR 0.07
+  B=  4 L=8 serial       75.42 ms  IQR 0.24
+  B=  4 L=8 batched      20.71 ms  IQR 0.10
+  B= 16 L=1 serial       16.06 ms  IQR 0.05
+  B= 16 L=1 batched      18.09 ms  IQR 0.05
+  B= 16 L=2 serial       24.60 ms  IQR 0.06
+  B= 16 L=2 batched      18.70 ms  IQR 0.05
+  B= 16 L=3 serial       33.14 ms  IQR 0.08
+  B= 16 L=3 batched      19.03 ms  IQR 1.33
+  B= 16 L=4 serial       41.80 ms  IQR 0.13
+  B= 16 L=4 batched      19.52 ms  IQR 0.07
+  B= 16 L=8 serial       71.28 ms  IQR 0.18
+  B= 16 L=8 batched      19.75 ms  IQR 0.05
+  B= 64 L=1 serial       16.15 ms  IQR 0.05
+  B= 64 L=1 batched      18.20 ms  IQR 0.04
+  B= 64 L=2 serial       24.68 ms  IQR 0.06
+  B= 64 L=2 batched      18.66 ms  IQR 0.07
+  B= 64 L=3 serial       33.27 ms  IQR 0.10
+  B= 64 L=3 batched      21.32 ms  IQR 0.03
+  B= 64 L=4 serial       41.87 ms  IQR 2.83
+  B= 64 L=4 batched      25.87 ms  IQR 0.03
+  B= 64 L=8 serial       71.71 ms  IQR 0.18
+  B= 64 L=8 batched      43.66 ms  IQR 0.03
+
+wrote 40 records to results/records/j8_lane_bench_NVIDIA_H200.jsonl

@@ -1,0 +1,215 @@
+{
+ "meta": {
+  "experiment_id": "j2a_confidence_intervals",
+  "seed": 20260902,
+  "n_boot": 100000,
+  "error_p": 0.05,
+  "note": "Regenerated. The previous copies of these two records had no generating script and no recorded seed, and could not be reproduced by the documented procedure; they are kept under results/records/superseded/. The seed is recorded here so this cannot recur."
+ },
+ "vs_free": [
+  {
+   "system": "disjoint_test_1200K",
+   "free_signal": "energy_std",
+   "delta": 0.14103318860843328,
+   "ci_lo": 0.08918614382689334,
+   "ci_hi": 0.1927681668869405,
+   "boot_sd": 0.02647600823623972,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "disjoint_test_1200K",
+   "free_signal": "force_norm",
+   "delta": 0.13578997718743102,
+   "ci_lo": 0.07409345812906273,
+   "ci_hi": 0.19788805280479033,
+   "boot_sd": 0.03150651789820301,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "free_signal": "force_norm",
+   "delta": 0.18150250202369567,
+   "ci_lo": 0.12544389197150163,
+   "ci_hi": 0.23769332395667253,
+   "boot_sd": 0.028645491873929448,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "same_test_1200K",
+   "free_signal": "force_norm",
+   "delta": 0.14602343807491358,
+   "ci_lo": 0.08556449329620602,
+   "ci_hi": 0.2072629941182416,
+   "boot_sd": 0.03103173914436757,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "free_signal": "energy_std",
+   "delta": 0.08764210526315785,
+   "ci_lo": 0.009651364587295567,
+   "ci_hi": 0.1683727870092873,
+   "boot_sd": 0.04044345087501111,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "free_signal": "force_norm",
+   "delta": 0.06738947368421044,
+   "ci_lo": -0.029899040305685843,
+   "ci_hi": 0.16471088828246092,
+   "boot_sd": 0.04948279306878918,
+   "significant": false,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "free_signal": "energy_std",
+   "delta": 0.09273684210526312,
+   "ci_lo": 0.011276854430301412,
+   "ci_hi": 0.1797013534278197,
+   "boot_sd": 0.04293718790667513,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 2
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "free_signal": "force_norm",
+   "delta": 0.11229473684210522,
+   "ci_lo": 0.00838562511488561,
+   "ci_hi": 0.21584174921206126,
+   "boot_sd": 0.05283301419711349,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 2
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "free_signal": "energy_std",
+   "delta": 0.1685684210526316,
+   "ci_lo": 0.0665846030039498,
+   "ci_hi": 0.2717463209077583,
+   "boot_sd": 0.052215440966335146,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "free_signal": "force_norm",
+   "delta": 0.23016842105263158,
+   "ci_lo": 0.14862360130403623,
+   "ci_hi": 0.3122373949579832,
+   "boot_sd": 0.04179859942037646,
+   "significant": true,
+   "n_boot": 100000,
+   "scheme": "block",
+   "block_len": 3
+  }
+ ],
+ "absolute": [
+  {
+   "system": "disjoint_test_1200K",
+   "block_len": 3,
+   "exact_global": 0.77307013025241,
+   "exact_global_ci": [
+    0.7294994933822108,
+    0.8140049267324775
+   ],
+   "exact_maxcomp": 0.7083118698947678,
+   "exact_maxatom": 0.7087534034881154,
+   "force_norm": 0.637280153064979,
+   "energy_std": 0.6320369416439767,
+   "random_null": 0.5159044079770403
+  },
+  {
+   "system": "overlapping_test_1200K",
+   "block_len": 3,
+   "exact_global": 0.7878523070130252,
+   "exact_global_ci": [
+    0.7462750662378546,
+    0.8268220421832154
+   ],
+   "exact_maxcomp": 0.772191662373979,
+   "exact_maxatom": 0.7716535433070866,
+   "force_norm": 0.6063498049893296,
+   "random_null": 0.4916752520420929
+  },
+  {
+   "system": "same_test_1200K",
+   "block_len": 3,
+   "exact_global": 0.847588122746339,
+   "exact_global_ci": [
+    0.8150632846815018,
+    0.8773849480280347
+   ],
+   "exact_maxcomp": 0.8239660755022444,
+   "exact_maxatom": 0.8384584958422253,
+   "force_norm": 0.7015646846714254,
+   "random_null": 0.49547887997645157
+  },
+  {
+   "system": "rmd17-disjoint_ethanol",
+   "block_len": 3,
+   "exact_global": 0.7373052631578947,
+   "exact_global_ci": [
+    0.6568225321301613,
+    0.8123170646911051
+   ],
+   "exact_maxcomp": 0.691221052631579,
+   "exact_maxatom": 0.661578947368421,
+   "force_norm": 0.6699157894736842,
+   "energy_std": 0.6496631578947368,
+   "random_null": 0.4687157894736842
+  },
+  {
+   "system": "rmd17-disjoint_aspirin",
+   "block_len": 2,
+   "exact_global": 0.7596631578947368,
+   "exact_global_ci": [
+    0.7024260884013243,
+    0.8139631017658044
+   ],
+   "exact_maxcomp": 0.6533894736842105,
+   "exact_maxatom": 0.6962105263157895,
+   "force_norm": 0.6473684210526316,
+   "energy_std": 0.6669263157894737,
+   "random_null": 0.5301473684210526
+  },
+  {
+   "system": "rmd17-disjoint_azobenzene",
+   "block_len": 3,
+   "exact_global": 0.8303368421052632,
+   "exact_global_ci": [
+    0.7790332488207389,
+    0.8771227800553938
+   ],
+   "exact_maxcomp": 0.7593473684210527,
+   "exact_maxatom": 0.7232631578947368,
+   "force_norm": 0.6001684210526316,
+   "energy_std": 0.6617684210526316,
+   "random_null": 0.48338947368421054
+  }
+ ]
+}

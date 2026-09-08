@@ -1,0 +1,15 @@
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{4}{c}{AUROC by error score} & \multicolumn{2}{c}{stratified (post hoc)}\\
+\cmidrule(lr){2-5}\cmidrule(lr){6-7}
+signal & $e_{\max}$ & $e_{\mathrm{rmse}}$ & $e_{\max\mathrm{c}}$ & $e_{q95}$ & by size & by force \\
+\midrule
+exact max-atom & 0.836 & 0.819 & 0.824 & 0.806 & -- & 0.649 \\
+exact max-component & 0.821 & 0.808 & 0.822 & 0.805 & 0.798 & 0.656 \\
+exact global & 0.798 & 0.769 & 0.793 & 0.759 & 0.794 & 0.632 \\
+leading-only, 5 lanes & 0.791 & 0.763 & 0.786 & 0.753 & 0.779 & 0.626 \\
+$\|\bar{f}\|$ \emph{(free)} & \textbf{0.943} & \textbf{0.933} & \textbf{0.942} & \textbf{0.930} & \textbf{0.933} & \textbf{0.710} \\
+energy std \emph{(free)} & 0.481 & 0.447 & 0.483 & 0.450 & 0.394 & 0.511 \\
+random null & 0.499 & 0.498 & 0.498 & 0.498 & -- & 0.499 \\
+\bottomrule
+\end{tabular}

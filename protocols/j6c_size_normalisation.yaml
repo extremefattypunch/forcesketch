@@ -1,0 +1,115 @@
+experiment_id: j6c_size_normalisation
+version: 1
+status: post-hoc-repair-with-pre-specified-criteria
+# =============================================================================
+# HONEST LABELLING. This is NOT a blind prediction. J6B has already shown that
+# the global statistic is extensive and loses to max-component on a variable-N
+# pool, and this file is written to attempt the repair that failure implies. It
+# would be dishonest to dress that up as a pre-registered discovery.
+#
+# What IS pre-specified, before any normalised quantity has been computed:
+#   * the estimator family and the grid searched over it,
+#   * the SELECTION PROCEDURE (alpha chosen on a design split, never on the
+#     evaluation set),
+#   * the success criteria and their thresholds.
+# So the outcome is not knowable from this file, and the selection cannot be
+# tuned after the fact. That is the strongest available guarantee for a repair,
+# and it is weaker than the guarantee J6B itself carried.
+# =============================================================================
+
+motivation: >
+  The global statistic is sum_d v_d over 3N coordinates. It is EXTENSIVE, so at
+  variable N it ranks large structures highly whether or not the model is
+  uncertain about them: on the MPtraj pool it acquires a median of 70 atoms from
+  a pool whose median is 20, correlates 0.631 with atom count, and loses to
+  max-component on all four error scores. At fixed N -- every other system in the
+  project -- 3N is one constant shared by every structure, so normalising by it
+  cannot change any ranking and the defect is invisible by construction.
+
+estimator_family: >
+  S_alpha(x) = ( sum_d v_d(x) ) / (3 N_x)^alpha
+  alpha = 0 recovers the current global statistic; alpha = 1 is the mean
+  per-coordinate variance. Intermediate alpha is admitted because the TARGET is
+  itself mildly size-dependent -- e_max is a maximum over N atoms and so grows
+  with N even for a perfect model -- meaning a fully intensive statistic may
+  over-correct. Any strictly monotone transform of S_alpha (e.g. its square
+  root) gives an identical ranking and is therefore not a separate hypothesis.
+
+grid: [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]
+
+selection_rule: >
+  alpha* = argmax over the grid of AUROC for the top-5% e_max structures,
+  computed ON THE DESIGN SPLIT ONLY (the same 10% held out in J6B to fit the
+  leading-only basis, same seed 20260816). Every number reported as a result is
+  then computed on the disjoint remaining 90%. Ties broken toward the smaller
+  alpha.
+
+predictions:
+  - id: N1
+    statement: >
+      INVARIANCE. On all fixed-N systems the normalisation changes nothing:
+      AUROC under any alpha is bit-identical to alpha = 0.
+    confidence: certain
+    note: >
+      A derivation, not a discovery -- 3N is one constant per system there. It is
+      listed because it is the claim that lets the repair be adopted globally
+      rather than as a special case, and an implementation that violated it would
+      be silently wrong everywhere else in the paper.
+    criteria:
+      - metric: max_abs_auroc_change_fixed_N
+        op: le
+        threshold: 1.0e-12
+
+  - id: N2
+    statement: The design-selected alpha* is greater than 0.
+    criteria: [{metric: alpha_star, op: gt, threshold: 0.0}]
+
+  - id: N3
+    statement: >
+      On the held-out split, S_{alpha*} beats S_0 on all four error scores.
+    criteria:
+      - metric: auroc_alphastar_minus_alpha0
+        op: gt
+        threshold: 0.0
+        require: all_4_error_scores
+
+  - id: N4
+    statement: >
+      THE REPAIR SUCCEEDS: on the held-out split S_{alpha*} beats the
+      max-component statistic on e_max, reversing J6B's Q2 failure.
+    confidence: unknown
+    criteria: [{metric: auroc_alphastar_minus_maxcomp_e_max, op: gt, threshold: 0.0}]
+
+  - id: N5
+    statement: >
+      The acquisition size bias is substantially corrected: the median atom count
+      of the top-8000 by S_{alpha*} is below 40, against 70 for S_0 and a pool
+      median of 20.
+    criteria: [{metric: median_atoms_alphastar_8000, op: lt, threshold: 40}]
+
+  - id: N6
+    statement: >
+      The selection-overlap bound is restored: Jaccard between the normalised
+      leading-only gate and normalised exact global at budget 8000 reaches 0.90,
+      the threshold J6B's Q4 missed at 0.794.
+    confidence: low
+    note: >
+      Listed at low confidence. Normalising both sides by the same per-structure
+      constant does not obviously make two rankings agree more; if anything,
+      compressing the dynamic range can make near-ties more frequent and overlap
+      worse. A failure here says the gate's disagreement with the exact statistic
+      is about the head-space subspace, not about size.
+    criteria: [{metric: jaccard_normalised_8000, op: ge, threshold: 0.90}]
+
+falsification: >
+  If N4 fails, size normalisation does not rescue the global statistic on
+  variable-N systems and the recommendation stays scoped to fixed N, with
+  max-component (or max-atom) as the variable-N default. That is a legitimate
+  outcome and must be reported as the primary one, not buried under whichever
+  alpha looked best.
+
+analysis:
+  script: experiments/j6c_size_normalisation.py
+  reads: results/records/j6b_foundation_scan.pt
+  settings: {error_p: 0.05, budgets: [1000, 8000], lanes: 5, lo_r0: 4,
+             design_frac: 0.10, split_seed: 20260816}

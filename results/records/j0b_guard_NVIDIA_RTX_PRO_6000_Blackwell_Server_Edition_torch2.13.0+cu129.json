@@ -1,0 +1,33 @@
+{
+ "device_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "compute_capability": "12.0",
+ "torch_version": "2.13.0+cu129",
+ "torch_cuda": "12.9",
+ "is_mig": false,
+ "probes": {
+  "fuser_ON_(upstream_default)": {
+   "fuser_on": true,
+   "n_calls": 12,
+   "texpr_enabled": true,
+   "n_success": 2,
+   "first_failing_call_index": 2,
+   "errors": [
+    "RuntimeError: The following operation failed in the TorchScript interpreter.\nTraceback of TorchScript (most recent call last):\nRuntimeError: Cannot access data pointer of Ten"
+   ],
+   "max_rel_err_vs_serial_fp64": null,
+   "fp64_batched_error": "The following operation failed in the TorchScript interpreter.\nTraceback of TorchScript (most recent call last):\nRuntimeError: Cannot access data pointer of Ten"
+  },
+  "fuser_OFF_(shipped_fix)": {
+   "fuser_on": false,
+   "n_calls": 12,
+   "texpr_enabled": false,
+   "n_success": 12,
+   "first_failing_call_index": null,
+   "errors": [],
+   "max_rel_err_vs_serial_fp64": 2.773824800613524e-15
+  }
+ },
+ "fuser_needed": true,
+ "fix_sufficient": true,
+ "verdict": "fix still needed AND sufficient -- workshop result stands"
+}

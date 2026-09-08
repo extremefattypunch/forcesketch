@@ -1,0 +1,124 @@
+== holygpu8a22103.rc.fas.harvard.edu gpu 39518641 device=NVIDIA_A100-SXM4-80GB
+NVIDIA A100-SXM4-80GB, Disabled, 1410 MHz
+{
+ "device_name": "NVIDIA A100-SXM4-80GB",
+ "compute_capability": "8.0",
+ "sm_count": 108,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.0077599999494850636
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+  B=  1 L=1 serial       23.03 ms  IQR 0.10
+  B=  1 L=1 batched      25.86 ms  IQR 0.12
+  B=  1 L=2 serial       35.73 ms  IQR 0.07
+  B=  1 L=2 batched      26.62 ms  IQR 0.10
+  B=  1 L=3 serial       48.64 ms  IQR 0.15
+  B=  1 L=3 batched      27.09 ms  IQR 0.07
+  B=  1 L=4 serial       61.52 ms  IQR 0.33
+  B=  1 L=4 batched      27.65 ms  IQR 0.07
+  B=  1 L=8 serial      112.47 ms  IQR 0.59
+  B=  1 L=8 batched      30.18 ms  IQR 0.17
+  B=  4 L=1 serial       22.93 ms  IQR 0.06
+  B=  4 L=1 batched      25.89 ms  IQR 0.05
+  B=  4 L=2 serial       35.77 ms  IQR 0.10
+  B=  4 L=2 batched      26.68 ms  IQR 0.05
+  B=  4 L=3 serial       48.73 ms  IQR 0.20
+  B=  4 L=3 batched      27.28 ms  IQR 0.05
+  B=  4 L=4 serial       61.33 ms  IQR 0.11
+  B=  4 L=4 batched      27.92 ms  IQR 0.15
+  B=  4 L=8 serial      112.63 ms  IQR 0.16
+  B=  4 L=8 batched      30.14 ms  IQR 0.06
+  B= 16 L=1 serial       23.01 ms  IQR 0.03
+  B= 16 L=1 batched      25.98 ms  IQR 0.12
+  B= 16 L=2 serial       36.00 ms  IQR 0.06
+  B= 16 L=2 batched      26.80 ms  IQR 0.05
+  B= 16 L=3 serial       48.67 ms  IQR 0.08
+  B= 16 L=3 batched      27.41 ms  IQR 0.07
+  B= 16 L=4 serial       61.59 ms  IQR 0.11
+  B= 16 L=4 batched      28.17 ms  IQR 0.08
+  B= 16 L=8 serial      113.07 ms  IQR 0.53
+  B= 16 L=8 batched      31.11 ms  IQR 0.02
+  B= 64 L=1 serial       23.07 ms  IQR 0.04
+  B= 64 L=1 batched      26.08 ms  IQR 0.08
+  B= 64 L=2 serial       36.06 ms  IQR 0.11
+  B= 64 L=2 batched      31.50 ms  IQR 0.01
+  B= 64 L=3 serial       49.03 ms  IQR 0.08
+  B= 64 L=3 batched      41.46 ms  IQR 0.03
+  B= 64 L=4 serial       62.11 ms  IQR 0.11
+  B= 64 L=4 batched      51.39 ms  IQR 0.03
+  B= 64 L=8 serial      113.79 ms  IQR 0.92
+  B= 64 L=8 batched      91.24 ms  IQR 0.04
+
+wrote 40 records to results/records/j8_lane_bench_NVIDIA_A100-SXM4-80GB_pair.jsonl
+{
+ "device_name": "NVIDIA A100-SXM4-80GB",
+ "compute_capability": "8.0",
+ "sm_count": 108,
+ "is_mig": false,
+ "texpr_fuser_enabled": false,
+ "event_overhead_ms": 0.0074880002066493034
+}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+  B=  1 L=1 serial       23.46 ms  IQR 0.14
+  B=  1 L=1 batched      26.63 ms  IQR 0.05
+  B=  1 L=2 serial       36.83 ms  IQR 0.12
+  B=  1 L=2 batched      27.28 ms  IQR 0.28
+  B=  1 L=3 serial       50.05 ms  IQR 0.11
+  B=  1 L=3 batched      27.93 ms  IQR 0.11
+  B=  1 L=4 serial       63.87 ms  IQR 0.56
+  B=  1 L=4 batched      28.31 ms  IQR 0.07
+  B=  1 L=8 serial      116.18 ms  IQR 0.53
+  B=  1 L=8 batched      43.21 ms  IQR 0.04
+  B=  2 L=1 serial       23.52 ms  IQR 0.06
+  B=  2 L=1 batched      26.41 ms  IQR 0.05
+  B=  2 L=2 serial       36.80 ms  IQR 0.06
+  B=  2 L=2 batched      27.43 ms  IQR 0.03
+  B=  2 L=3 serial       49.90 ms  IQR 0.23
+  B=  2 L=3 batched      35.16 ms  IQR 0.03
+  B=  2 L=4 serial       63.35 ms  IQR 0.13
+  B=  2 L=4 batched      42.75 ms  IQR 0.03
+  B=  2 L=8 serial      116.24 ms  IQR 0.50
+  B=  2 L=8 batched      73.15 ms  IQR 0.04
+  B=  4 L=1 serial       27.76 ms  IQR 0.02
+  B=  4 L=1 batched      29.65 ms  IQR 0.04
+  B=  4 L=2 serial       43.87 ms  IQR 0.02
+  B=  4 L=2 batched      44.84 ms  IQR 0.03
+  B=  4 L=3 serial       59.92 ms  IQR 0.03
+  B=  4 L=3 batched      59.48 ms  IQR 0.03
+  B=  4 L=4 serial       76.00 ms  IQR 0.03
+  B=  4 L=4 batched      74.09 ms  IQR 0.04
+  B=  4 L=8 serial      140.34 ms  IQR 0.04
+  B=  4 L=8 batched     134.72 ms  IQR 0.06
+  B=  8 L=1 serial       47.69 ms  IQR 0.02
+  B=  8 L=1 batched      50.21 ms  IQR 0.03
+  B=  8 L=2 serial       77.21 ms  IQR 0.03
+  B=  8 L=2 batched      79.68 ms  IQR 0.04
+  B=  8 L=3 serial      106.75 ms  IQR 0.04
+  B=  8 L=3 batched     108.84 ms  IQR 0.04
+  B=  8 L=4 serial      136.28 ms  IQR 0.04
+  B=  8 L=4 batched     138.96 ms  IQR 0.06
+  B=  8 L=8 serial      254.31 ms  IQR 0.05
+  B=  8 L=8 batched     257.81 ms  IQR 0.05
+  B= 16 L=1 serial       87.23 ms  IQR 0.03
+  B= 16 L=1 batched      91.12 ms  IQR 0.04
+  B= 16 L=2 serial      143.63 ms  IQR 0.06
+  B= 16 L=2 batched     151.09 ms  IQR 0.05
+  B= 16 L=3 serial      200.00 ms  IQR 0.05
+  B= 16 L=3 batched     209.76 ms  IQR 0.10
+  B= 16 L=4 serial      256.44 ms  IQR 0.04
+  B= 16 L=4 batched     268.63 ms  IQR 0.06
+  B= 16 L=8 serial      481.98 ms  IQR 0.07
+  B= 16 L=8 batched     503.40 ms  IQR 0.09
+  B= 32 L=1 serial      170.21 ms  IQR 0.05
+  B= 32 L=1 batched     176.50 ms  IQR 0.05
+  B= 32 L=2 serial      281.14 ms  IQR 0.05
+  B= 32 L=2 batched     296.25 ms  IQR 0.07
+  B= 32 L=3 serial      392.01 ms  IQR 0.08
+  B= 32 L=3 batched     413.02 ms  IQR 0.05
+  B= 32 L=4 serial      502.97 ms  IQR 0.15
+  B= 32 L=4 batched     529.70 ms  IQR 0.08
+  B= 32 L=8 serial      946.70 ms  IQR 0.14
+  B= 32 L=8 batched     997.66 ms  IQR 0.11
+
+wrote 60 records to results/records/j8_lane_bench_water_NVIDIA_A100-SXM4-80GB_pair.jsonl

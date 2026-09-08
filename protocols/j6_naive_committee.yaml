@@ -1,0 +1,160 @@
+experiment_id: j6_naive_committee
+version: 1
+status: pre-registered
+# =============================================================================
+# Written BEFORE any naive-committee cache exists. `git merge-base
+# --is-ancestor` must show this file's commit predates every record it scores.
+# No naive head-force cache had been generated at authoring time; the only
+# inputs consulted were the training scripts shipped in the Zenodo archive.
+#
+# Lesson carried over from j8_water_prediction v2 -> v3: NO cross-context
+# constant is frozen in this file. Every reference value is derived at scoring
+# time from the matched shared-trunk record, exactly as `derive_from_reference_run`
+# does for J8. A constant copied into a protocol is a constant that goes stale.
+# =============================================================================
+
+motivation: >
+  Every result in the project so far comes from ONE committee construction: a
+  shared MACE trunk with M=8 output heads. That is also where the method's
+  speed comes from -- one reverse pass through a shared trunk yields F w for a
+  head-space cotangent w. The obvious referee question is whether anything here
+  survives contact with an ordinary ensemble of independently trained models,
+  and it splits into two very different halves that must not be conflated:
+
+    (a) ACCELERATION does not transfer, and this is a derivation, not a
+        measurement. With M independent models there is no shared trunk, so
+        g_k = F w_k requires all M columns of F, i.e. M separate
+        forward+backward passes. No sketch of the head space can be formed more
+        cheaply than the exact quantity it approximates. This is stated here, in
+        advance, so that it cannot later read as a post-hoc excuse.
+
+    (b) DECISION QUALITY is a genuine empirical question. Factor A (does exact
+        committee disagreement rank reference-force error?), the global-over-
+        max-component finding, and the conformal gate are all linear algebra on
+        F. They are indifferent to how F was produced. If they hold for naive
+        ensembles too, the recommendation generalises well beyond multi-head
+        models -- which is a strictly larger claim than anything the workshop
+        paper made.
+
+  There is also a mechanism to test. The head-space spectrum of every system
+  measured so far is concentrated (stable rank 1.21-4.25 against an isotropic
+  7.0), and J2b found that this concentration predicts the SIGN of the
+  leading-only-vs-control-variate comparison, separating cleanly at srank ~ 2.5.
+  If the concentration is an artifact of the shared trunk, naive committees will
+  sit at the flat end and the rule gets an out-of-range test it could fail.
+
+systems:
+  # Matched pairs. Each naive committee is compared against the shared-trunk
+  # committee trained on the SAME data with the SAME architecture and evaluated
+  # on the SAME test frames, so construction is the only thing that varies.
+  - naive: 3bpa-naive-same          # 8 models, identical train/valid files, seeds 0-7
+    matched: same_test_1200K        # shared trunk, heads see identical data
+    rationale: init-only diversity, both constructions
+  - naive: 3bpa-naive               # 8 models, --valid_fraction=0.2 per seed
+    matched: overlapping_test_1200K # shared trunk, heads see overlapping subsets
+    rationale: data-resampling diversity, both constructions
+  - naive: water-naive_md_T300K
+    matched: water-overlapping_md_T300K
+    rationale: same, at D = 576 and periodic
+  - naive: water-naive_pimd_T300K
+    matched: water-overlapping_pimd_T300K
+    rationale: same, under distribution shift
+  # rMD17 naive committees exist in the archive but their train_all.xyz /
+  # test_all.xyz are not among the fetched data, so they are out of scope here.
+  # Recorded so the omission is visible rather than silent.
+
+predictions:
+  - id: P1
+    statement: >
+      The shared trunk is what concentrates the head space. Each naive
+      committee's centred head-space stable rank will EXCEED that of its matched
+      shared-trunk counterpart.
+    confidence: high
+    criteria:
+      - metric: stable_rank_FQ
+        comparison: greater_than_matched
+        require: all_pairs
+
+  - id: P2
+    statement: >
+      The srank ~ 2.5 rule from J2b predicts the sign of the leading-only minus
+      control-variate skip fraction out of sample. For each naive system the rule
+      predicts LO - CV > 0 when srank > 2.5 and LO - CV <= 0 otherwise; the
+      realised sign must match.
+    confidence: medium
+    note: >
+      This is the risky one. The rule was read off ten shared-trunk systems and
+      the threshold was chosen to separate them; naive committees are outside the
+      range it was drawn from. A miss here falsifies the rule as stated and it
+      must be reported as a scope limit on the rule, not quietly re-fitted.
+    criteria:
+      - metric: sign_lo_minus_cv
+        rule: srank_gt_2p5_implies_positive
+        threshold_srank: 2.5
+        require: at_least_3_of_4
+
+  - id: P3
+    statement: >
+      The global statistic beats the max-component statistic at ranking
+      reference-force error for naive committees too, as it did in 24 of 24
+      shared-trunk cells.
+    confidence: high
+    criteria:
+      - metric: auroc_global_minus_maxcomp
+        op: positive_fraction_ge
+        threshold: 0.875          # >= 14 of 16 (4 systems x 4 error scores)
+
+  - id: P4
+    statement: >
+      Naive committees are better calibrated in magnitude than shared-trunk
+      committees: the overconfidence ratio (committee force RMSE divided by
+      median per-atom disagreement) will be SMALLER for each naive committee
+      than for its matched counterpart.
+    confidence: high
+    criteria:
+      - metric: overconfidence_ratio
+        comparison: less_than_matched
+        require: all_pairs
+
+  - id: P5
+    statement: >
+      Factor A holds at a useful level for naive committees: AUROC of the exact
+      global statistic for the top-5% e_max structures is at least 0.70 on every
+      naive system.
+    confidence: medium
+    criteria:
+      - metric: auroc_top05_exact_global
+        op: ge
+        threshold: 0.70
+        require: all_systems
+
+falsification: >
+  P1 and P4 failing together would mean the naive/shared-trunk distinction does
+  not behave as the mechanism story says, and the "shared trunk concentrates the
+  head space" explanation would have to be withdrawn. P3 failing would confine
+  the global-over-max-component recommendation to multi-head models, which is a
+  material narrowing of the paper's main constructive claim. P5 failing would say
+  Factor A is a property of multi-head committees specifically -- interesting,
+  but it would mean the scoping section has to be rewritten around architecture
+  rather than around chemistry.
+
+analysis:
+  cache_script: experiments/j6_naive_caches.py
+  scoring_script: experiments/j6_naive_verdict.py
+  # Every downstream number is produced by the EXISTING experiment scripts
+  # pointed at the new cache directory via --cache-dirs. No new analysis code
+  # computes any scored quantity, so the naive numbers and the shared-trunk
+  # numbers come from one code path by construction.
+  reuses:
+    - experiments/j2a_oracle_panel.py     # P3, P5
+    - experiments/j9a_leading_only_ci.py  # P2
+    - experiments/j3_extreme_value.py     # spectrum for P1
+  settings:
+    lanes: 5
+    alpha: 0.05
+    target_p: 0.05
+    error_p: 0.05
+    cv_r0: 2
+    score: global
+    split_scheme: contiguous_block
+    precision: float64
