@@ -1,0 +1,106 @@
+From: liu-office@jctc.acs.org
+To: ip323@ic.ac.uk
+16-Oct-2026
+
+Journal:  Journal of Chemical Theory and Computation
+Manuscript ID: ct-2026-01838j
+Title: "When is committee force uncertainty worth computing in MD? Decision quality, cheap gates, and the baselines that must be beaten"
+Author(s): Poon, Ian
+
+Dear Dr. Poon:
+
+Thank you for your recent manuscript submission to Journal of Chemical Theory and Computation. It has been examined by expert reviewers whose criticisms are enclosed.  The reviewers have expressed serious reservations about this work that make it unsuitable for publication in its current form.
+
+If you feel that you can correct these problems, and choose to substantially revise and resubmit your paper, please provide me with a detailed explanation of your changes and/or a rebuttal to the reviewers’ criticisms.
+
+We ask that you submit your revision no later than 15-Nov-2026.
+
+When submitting your revised manuscript, you will be able to respond to the editor's comments by attaching a file containing your detailed responses to all of the points raised.
+
+With sincere regards,
+
+Prof. Haiyan Liu
+Associate Editor
+Journal of Chemical Theory and Computation
+Email : liu-office@jctc.acs.org
+
+------------------------------------
+
+Reviewer Comments to Author:
+
+Reviewer: 1
+
+Recommendation: It appears that publication in any form would be premature at this time.
+
+Comments:
+Thank you for the opportunity to review this manuscript. The question of whether committee force uncertainty is worth its computational cost is interesting. However, I have several concerns about the current manuscript.
+
+1. The manuscript is difficult to follow. The large amount of manuscript-specific terminology (“Factor A/B,” “oracle,” “preservation,” “lane,” “gate,” etc.) makes the main scientific questions unnecessarily difficult to understand. I suggest substantial rewriting with clearer definitions and a more straightforward presentation.
+
+2. The committee models are insufficiently characterized. Since the main conclusions concern committee uncertainty, the manuscript should clearly describe how the committee members/heads are trained, how their diversity is generated, what loss function is used, and how the uncertainty is defined and calibrated. This is particularly important given the large calibration difference reported between the shared-trunk and independently trained committees.
+
+3. The underlying model accuracy and uncertainty–error relationship should be shown explicitly. Standard energy/force MAE or RMSE should be reported for the relevant models and datasets. I would also strongly suggest an error-versus-uncertainty scatter or calibration plot. AUROC alone does not show the actual error distribution or how reliably the uncertainty criterion correlates with model error.
+
+4. The conclusion regarding the force-magnitude baseline appears too broad. The strong performance of the free force-magnitude signal on MPtraj is interesting, but it may reflect a model- or dataset-specific correlation between large forces and large prediction errors. More evidence is needed before drawing a general conclusion about the usefulness of committee uncertainty. In addition, since no active-learning retraining is performed, identifying high-error structures should be clearly distinguished from demonstrating a better active-learning acquisition strategy.
+
+Overall, the manuscript contains potentially interesting observations, but I do not think the current analysis sufficiently supports its broader conclusions. Substantial additional analysis and rewriting would be needed.
+
+
+Additional Questions:
+Please rate the quality of the science reported in this paper (10 - High Quality / 1 - Low Quality).: 3
+
+Please rate the overall importance of this paper to the field of chemical theory or computation (10 - High Importance / 1 - Low Importance).: 5
+
+
+Reviewer: 2
+
+Recommendation: It appears that publication in any form would be premature at this time.
+
+Comments:
+Dear Editor,
+
+In the following, you can find my review of the manuscript "When is committee force uncertainty worth computing in MD? Decision quality, cheap gates, and the baselines that must be beaten".
+My recommendation is to reject the manuscript. A short summary of the manuscript as well as the reasons for my recommendation can be found below.
+
+The paper discusses the evaluation of committee uncertainties and different strategies to further process them in workflows such as query by committee.
+The key results are:
+- A comparison against the actual error is important
+- The selection rule for structures in a query by committee workflow should be size independent
+- A structure-wide average of force uncertainty performs better than choosing the structure with the largest disagreement of a single atom or a single force component.
+- Given the additional cost associated with committee force disagreements, the relevant benchmark to compare these strategies against should not be limited to the random selection of structures, but also include essentially-free metrics.
+
+The manuscript suffers from many problems:
+- Some of the basic claims are - to my knowledge - not true, or at least not sufficiently referenced. The author claims that a comparison between the uncertainty metric and true error is uncommon in the field of uncertainty quantification and instead cheap uncertainty metrics are measured against more expensive ones. The author further claims that these uncertainty metrics are strongly size dependent. Neither of these claims are supported by the given references. In fact, there is only a single reference to another uncertainty-focused work and neither of the two claims are supported by it.
+- Across most sections, the manuscript is incomprehensible. It uses terminology that is completely uncommon in the field. In the methods section it introduces methodology and concepts in very broad strokes and without any references to more detailed work. It excessively uses pronouns and "the former", "others" and similar constructions in a way that makes it impossible to identify what is being talked about in each sentence.
+- The manuscript lacks a proper introduction to the field and references to highly relevant work. A manuscript working on the topic of shallow ensembles/multi-head committees should at the very least cite papers such as doi.org/10.1088/2632-2153/ad594a or doi.org/10.1088/2632-2153/ae0bf0, as well as the review and papers contained in the review doi.org/10.1515/revce-2024-0028 to evaluate the performance of uncertainty estimates. The full list of relevant omitted publications is much longer and up to the author to collect.
+
+On a more detailed level, I also found these shortcomings:
+- Figures 1 and 2 compare 3BPA disjoint, 3BPA overlapping, 3BPA same, ethanol, aspirin and azobenzene. Why are the first three system + committee type and the last three just a system? What committee type was used? Why change what is being compared mid-figure?
+- Table 1 shows that the force magnitude is the best "uncertainty estimate", beating every pooling of committee disagreement as well as the energy disagreement. Given the experimental setup, this revolutionary result does not hold up to scrutiny. It is stated that the model used was the MACE-MP foundation model with disjoint committee heads. This model was trained on the same MPtraj dataset used for testing. Furthermore, the dataset contains many crystal structures at equilibrium, where forces are exactly 0. This has massive implications on a test that uses force magnitude as an "uncertainty estimate". Neither are these aspects discussed, nor are the results tested on an out-of-domain test set.
+
+In conclusion, the manuscript shows large problems in many core areas, such as knowledge of the state of the art of the field, the execution of the scientific experiments, the presentation of the data and the writing in general. The key results of the manuscript beyond these issues are the comparison of different pooling techniques for query by committee, the comparison against essentially-free metrics and an analysis of the effects of reducing the committee size of the uncertainty metric. These results of some interest to the field of uncertainty quantification in atomistic simulations.
+However, even after a hypothetical major revision that rectifies all issues, the results would still not be of sufficient relevance to justify a publication in a journal such as JCTC.
+
+Additional Questions:
+Please rate the quality of the science reported in this paper (10 - High Quality / 1 - Low Quality).: 3
+
+Please rate the overall importance of this paper to the field of chemical theory or computation (10 - High Importance / 1 - Low Importance).: 3
+-----------------------------------------------------------------------
+
+If the Editor has suggested that your manuscript may benefit from language editing, you are encouraged to have it reviewed by a fluent English speaker before resubmitting. ACS Authoring Services can assist you by matching your manuscript with trained chemists who will edit your work for accurate terminology and phrasing. For pricing and information, visit https://authoringservices.acs.org/. Please note that using this (or any) service does not guarantee that your manuscript will be accepted for publication.
+
+-----------------------------------------------------------------------
+
+FOR ASSISTANCE WITH YOUR MANUSCRIPT SUBMISSION PLEASE CONTACT:
+ACS Publications Customer Services & Information (CSI)
+Email: support@services.acs.org
+Phone: 202-872-4357
+Toll Free Phone: 800-227-9919 (USA/Canada only)
+    
+ 
+------------
+PLEASE NOTE: This email message, including any attachments, contains confidential information related to peer review and is intended solely for the personal use of the recipient(s) named above. No part of this communication or any related attachments may be shared with or disclosed to any third party or organization without the explicit prior written consent of the journal Editor and ACS. If the reader of this message is not the intended recipient or is not responsible for delivering it to the intended recipient, you have received this communication in error. Please notify the sender immediately by e-mail, and delete the original message.
+ 
+As an author or reviewer for ACS Publications, we may send you communications about related journals, topics or products and services from the American Chemical Society. Please email us at pubs-comms-unsub@acs.org if you do not want to receive these. Note, you will still receive updates about your manuscripts, reviews, or future invitations to review.   
+
+Thank you.
