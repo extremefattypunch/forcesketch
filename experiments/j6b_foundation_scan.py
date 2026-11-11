@@ -54,6 +54,7 @@ from forcesketch.exact.centered_basis import helmert_basis  # noqa: E402
 from forcesketch.utils.reproducibility import pin_numerics  # noqa: E402
 
 from forcesketch_journal.paths import FOUNDATION  # noqa: E402
+from forcesketch_journal.data.frames import reference_energy  # noqa: E402
 POOL = FOUNDATION / "qbc/mp_traj_qbc_79th_not_selected.xyz"
 
 
@@ -106,6 +107,7 @@ def read_frames(path: pathlib.Path, keep: set[int] | None):
     for i, atoms in enumerate(ase.io.iread(str(path), format="extxyz")):
         if keep is None or i in keep:
             atoms.arrays["REF_forces"] = atoms.get_forces()
+            atoms.info["REF_energy"] = reference_energy(atoms)
             out.append(atoms)
             idx.append(i)
             if keep is not None and len(out) == len(keep):
@@ -126,6 +128,7 @@ def iter_chunks(path: pathlib.Path, keep: set[int] | None, chunk: int):
         if keep is not None and i not in keep:
             continue
         atoms.arrays["REF_forces"] = atoms.get_forces()
+        atoms.info["REF_energy"] = reference_energy(atoms)
         buf.append(atoms)
         idxbuf.append(i)
         if len(buf) == chunk:
@@ -140,7 +143,10 @@ def scan(adapter, frames, *, batch_size: int) -> dict:
     Qc = helmert_basis(M, dtype=torch.float64).to(adapter.device)
     acc = {k: [] for k in ("A_s", "exact_maxcomp", "exact_maxatom", "exact_global",
                            "force_norm", "energy_std", "natoms",
-                           "e_max", "e_rmse", "e_maxcomp", "e_q95")}
+                           "e_max", "e_rmse", "e_maxcomp", "e_q95",
+                           # added for the revision: reference-force magnitude,
+                           # per-head and reference energies, energy error
+                           "ref_force_max", "ref_force_rms", "E", "E_ref", "E_mean")}
     n_periodic_edges = 0
     for batch in make_loader(frames, adapter.model, batch_size=batch_size):
         bd = batch.to_dict()
@@ -184,6 +190,20 @@ def scan(adapter, frames, *, batch_size: int) -> dict:
         acc["force_norm"].append(fn.cpu())
         acc["energy_std"].append(E.std(dim=-1, unbiased=True).cpu())
         acc["natoms"].append(torch.bincount(bidx, minlength=B).cpu())
+        acc["E"].append(E.cpu())
+        acc["E_mean"].append(E.mean(dim=-1).cpu())
+        e_ref = b["energy"].double() if "energy" in b and b["energy"] is not None else None
+        if e_ref is None or e_ref.shape[0] != B:
+            raise SystemExit("reference energies are absent from the batch; set REF_energy")
+        acc["E_ref"].append(e_ref.cpu())
+        rn = fref.norm(dim=-1)                                         # [N]
+        acc["ref_force_max"].append(torch.full((B,), -1.0, dtype=torch.float64, device=f.device)
+                                    .scatter_reduce(0, bidx, rn, reduce="amax").cpu())
+        rsq = torch.zeros(B, dtype=torch.float64, device=f.device) \
+            .index_add_(0, didx, fref.reshape(-1).pow(2))
+        rcnt = torch.zeros(B, dtype=torch.float64, device=f.device) \
+            .index_add_(0, didx, torch.ones(fref.numel(), dtype=torch.float64, device=f.device))
+        acc["ref_force_rms"].append((rsq / rcnt).sqrt().cpu())
 
         if fref is None:
             raise SystemExit("batch carries no reference forces; check the forces key")
@@ -206,6 +226,19 @@ def scan(adapter, frames, *, batch_size: int) -> dict:
     out = {k: torch.cat(v) for k, v in acc.items()}
     out["n_periodic_edges"] = n_periodic_edges
     return out
+
+
+def write_compact(res: dict, path: pathlib.Path) -> None:
+    """Per-structure scalars only (everything but A_s and E), compressed.
+
+    ~137k rows x 16 float64 columns is a few MB, small enough to commit, and it
+    is what every reviewer-facing re-analysis (zero-force filter, force-stratified
+    AUROC, accuracy table) reads. The .pt keeps A_s for the estimator work."""
+    cols = {k: v.numpy() for k, v in res.items()
+            if torch.is_tensor(v) and v.ndim == 1 and k not in ("E",)}
+    meta = {k: v for k, v in res.items() if not torch.is_tensor(v)}
+    np.savez_compressed(path, **cols, meta=json.dumps(meta, sort_keys=True))
+    print(f"wrote {path} ({path.stat().st_size / 1e6:.1f} MB, {len(cols)} columns)")
 
 
 def main() -> int:
@@ -269,6 +302,7 @@ def main() -> int:
     res["seconds"] = dt
     out = ROOT / a.out
     torch.save(res, out)
+    write_compact(res, ROOT / "results/records" / (pathlib.Path(a.out).stem + "_perstructure.npz"))
     print(f"scanned {len(idx)} structures in {dt:.0f}s "
           f"({len(idx) / dt:.1f}/s, {res['n_periodic_edges']} periodic edges)")
     print(f"wrote {out}")
