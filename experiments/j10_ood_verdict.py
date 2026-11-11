@@ -84,13 +84,40 @@ def decile_auroc(d: dict, mask: np.ndarray | None, p: float = 0.05, n_bins: int 
     return out
 
 
-def accuracy(d: dict) -> dict:
+def compositions(subset: str, row_ids: np.ndarray) -> np.ndarray | None:
+    """Element-count matrix [n, 119] for the scanned OMat24 rows, read back from
+    the LMDB on CPU. Needed because OMat24 was computed with a different VASP
+    pseudopotential set from MPtraj, so the raw energy error is dominated by
+    per-element reference offsets that a one-off linear fit removes."""
+    try:
+        from forcesketch_journal.data.aselmdb import AseLMDB
+        from forcesketch_journal.paths import SCRATCH
+        db = AseLMDB(SCRATCH / "omat24" / subset / "data.aselmdb")
+    except Exception as e:  # noqa: BLE001
+        print(f"  (no compositions for {subset}: {e})")
+        return None
+    X = np.zeros((row_ids.size, 119))
+    for i, rid in enumerate(row_ids.tolist()):
+        np.add.at(X[i], db.get(rid).numbers, 1.0)
+    db.close()
+    return X
+
+
+def accuracy(d: dict, X: np.ndarray | None = None) -> dict:
     n = d["natoms"].astype(float)
-    de = (d["E_mean"] - d["E_ref"]) / n
-    return {"force_rmse_mev_A": float(np.sqrt(np.sum(d["e_rmse"] ** 2 * 3 * n) / np.sum(3 * n))) * 1000,
-            "energy_mae_mev_atom": float(np.abs(de).mean()) * 1000,
-            "median_ref_force_max_eV_A": float(np.median(d["ref_force_max"])),
-            "frac_ref_force_max_below_0.05": float(np.mean(d["ref_force_max"] < 0.05))}
+    de_tot = d["E_mean"] - d["E_ref"]
+    out = {"force_rmse_mev_A": float(np.sqrt(np.sum(d["e_rmse"] ** 2 * 3 * n) / np.sum(3 * n))) * 1000,
+           "force_mae_proxy_mev_A": None,
+           "energy_mae_mev_atom": float(np.abs(de_tot / n).mean()) * 1000,
+           "median_ref_force_max_eV_A": float(np.median(d["ref_force_max"])),
+           "frac_ref_force_max_below_0.05": float(np.mean(d["ref_force_max"] < 0.05))}
+    if X is not None:
+        cols = np.flatnonzero(X.sum(0) > 0)
+        coef, *_ = np.linalg.lstsq(X[:, cols], de_tot, rcond=None)
+        resid = de_tot - X[:, cols] @ coef
+        out["energy_mae_mev_atom_after_element_offsets"] = float(np.abs(resid / n).mean()) * 1000
+        out["n_elements_fitted"] = int(cols.size)
+    return out
 
 
 def main() -> int:
@@ -109,14 +136,15 @@ def main() -> int:
     thr = float(proto["analysis"]["settings"]["filtered_force_threshold_eV_A"])
 
     rec_dir = ROOT / "results/records/j10"
-    ood = {}
+    ood, comp = {}, {}
     for m in MODELS:
         for sub in SUBSETS:
             p = rec_dir / f"j10_{m}_{sub}_perstructure.npz"
             if p.exists():
                 d = load_npz(p)
+                X = comp.setdefault(sub, compositions(sub, d["row_id"]))
                 ood[(m, sub)] = {"panel": panel(d, None, seed, n_boot=a.n_boot),
-                                 "deciles": decile_auroc(d, None), "accuracy": accuracy(d),
+                                 "deciles": decile_auroc(d, None), "accuracy": accuracy(d, X),
                                  "n_dropped_elements": d["meta"].get("n_dropped_elements")}
                 print(f"{m:<10} {sub:<28} n={ood[(m, sub)]['panel']['n']:5d}  "
                       f"maxatom {ood[(m, sub)]['panel']['auroc']['e_max']['exact_maxatom']:.3f}  "

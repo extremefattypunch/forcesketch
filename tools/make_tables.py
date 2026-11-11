@@ -139,7 +139,97 @@ def table_accuracy():
     return "table_accuracy"
 
 
+SIG_ROWS = [("max-atom", "exact_maxatom"), ("max-component", "exact_maxcomp"),
+            ("sum over coordinates (global)", "exact_global"),
+            (r"predicted force norm $\|\bar{f}\|$ \emph{(zero cost)}", "force_norm"),
+            ("energy spread \\emph{(zero cost)}", "energy_std"), ("random null", "random_null")]
+
+
+def table_ood():
+    """Error-ranking AUROC (top-5% e_max) of the QbC-8000 foundation committee:
+    MPtraj in-distribution (all structures, and excluding near-equilibrium and
+    single-atom structures) beside the three OMat24 out-of-distribution subsets."""
+    v = rd("j10_ood_verdict.json")
+    cols = []
+    mp = v.get("mptraj")
+    if mp:
+        cols += [("MPtraj, all", mp["full"]["auroc"]["e_max"], mp["full"]["n"]),
+                 ("MPtraj, filtered", mp["filtered"]["auroc"]["e_max"], mp["filtered"]["n"])]
+    for sub, lab in (("aimd-from-PBE-1000-nvt", "OMat24 NVT"), ("aimd-from-PBE-1000-npt", "OMat24 NpT"),
+                     ("rattled-1000-subsampled", "OMat24 rattled")):
+        o = v["ood"].get(f"qbc8000|{sub}")
+        if o:
+            cols.append((lab, o["panel"]["auroc"]["e_max"], o["panel"]["n"]))
+    L = [r"\begin{tabular}{l" + "c" * len(cols) + "}", r"\toprule",
+         "signal & " + " & ".join(c[0] for c in cols) + r" \\",
+         " & " + " & ".join(rf"($n={c[2]:,}$)" for c in cols) + r" \\", r"\midrule"]
+    for lab, k in SIG_ROWS:
+        cells = []
+        for _, au, _ in cols:
+            x = au[k]
+            cells.append(rf"\textbf{{{x:.3f}}}" if k == "force_norm" else f"{x:.3f}")
+        L.append(f"{lab} & " + " & ".join(cells) + r" \\")
+    L += [r"\bottomrule", r"\end{tabular}"]
+    (OUT / "table_ood.tex").write_text("\n".join(L) + "\n")
+    return "table_ood"
+
+
+def table_ood_committees():
+    """All four foundation committees out of distribution (SI): force RMSE,
+    max-atom AUROC, force-norm AUROC and their paired difference with CI."""
+    v = rd("j10_ood_verdict.json")
+    NAMES = {"qbc8000": "QbC, 8000", "qbc1000": "QbC, 1000", "random8000": "random, 8000",
+             "mmf8000": "max mean force, 8000"}
+    L = [r"\begin{tabular}{llrccc}", r"\toprule",
+         r"readout training set & OMat24 subset & $F$ RMSE & AUROC max-atom & AUROC $\|\bar{f}\|$ & $\Delta$ [95\% CI] \\",
+         r" & & (meV/\AA) & & & \\", r"\midrule"]
+    for m, lab in NAMES.items():
+        for sub, slab in (("aimd-from-PBE-1000-nvt", "NVT"), ("aimd-from-PBE-1000-npt", "NpT"),
+                          ("rattled-1000-subsampled", "rattled")):
+            o = v["ood"].get(f"{m}|{sub}")
+            if not o:
+                continue
+            au = o["panel"]["auroc"]["e_max"]; d = o["panel"]["free_minus_best_committee"]["e_max"]
+            L.append(f"{lab} & {slab} & {o['accuracy']['force_rmse_mev_A']:.0f} & {au['exact_maxatom']:.3f} & "
+                     f"{au['force_norm']:.3f} & {d['delta']:+.3f} [{d['ci95'][0]:+.3f}, {d['ci95'][1]:+.3f}] " + r"\\")
+    L += [r"\bottomrule", r"\end{tabular}"]
+    (OUT / "table_ood_committees.tex").write_text("\n".join(L) + "\n")
+    return "table_ood_committees"
+
+
+def table_al():
+    """One active-learning round on 3BPA: force RMSE after retraining, by
+    selection rule, mean and standard deviation over three model seeds."""
+    v = rd("j11_verdict.json")["table"]
+    NAMES = {"none": "none (100 frames only)", "random": "random", "global": "sum over coordinates (global)",
+             "maxcomp": "max-component", "maxatom": "max-atom",
+             "force_norm": r"predicted force norm $\|\bar{f}\|$ \emph{(zero cost)}",
+             "energy_std": "energy spread \\emph{(zero cost)}"}
+
+    def ms(r, key):
+        c = v[r].get(key)
+        if not c:
+            return "--"
+        return f"{c['mean']:.1f}" + (f" $\\pm$ {c['sd']:.1f}" if c["sd"] is not None else "")
+
+    L = [r"\begin{tabular}{lrccc c}", r"\toprule",
+         r"selection rule & $n_\mathrm{train}$ & \multicolumn{3}{c}{force RMSE after retraining (meV/\AA)} & $E$ MAE \\",
+         r"\cmidrule(lr){3-5}", r" & & held-out 1200 K & 600 K & 300 K & held-out (meV/atom) \\", r"\midrule"]
+    for r, lab in NAMES.items():
+        if r not in v:
+            continue
+        L.append(f"{lab} & {v[r]['n_train']} & {ms(r, 'heldout_1200K/force_rmse_mev_A')} & "
+                 f"{ms(r, 'test_600K/force_rmse_mev_A')} & {ms(r, 'test_300K/force_rmse_mev_A')} & "
+                 f"{ms(r, 'heldout_1200K/energy_mae_mev_atom')} " + r"\\")
+    L += [r"\bottomrule", r"\end{tabular}"]
+    (OUT / "table_al.tex").write_text("\n".join(L) + "\n")
+    return "table_al"
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for f in (table_mptraj, table_pairs, table_accuracy):
-        print(f"  wrote paper/tables/{f()}.tex")
+    for f in (table_mptraj, table_pairs, table_accuracy, table_ood, table_ood_committees, table_al):
+        try:
+            print(f"  wrote paper/tables/{f()}.tex")
+        except FileNotFoundError as e:
+            print(f"  skipped {f.__name__}: record not yet available ({e.filename})")

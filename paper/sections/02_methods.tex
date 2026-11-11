@@ -1,0 +1,605 @@
+% paper/sections/02_methods.tex
+% Methods for the JCTC revision of ct-2026-01838j.
+% Derived numbers are \fs... macros from paper/macros.tex. Training recipes,
+% dataset sizes and protocol settings are transcribed from
+% paper/REVISION_FACTS.md (sections 4 and 7) and protocols/j10_ood.yaml,
+% protocols/j11_active_learning.yaml. \fsTODO marks a number that will exist as
+% a macro once the J10 scoring record is committed.
+
+\section{Methods}
+\label{sec:methods}
+
+This section defines every object the Results use.
+Section~\ref{sec:committees} describes how each committee was built.
+Section~\ref{sec:scores} defines the uncertainty of a committee and the three
+ways we reduce that uncertainty to one number per structure.
+Section~\ref{sec:baselines} defines two zero-cost baselines that every
+committee score is compared against. Section~\ref{sec:metric} defines what
+counts as an error and how a score is judged for ranking errors, and
+Section~\ref{sec:calibmetrics} defines the calibration metrics.
+Section~\ref{sec:screening} defines the cheap estimators and the screening rule
+built on them. Section~\ref{sec:data} lists the datasets, the splits, and the
+overlap between training and evaluation sets. Section~\ref{sec:protocols}
+gives the two experiments that were pre-registered for this revision.
+Table~\ref{tab:notation} collects the notation.
+
+\subsection{Committee models}
+\label{sec:committees}
+
+A committee is a set of $M$ force predictors evaluated on the same structure.
+The spread of the $M$ predictions is the uncertainty. We use three kinds of
+committee, all with $M=8$ members. The first two kinds were trained by
+\citet{beck2025committee} and released with the supporting data of that paper;
+we use those checkpoints unchanged, and the recipes below are taken from the
+training scripts and configuration files in that archive. The third kind places
+new committee heads on a frozen foundation-model trunk.
+
+\subsubsection{Shared-trunk committees}
+
+A shared-trunk committee, also called a multi-head committee, attaches $M$
+readout heads to one message-passing trunk~\citep{beck2025committee}. The
+construction is a shallow ensemble in the sense of
+\citet{kellner2024shallow}: the heads share every feature and differ only in
+the last layer. The trunk is a MACE model~\citep{batatia2022mace} with two
+interaction layers, 32 channels, maximum rotational order $L=1$, correlation
+order 3 and a cutoff radius of $6.0$~\AA. Each head $m$ is a separate readout
+attached to the atomic features of every layer: a linear readout on the first
+layer and a multilayer perceptron with one hidden layer of 16 SiLU units on the
+second. Head $m$ sums its per-atom readouts into an energy $E_m(x)$ for a
+structure $x$, and the forces of head $m$ are
+$F_m(x)=-\nabla_x E_m(x)$. One evaluation of the trunk therefore gives $M$
+energies and, after the backward passes described in
+Section~\ref{sec:screening}, $M$ force vectors.
+
+Every head is trained with the loss
+\begin{equation}
+\mathcal{L}=10\,\mathrm{MSE}(E)+1000\,\mathrm{MSE}(F),
+\label{eq:loss}
+\end{equation}
+with the per-atom normalisation of the energy term used by MACE, on the
+structures assigned to that head. Gradients from every head update the trunk.
+Training used the Adam optimiser with an exponential moving average of the
+weights, batch size 10, float32 arithmetic and random seed 123, followed by
+stochastic weight averaging (SWA) over the final quarter of the epochs.
+
+The heads differ only through the training data each head sees. The trunk
+sees every training structure in all three constructions.
+\begin{itemize}
+\item \emph{Disjoint heads.} The training set is divided evenly among the
+  eight heads with no structure shared. Each structure updates the trunk and
+  the one head assigned to that structure, so each head is fitted to one
+  eighth of the data.
+\item \emph{Overlapping heads.} Each head is trained on an independently drawn
+  random 80\% of the training set, with the remaining 20\% used as the
+  validation set of that head. Any two heads share most of their data.
+\item \emph{Identical data.} Every head is trained on the full training set.
+  The heads differ only by their random initialisation.
+\end{itemize}
+The number of epochs, with the epoch at which SWA began in parentheses, was:
+3BPA disjoint 500 (375), overlapping 78 (59), identical data 65 (49); liquid
+water disjoint 200 (150), overlapping 31 (23); rMD17 disjoint 320 (240). The
+overlapping and identical-data committees were trained for fewer epochs because
+each head sees more data per epoch.
+
+\subsubsection{Independently trained committees}
+
+An independently trained committee consists of eight complete MACE models of
+the architecture above, each trained from scratch with the loss of
+Eq.~\eqref{eq:loss} and the same optimiser, from random seeds 0 to 7
+\citep{krogh1995neural,lakshminarayanan2017simple}.
+\citet{beck2025committee} call this construction a naive committee. Two
+variants match two of the shared-trunk constructions. In the identical-data
+variant all eight models use the same training and validation files, which
+matches identical-data heads. In the resampled variant each model draws its
+own random 80\% of the training set, which matches overlapping heads. The
+number of epochs (SWA start) was 3BPA resampled 625 (469), 3BPA identical data
+521 (391), water resampled 250 (188). The committee mean, the head variance and
+every score in Section~\ref{sec:scores} are computed from the eight force
+vectors by the same code as for the shared-trunk committees, so construction
+is the only variable in a matched comparison.
+
+\subsubsection{Foundation committees}
+
+The third kind places committee heads on a foundation model. The trunk is
+MACE-MP-0b (medium, agnesi radial basis)~\citep{batatia2023foundation}, which
+was pretrained on the MPtraj dataset~\citep{deng2023chgnet}. The trunk is
+frozen. Eight new disjoint readout heads, about $15{,}000$ parameters in
+total, are the only trainable weights. Fine-tuning ran for 1000 epochs with SWA
+from epoch 800, learning rate 0.01, AMSGrad, an exponential moving average with
+decay 0.99, float64 arithmetic, and the loss
+$10\,\mathrm{MSE}(E)+1000\,\mathrm{MSE}(F)+1\,\mathrm{MSE}(\text{stress})$,
+with the isolated-atom reference energies of the foundation model. Four
+variants, all from \citet{beck2025committee}, differ only in which MPtraj
+structures the heads were fitted on: $8{,}000$ structures selected by
+query by committee (QbC-8000), $1{,}000$ selected the same way (QbC-1000),
+$8{,}000$ drawn at random (random-8000), and the $8{,}000$ with the largest
+predicted mean force (max-force-8000). Because the trunk was pretrained on
+MPtraj, no MPtraj structure is new to the trunk. Section~\ref{sec:data} states
+what that overlap means for each experiment.
+
+\subsection{Uncertainty and the three structure-level scores}
+\label{sec:scores}
+
+For a structure $x$ with $N$ atoms, let $F(x)\in\mathbb{R}^{3N\times M}$ hold
+the predicted forces, one column per head, and let
+$\bar f(x)=M^{-1}\sum_{m}F_{\cdot m}(x)$ be the committee mean. The committee
+mean is the force a simulation would use. Index the $3N$ Cartesian coordinates
+by $d$ and the atoms by $a$. The per-coordinate head variance is the unbiased
+variance over heads,
+\begin{equation}
+v_d(x)=\frac{1}{M-1}\sum_{m=1}^{M}\bigl(F_{dm}(x)-\bar f_d(x)\bigr)^2 ,
+\label{eq:vd}
+\end{equation}
+and the per-atom standard deviation is the mean over the three Cartesian
+components of atom $a$,
+\begin{equation}
+\sigma_a(x)=\frac{1}{3}\sum_{d\in a}\sqrt{v_d(x)} ,
+\label{eq:sigma}
+\end{equation}
+which is the per-atom uncertainty of \citet{beck2025committee}. Every
+per-atom uncertainty in this paper is $\sigma_a$, and every per-coordinate
+uncertainty is $\sigma_d=\sqrt{v_d}$.
+
+A selection rule needs one number per structure. We compare three reductions
+of the head variance to such a number:
+\begin{align}
+S_{\mathrm{glob}}(x)&=\sum_{d=1}^{3N} v_d(x) \qquad\text{(global score),}
+\label{eq:global}\\
+S_{\mathrm{comp}}(x)&=\max_{d}\sqrt{v_d(x)} \qquad\text{(max-component score),}
+\label{eq:maxcomp}\\
+S_{\mathrm{atom}}(x)&=\max_{a}\sigma_a(x) \qquad\text{(max-atom score).}
+\label{eq:maxatom}
+\end{align}
+The global score is the sum over all $3N$ coordinates of the per-coordinate
+head variance. The max-component score is the largest per-coordinate standard
+deviation, and is the rule \citet{beck2025committee} used for acquisition. The
+max-atom score is the largest per-atom standard deviation. The global score
+sums over coordinates and therefore grows with $N$ even when the uncertainty
+per coordinate is constant; the two maximum scores do not. For pools in which
+$N$ varies we also use the size-normalised score
+\begin{equation}
+S_{\alpha}(x)=\frac{S_{\mathrm{glob}}(x)}{(3N)^{\alpha}},
+\label{eq:salpha}
+\end{equation}
+with the exponent $\alpha$ chosen on a design split
+(Section~\ref{sec:data}). The value $\alpha=0$ recovers the global score and
+$\alpha=1$ gives the mean per-coordinate variance. At fixed $N$ every $\alpha$
+gives the same ranking, so the normalisation changes nothing on a single-size
+dataset.
+
+The global score depends on $F(x)$ only through a small matrix. Let
+$Q_c\in\mathbb{R}^{M\times r}$ with $r=M-1$ be an orthonormal basis of the
+subspace of head space orthogonal to the all-ones vector; we use the Helmert
+basis. Multiplying by $Q_c$ removes the mean force, and
+\begin{equation}
+A(x)=Q_c^{\top}F(x)^{\top}F(x)\,Q_c\in\mathbb{R}^{r\times r},\qquad
+v_d(x)=\frac{\lVert Q_c^{\top}F_{d\cdot}(x)^{\top}\rVert^{2}}{M-1},\qquad
+S_{\mathrm{glob}}(x)=\frac{\operatorname{tr}A(x)}{M-1},
+\label{eq:A}
+\end{equation}
+where $F_{d\cdot}(x)\in\mathbb{R}^{1\times M}$ is row $d$ of $F(x)$. This
+centred head-space matrix is needed because every cheap estimator of the
+global score in Section~\ref{sec:screening} is a function of $A(x)$ alone:
+$A(x)$ has $r\times r$ entries whatever the value of $N$, so a pool scan can
+store $A(x)$ for every structure instead of $F(x)$, and the exactness of each
+estimator can be checked against Eq.~\eqref{eq:vd} directly. The two maximum
+scores are not functions of $A(x)$ and are computed from $F(x)$.
+
+\subsection{Zero-cost baselines}
+\label{sec:baselines}
+
+A committee score should not be compared with random selection alone, because
+two informative quantities are available before any committee uncertainty has
+been computed.
+
+The \emph{predicted force norm} is the largest mean-force magnitude on any
+atom,
+\begin{equation}
+b_F(x)=\max_{a}\lVert \bar f_a(x)\rVert .
+\label{eq:bF}
+\end{equation}
+The mean force is the force the integrator needs, so $b_F$ costs nothing beyond
+the simulation step itself. Force errors tend to grow with force magnitude, so
+$b_F$ is a plausible predictor of error, and selection by the largest mean
+force is one of the acquisition baselines of \citet{beck2025committee}.
+
+The \emph{head-energy spread} is the unbiased standard deviation of the $M$
+head energies,
+\begin{equation}
+b_E(x)=\Bigl(\frac{1}{M-1}\sum_{m=1}^{M}\bigl(E_m(x)-\bar E(x)\bigr)^2\Bigr)^{1/2}.
+\label{eq:bE}
+\end{equation}
+The head energies are produced by the forward pass, so $b_E$ costs one forward
+pass and no backward pass beyond the one that produces the mean force.
+
+Both quantities are zero-cost relative to committee force uncertainty, which
+for a shared-trunk committee needs $r=M-1$ additional backward passes
+(Section~\ref{sec:screening}) and for an independently trained committee needs
+$M$ complete model evaluations.
+
+\subsection{Error targets and the ranking metric}
+\label{sec:metric}
+
+Let $F_{\mathrm{ref}}(x)$ be the reference forces from the electronic-structure
+method that labelled the dataset, and let
+\begin{equation}
+\Delta(x)=\bar f(x)-F_{\mathrm{ref}}(x)\in\mathbb{R}^{3N}
+\label{eq:delta}
+\end{equation}
+be the error of the committee mean. We measure the error of the committee
+mean, not of the individual heads, because the mean is the prediction a
+simulation uses and the prediction a selection rule is meant to protect. The
+error vector is reduced to one number per structure in four ways, which we call
+the error targets:
+\begin{align}
+e_{\max}(x)&=\max_{a}\lVert\Delta_a(x)\rVert \qquad\text{(largest per-atom error; primary),}\\
+e_{\mathrm{rmse}}(x)&=\Bigl(\frac{1}{3N}\sum_{d}\Delta_d(x)^2\Bigr)^{1/2} \qquad\text{(root-mean-square error over coordinates),}\\
+e_{\mathrm{maxcomp}}(x)&=\max_{d}\lvert\Delta_d(x)\rvert \qquad\text{(largest per-coordinate error),}\\
+e_{\mathrm{q95}}(x)&=\text{the 95th percentile of }\lvert\Delta_d(x)\rvert\text{ over the $3N$ coordinates.}
+\end{align}
+The largest per-atom error is primary because a simulation fails through its
+worst atom. The other three targets test whether a conclusion depends on the
+reduction chosen.
+
+For a given error target, the \emph{positives} of an evaluation set are the
+5\% of structures with the largest value of that target. A score is judged by
+the area under the receiver operating characteristic curve (AUROC): the
+probability that a randomly chosen positive structure receives a higher score
+than a randomly chosen negative structure, computed as the Mann--Whitney
+statistic with tied ranks averaged. A value of 0.5 means the score carries no
+information about which structures are positive; a value of 1 means every
+positive is scored above every negative. AUROC depends only on the ranking, so
+it is unaffected by any monotone rescaling of a score, and in particular by
+the magnitude calibration of the committee. A \emph{random null}, a uniformly
+random score with a recorded seed, is reported next to every comparison; its
+departure from 0.5 shows the finite-sample noise of the evaluation set.
+
+The ranking comparisons fit nothing, so they use the full evaluation set of
+each system. Confidence intervals come from a moving-block
+bootstrap~\citep{kunsch1989jackknife}, with block length $\lceil 2\tau_{\mathrm{int}}\rceil$
+frames, where $\tau_{\mathrm{int}}$ is the integrated autocorrelation time of
+the error target along the trajectory (Section~\ref{sec:data}). The bootstrap
+is paired: the same resample of structures is scored with both signals of a
+difference, so the interval of the difference accounts for the correlation
+between the two signals. The number of resamples and the seed are stored with
+each record. A difference is called significant when its 95\% interval excludes
+zero. These intervals quantify the resampling of structures at a fixed split
+assignment; they do not include the variability of redrawing the split.
+
+\subsection{Calibration metrics}
+\label{sec:calibmetrics}
+
+Ranking quality and calibration are different
+properties~\citep{pernot2022long,tran2020methods}: a committee can order
+structures correctly while understating every error by the same factor.
+Table~\ref{tab:accuracy} reports, for every committee and evaluation set, the
+force mean absolute error (MAE) and root-mean-square error (RMSE) of the
+committee mean and the per-atom energy MAE and RMSE, next to the following four
+calibration measures. Figure~\ref{fig:calibration} shows the
+error-versus-uncertainty relation that the measures summarise.
+
+\emph{Overconfidence ratio.} The force RMSE of the committee mean over all
+coordinates and structures of an evaluation set, divided by the median of
+$\sigma_a$ over all atoms and structures of that set. A ratio of 1 means the
+typical disagreement matches the typical error; a ratio above 1 means the
+committee understates its error by that factor.
+
+\emph{Z-score variance.} With $z_d=\Delta_d/\sigma_d$ per coordinate, we report
+the mean of $z_d^2$ over all coordinates and structures. If the errors were
+Gaussian with standard deviation $\sigma_d$ this variance would be 1; a larger
+value means overconfidence and a smaller value
+underconfidence~\citep{kahle2022quality,busk2021calibrated}. The per-atom
+version uses $\lVert\Delta_a\rVert/(\sqrt{3}\,\sigma_a)$.
+
+\emph{Spearman rank correlation.} Per atom, the Spearman correlation between
+$\sigma_a$ and $\lVert\Delta_a\rVert$ pooled over all atoms of all structures.
+Per structure, the Spearman correlation between $\max_a\sigma_a$ and
+$e_{\max}$. A rank correlation is used for the same reason as AUROC: it is
+unaffected by the magnitude calibration.
+
+\emph{Reliability curve.} All atoms of an evaluation set are sorted by
+$\sigma_a$ and divided into ten bins with equal numbers of atoms. For each bin
+we plot the mean of $\sigma_a$ against the root mean square of
+$\lVert\Delta_a\rVert$~\citep{kahle2022quality,levi2022evaluating}. For a
+calibrated committee with Gaussian errors the root mean square of the
+three-component error norm equals $\sqrt{3}\,\sigma_a$, and that line is drawn
+as the reference. Equal-count bins avoid sparsely populated bins at large
+$\sigma_a$, where a curve built from equal-width bins is dominated by a few
+atoms.
+
+\subsection{Cheap estimators and the screening rule}
+\label{sec:screening}
+
+\subsubsection{Cost model}
+
+For a shared-trunk committee the forces of all heads come from one trunk, and
+the cost lies in the backward passes. One reverse-mode pass through the trunk,
+with the $M$ head energies weighted by a vector $w\in\mathbb{R}^{M}$, returns
+the projection
+\begin{equation}
+g=F(x)\,w\in\mathbb{R}^{3N}.
+\label{eq:projection}
+\end{equation}
+The mean force is the projection with $w=\mathbf{1}/M$ and costs one backward
+pass, which the simulation pays in any case. The exact per-coordinate variances
+of Eq.~\eqref{eq:vd} need the $r=M-1$ projections onto the columns of $Q_c$,
+hence $r$ further backward passes, after which $A(x)$ follows exactly. A cheap
+estimator uses $K<r$ projections onto directions $w_1,\dots,w_K$ in the centred
+subspace. Throughout, $K$ denotes the number of head-space projections an
+estimator uses, and the total cost of the cheap score is $K+1$ backward passes
+including the mean force. Estimators are compared at equal numbers of backward
+passes. For an independently trained committee there is no shared trunk;
+obtaining $F(x)\,w$ needs all $M$ columns of $F(x)$, so no estimator can cost
+less than the exact quantity and the screening rule below does not apply.
+
+\subsubsection{Estimators of the global score}
+
+Every estimator below is a function of $A(x)$ (Eq.~\ref{eq:A}), because
+$\lVert g_k\rVert^2=w_k^{\top}F(x)^{\top}F(x)\,w_k$. We compare four.
+\begin{enumerate}
+\item \emph{Random sketch.} In the Haar sketch, $w_1,\dots,w_K$ are an
+  orthonormal set drawn uniformly at random from the centred subspace, and the
+  estimate is $(r/K)\sum_{k}\lVert g_k\rVert^2/(M-1)$, which is unbiased for
+  $S_{\mathrm{glob}}$. In the Gaussian sketch the $w_k$ are independent
+  standard Gaussian vectors in the centred subspace with the matching scaling.
+\item \emph{Head subsampling.} $K$ of the $M$ heads are chosen at random, and
+  the variance of their forces about the full committee mean is rescaled by
+  $M/\bigl(K(M-1)\bigr)$, which makes the estimate unbiased.
+\item \emph{Randomised low-rank sketch with control variate.} The leading
+  $r_0$ eigenvectors of the pooled design-split matrix
+  $G=\sum_{x\in\mathrm{design}}A(x)$ are evaluated exactly, and the residual
+  subspace orthogonal to those eigenvectors is sketched with the remaining
+  $K-r_0$ random directions. This is the split between an exact leading
+  subspace and a sketched residual that \citet{meyer2021hutchpp} show to be
+  optimal for trace estimation. The estimate is unbiased and the random part
+  sees only the energy left in the residual.
+\item \emph{Deterministic leading subspace.} The $r_0$ leading eigenvectors of
+  $G$ only, with no residual term: the estimate is
+  $\sum_{k\le r_0}\lVert g_k\rVert^2/(M-1)$. The estimate is biased low by the
+  energy in the residual subspace, involves no randomness, and costs $r_0+1$
+  backward passes.
+\end{enumerate}
+Randomised estimators are run with ten fixed probe seeds, and the worst seed
+is reported next to the mean, because a deployment draws one seed. Unless
+stated otherwise, $K=4$ and $r_0=2$.
+
+\subsubsection{The screening rule}
+
+Let $S$ be the exact score, the global score unless stated otherwise, let
+$\hat S$ be a cheap estimate of $S$, and let $\tau$ be a selection threshold
+set on the design split as the 95th percentile of $S$ there, so that the exact
+rule selects about 5\% of structures. The \emph{exact rule} computes $S(x)$ for
+every structure and selects those with $S(x)\ge\tau$. The \emph{screening rule}
+computes $\hat S(x)$ from $K$ projections; if $c_\alpha\hat S(x)<\tau$ the
+structure is skipped, which means not selected and not evaluated further;
+otherwise $S(x)$ is computed exactly and the structure is selected if and only
+if $S(x)\ge\tau$.
+
+The constant $c_\alpha$ is the split-conformal
+one~\citep{vovk2005algorithmic,lei2018distribution}. With $n$ calibration
+structures and ratios $\rho_i=S(x_i)/\hat S(x_i)$, $c_\alpha$ is the
+$\lceil (n+1)(1-\alpha)\rceil$-th smallest $\rho_i$. If calibration and test
+structures are exchangeable, then for a new structure
+$\Pr\bigl[S(x)\le c_\alpha\hat S(x)\bigr]\ge 1-\alpha$, so the screening rule
+skips a structure the exact rule would have selected with probability at most
+$\alpha$. When $\lceil (n+1)(1-\alpha)\rceil>n$ no order statistic carries
+this guarantee; the implementation then returns $c_\alpha=+\infty$, and the
+rule skips nothing, which is the safe failure. The realised coverage of the
+rule follows the $\mathrm{Beta}(k,\,n+1-k)$ law with
+$k=\lceil (n+1)(1-\alpha)\rceil$. We verify that law by simulation rather
+than assert it, at the smallest and largest calibration sets
+($n=\fsCovNCalMin$ and $n=\fsCovNCalMax$) among the $\fsCovSplits$ registered
+splits. The guarantee is weakest at the smallest, $n=\fsCovNCalMin$, where the
+realised coverage is $\fsCovRealisedMin$ against the $\fsCovBetaMin$ the law
+predicts. At the value $\alpha=0.05$ used throughout, $\fsCovInfeasible$ of
+the $\fsCovSplits$ splits lack a feasible order statistic.
+
+Two properties of the rule follow from the construction. First, a systematic
+bias in $\hat S$ is absorbed by $c_\alpha$ exactly, because $c_\alpha$ is
+fitted to the ratio $S/\hat S$; only the variance of $\hat S$ across
+structures widens the ratio distribution and reduces skipping. Second, the set
+selected by the screening rule is a subset of the set selected by the exact
+rule, so the fidelity of the screening rule to the exact committee statistic
+is measured as the drop in recall of the top-5\% error positives relative to
+the exact rule. That drop is never negative. The benefit is measured as the
+\emph{skip fraction}, the fraction of test structures for which the exact
+computation was avoided.
+
+What the rule costs when it does not skip must be stated, because this is the
+obvious way to flatter such a method. There is no partial credit. A structure
+the rule declines to skip is then evaluated exactly and in full, so the $K{+}1$
+backward passes already spent on its cheap score are overhead rather than a
+down payment on the exact computation. The skip fractions reported are
+therefore counts of structures that avoided the exact computation altogether,
+estimators are compared at matched numbers of backward passes, and the skip
+fraction is reported in place of a speedup because the skip fraction is
+independent of hardware, automatic-differentiation backend and batch size.
+Wall-clock measurements are reported separately (Figure~\ref{fig:speedup}).
+
+\subsection{Datasets, splits and contamination}
+\label{sec:data}
+
+\subsubsection{Datasets}
+
+\emph{3BPA} is a 27-atom flexible organic molecule~\citep{kovacs2021beyond}.
+The training set is the 100 frames sampled at 300~K that \citet{beck2025committee}
+used for every 3BPA committee, with 300 further frames at 300~K for validation.
+The test sets are the published frames at 300, 600 and 1200~K
+(1669, 2138 and 2139 frames). Because all 3BPA committees were trained at
+300~K, temperature is a graded distance from the training distribution with
+the model, the molecule and $N$ held fixed.
+
+\emph{rMD17} is the revised MD17 set of ten small organic
+molecules~\citep{christensen2020role}. One committee was trained jointly on 50
+frames of each of the ten molecules (500 frames; 100 frames per molecule for
+validation). We score the held-out test frames of ethanol (9 atoms), aspirin
+(21 atoms) and azobenzene (24 atoms), 1000 frames each. Every rMD17 result in
+this paper therefore refers to one committee with disjoint heads, evaluated
+on three molecules.
+
+\emph{Liquid water} is a periodic box of 64 molecules (192 atoms, cubic cell
+of edge 12.42~\AA). The committees were trained on 111 frames with 500 for
+validation. Two test sets of 500 frames each at 300~K come from a classical
+molecular dynamics (MD) trajectory and from a path-integral molecular dynamics
+(PIMD) trajectory. The two differ only in nuclear quantum effects, which gives
+a distribution shift with the temperature, the system and the cell held fixed.
+All 3BPA and water frames and all checkpoints are the supporting data of
+\citet{beck2025committee}; the rMD17 frames are those of
+\citet{christensen2020role}. Every file is verified against a recorded SHA-256
+hash before use.
+
+\emph{MPtraj pool.} The materials pool is the set of $\fsMPtrajN$ periodic
+structures from MPtraj~\citep{deng2023chgnet} that remained after the
+query-by-committee selection of \citet{beck2025committee}, spanning 89
+elements and 1 to 444 atoms with a median of 20 atoms. The pool contains many
+near-equilibrium frames whose reference forces are close to zero. Structures of
+different size cannot be stacked into one array, so the scan stores
+$A(x)$ (Eq.~\ref{eq:A}) and the two maximum scores for each structure, and
+the identity between the stored $A(x)$ and the direct computation of
+Eq.~\eqref{eq:vd} is asserted before the scan starts.
+
+\subsubsection{Contamination between training and evaluation}
+
+The MACE-MP-0b trunk was pretrained on MPtraj. The MPtraj pool is therefore
+inside the training distribution of the trunk, and largely inside its training
+set; the pool is out-of-sample only for the readout heads. Of the four
+foundation committees, only QbC-8000 can be scored on the pool without
+contamination of the heads, because the pool is by construction the complement
+of the QbC selection: no structure of the QbC-8000 fine-tuning set appears in
+the pool, which we checked by content hash. The random-8000 and max-force-8000
+committees were fitted on structures most of which lie inside the pool
+(\fsTODO{number of the 8,000 random-selected and of the 8,000
+max-force-selected fine-tuning structures that lie inside the pool}), so those
+committees are not scored on MPtraj. The submitted version of this paper did
+not state the pretraining overlap; the out-of-distribution protocol of
+Section~\ref{sec:protocols} exists because of that overlap. For 3BPA, rMD17
+and water the test frames are disjoint from the training and validation frames
+of every committee.
+
+\subsubsection{Splits}
+
+Three quantities are fitted in this paper: the leading subspace and the
+threshold $\tau$ (on a design split), the constant $c_\alpha$ (on a calibration
+split), and the exponent $\alpha$ of Eq.~\eqref{eq:salpha} (on a design
+split). Every number that involves a fitted quantity is reported on a test
+split disjoint from the split the quantity was fitted on. Trajectory frames
+are ordered in time, so a random split of frames can place near-duplicate
+frames on both sides of a fit. Each trajectory is instead cut into ten
+contiguous blocks, of which two serve as the design split, two as the
+calibration split and six as the test split. The roles of the blocks are
+permuted with a seed mixed with a hash of the system name, so that every role
+samples the whole trajectory and a slow drift is not confounded with the role.
+At each boundary where the role changes, a guard band of
+$\lceil 2\tau_{\mathrm{int}}\rceil$ frames is dropped, where
+$\tau_{\mathrm{int}}$ is the integrated autocorrelation time of the error
+series measured by automatic windowing. The same $\tau_{\mathrm{int}}$ sets
+the block length of the bootstrap in Section~\ref{sec:metric}. The MPtraj pool
+is not a trajectory; there, a seeded random tenth of the pool is the design
+split and the remainder is the test split. Each split is written to a manifest
+whose content hash covers the structure identifiers and their roles, and each
+manifest recomputes from its recorded seed, so a regenerated manifest hashes
+identically if and only if the assignment is identical.
+
+\subsection{Out-of-distribution and active-learning protocols}
+\label{sec:protocols}
+
+Two experiments were added for this revision. For each, the predictions, the
+scoring script and the thresholds were written and registered by hash before
+any structure was scored or any model trained.
+
+\subsubsection{Out-of-distribution scan on OMat24}
+
+The MPtraj result is open to two objections: the trunk was pretrained on the
+pool, and the pool contains near-equilibrium frames with vanishing forces. The
+scan addresses both. The evaluation data are three subsets of the validation
+split of OMat24~\citep{barrosoluque2024omat24}, which post-dates the training
+of MACE-MP-0 and which \citet{beck2025committee} used as their
+out-of-distribution test: aimd-from-PBE-1000-nvt and aimd-from-PBE-1000-npt,
+both ab initio molecular dynamics at 1000~K and far from equilibrium, and
+rattled-1000-subsampled, rattled static frames. From each subset $10{,}000$
+structures are drawn without replacement with a seeded generator (seed
+20261111). Structures containing an element outside the 89-element table of
+the model are dropped and counted. No structure in OMat24 was seen by the
+trunk or by any readout head. All four foundation committees are scored. For
+each committee and subset we report, for the top-5\% $e_{\max}$ positives,
+the AUROC of the three committee scores and of the zero-cost baselines, and
+the AUROC averaged within deciles of the reference-force magnitude, which asks
+whether a committee score carries information beyond force magnitude. On the
+in-distribution MPtraj pool the same scoring is repeated after excluding
+structures whose largest reference-force norm is below 0.05~eV/\AA\ and
+single-atom cells. Intervals are from a paired bootstrap with a recorded seed.
+Five predictions were registered: (P1) the max-atom score reaches AUROC of at
+least 0.70 on both molecular-dynamics subsets for the QbC-8000 committee;
+(P2) on both molecular-dynamics subsets the predicted force norm is within
+0.02 AUROC of, or above, the best committee score; (P3) on the filtered MPtraj
+pool the margin of the predicted force norm over the best committee score
+shrinks but stays positive; (P4) within reference-force deciles the max-atom
+score exceeds AUROC 0.55 on both molecular-dynamics subsets; (P5) the
+committee with the lowest out-of-distribution force RMSE has the highest
+max-atom AUROC. Results are in Table~\ref{tab:ood}.
+
+\subsubsection{One active-learning round on 3BPA}
+
+Identifying high-error structures is not the same as acquiring the structures
+that most improve a retrained model. One retraining round tests the link on
+3BPA. The base training set is the 100 frames at 300~K used for every 3BPA
+committee. The pool is the 2139 labelled frames of the 1200~K test set. Each
+selection rule scores the pool with the shared-trunk committee with disjoint
+heads and picks $k=50$ frames. The rules are: none (no frames added), the
+global, max-component and max-atom scores, the predicted force norm, the
+head-energy spread, and random. For each rule a single-head MACE model with
+the independent-committee recipe of Section~\ref{sec:committees} (two layers,
+32 channels, $L=1$, cutoff 6~\AA, energy and force weights 10 and 1000, EMA and
+SWA, 625 epochs, float32, with the 300-frame validation file) is trained from
+scratch on the 150 frames, with model seeds 0, 1 and 2; the random rule draws
+a different subset for each seed. Each model is evaluated by force RMSE, force
+MAE and per-atom energy MAE on (i) the 1820 pool frames that no rule selected,
+a held-out set common to every rule, (ii) the 600~K test set and (iii) the
+300~K test set. Five predictions were registered: (P1) every rule, random
+included, lowers the held-out 1200~K force RMSE relative to the control with no
+added frames; (P2) each of the global, max-component, max-atom and force-norm
+rules gives a lower held-out force RMSE than random; (P3) the force-norm rule
+is within 10\% (relative) of the best committee rule; (P4) at fixed $N$ the
+global and max-component rules train models whose RMSE differ by less than the
+across-seed standard deviation of either; (P5) on the 300~K test set no rule
+improves the force RMSE over the control by more than 5\%. Results are in
+Table~\ref{tab:al}.
+
+\begin{table}[t]
+\centering
+\caption{Notation. Costs are counted in backward passes through a shared
+trunk; the mean force is the one backward pass a simulation pays in any case.}
+\label{tab:notation}
+\small
+\begin{tabular}{@{}llp{0.52\linewidth}@{}}
+\toprule
+Symbol & Name & Definition \\
+\midrule
+$N$ & atoms & number of atoms in a structure; $3N$ force coordinates \\
+$M$ & heads & number of committee members ($M=8$ throughout) \\
+$r=M-1$ & centred rank & dimension of head space after removing the mean \\
+$F(x)$ & head forces & $3N\times M$ matrix, one column of forces per head \\
+$\bar f(x)$ & committee mean & $M^{-1}\sum_m F_{\cdot m}(x)$; the force a simulation uses \\
+$Q_c$, $A(x)$ & centred head space & Helmert basis of the centred subspace and the $r\times r$ matrix $Q_c^{\top}F^{\top}FQ_c$ (Eq.~\ref{eq:A}) \\
+$v_d$ & head variance & unbiased variance over heads of coordinate $d$ (Eq.~\ref{eq:vd}) \\
+$\sigma_a$ & per-atom std & mean over the three components of atom $a$ of $\sqrt{v_d}$ (Eq.~\ref{eq:sigma}) \\
+$S_{\mathrm{glob}}$ & global score & $\sum_d v_d$; sum over all $3N$ coordinates \\
+$S_{\mathrm{comp}}$ & max-component score & $\max_d\sqrt{v_d}$ \\
+$S_{\mathrm{atom}}$ & max-atom score & $\max_a\sigma_a$ \\
+$S_\alpha$ & size-normalised score & $S_{\mathrm{glob}}/(3N)^{\alpha}$ (Eq.~\ref{eq:salpha}) \\
+$b_F$ & predicted force norm & $\max_a\lVert\bar f_a\rVert$; zero-cost baseline \\
+$b_E$ & head-energy spread & standard deviation over heads of the total energy; zero-cost baseline \\
+$\Delta$ & error & $\bar f-F_{\mathrm{ref}}$, error of the committee mean against the reference forces \\
+$e_{\max}$ & largest per-atom error & $\max_a\lVert\Delta_a\rVert$ (primary target) \\
+$e_{\mathrm{rmse}}$ & RMS error & root mean square of $\Delta_d$ over the $3N$ coordinates \\
+$e_{\mathrm{maxcomp}}$ & largest component error & $\max_d\lvert\Delta_d\rvert$ \\
+$e_{\mathrm{q95}}$ & 95th-percentile error & 95th percentile of $\lvert\Delta_d\rvert$ over the $3N$ coordinates \\
+$g_k=Fw_k$ & projection & forces projected on head-space direction $w_k$; one backward pass each \\
+$K$ & projections & number of head-space projections a cheap estimator uses; cost $K+1$ backward passes \\
+$r_0$ & leading directions & number of exact leading eigendirections of the design-split matrix $G$ \\
+$\tau$ & selection threshold & 95th percentile of the exact score on the design split \\
+$c_\alpha$ & screening constant & split-conformal order statistic of $S/\hat S$ on the calibration split \\
+$\alpha$ & miscoverage & allowed probability that a structure the exact rule selects is skipped ($0.05$) \\
+\bottomrule
+\end{tabular}
+\end{table}
