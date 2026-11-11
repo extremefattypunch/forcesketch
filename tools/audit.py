@@ -35,10 +35,11 @@ import sys
 import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-REPO = ROOT.parents[0]
+REPO = ROOT  # this repository is its own git root since the move out of the monorepo
 REC = ROOT / "results/records"
 sys.path.insert(0, str(ROOT / "src"))
 
+from forcesketch_journal.paths import FROZEN  # noqa: E402
 from forcesketch_journal.data.splits import (  # noqa: E402
     contiguous_block_split, random_frame_split,
 )
@@ -66,11 +67,16 @@ class Audit:
 
     # ---------------------------------------------------------------- frozen
     def frozen(self) -> None:
-        r = subprocess.run(["git", "diff", "--quiet", "workshop-v1.0", "--", "forcesketch/"],
-                           cwd=REPO, capture_output=True)
+        """The frozen workshop tree lives in its own clone (paths.FROZEN); the tag
+        workshop-v1.0 marks the commit this journal work was built against."""
+        frozen_repo = FROZEN.parent
+        self.check("frozen-exists", (FROZEN / "src/forcesketch").is_dir(),
+                   f"frozen tree missing at {FROZEN} (set FORCESKETCH_FROZEN)")
+        r = subprocess.run(["git", "diff", "--quiet", "workshop-v1.0", "--", FROZEN.name + "/"],
+                           cwd=frozen_repo, capture_output=True)
         self.check("frozen-tree", r.returncode == 0,
-                   "forcesketch/ differs from tag workshop-v1.0")
-        tags = subprocess.run(["git", "tag"], cwd=REPO, capture_output=True, text=True).stdout
+                   f"{FROZEN} differs from tag workshop-v1.0")
+        tags = subprocess.run(["git", "tag"], cwd=frozen_repo, capture_output=True, text=True).stdout
         self.check("frozen-tag", "workshop-v1.0" in tags, "tag workshop-v1.0 is missing")
 
     # ------------------------------------------------------------- protocols
@@ -112,9 +118,9 @@ class Audit:
 
         for reg in sorted(REC.glob("*_protocol_registration.json")):
             d = json.loads(reg.read_text())
-            proto_rel = f"forcesketchJournalReady/{d['protocol']}"
+            proto_rel = d["protocol"]
             pc = first_commit(proto_rel)
-            rc = first_commit(f"forcesketchJournalReady/{reg.relative_to(ROOT)}")
+            rc = first_commit(str(reg.relative_to(ROOT)))
             if not pc or not rc:
                 self.notes.append(f"  git-binding {pathlib.Path(d['protocol']).name}: "
                                   "not yet committed; sha256 registration only")

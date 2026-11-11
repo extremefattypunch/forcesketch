@@ -32,7 +32,8 @@ import pytest
 import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "experiments"))
 sys.path.insert(0, str(FROZEN / "src"))
@@ -388,12 +389,19 @@ def test_manuscript_only_uses_macros_that_exist():
     macros = ROOT / "paper/macros.tex"
     if not main.exists():
         pytest.skip("manuscript not started")
-    defined = set(re.findall(r"\\newcommand\{\\(fs\w+)\}", macros.read_text()))
+    # Derived numbers live in macros.tex; the artifact locator (a DOI, not a
+    # number) is defined in artifact.tex and the venue wrappers, so every
+    # \newcommand in paper/*.tex other than the shared body counts as defined.
+    defined = set()
+    for tex in (ROOT / "paper").glob("*.tex"):
+        if tex.name != "body.tex":
+            defined |= set(re.findall(r"\\(?:new|provide|renew)command\*?\{\\(fs\w+)\}", tex.read_text()))
     used = set(re.findall(r"\\(fs[A-Za-z]+)", main.read_text()))
     assert not (used - defined), f"main.tex uses undefined macros: {sorted(used - defined)}"
     prov = json.loads((RECORDS / "macro_provenance.json").read_text())
-    assert defined <= set(prov), \
-        f"macros with no provenance entry: {sorted(defined - set(prov))}"
+    derived = set(re.findall(r"\\newcommand\{\\(fs\w+)\}", macros.read_text()))
+    assert derived <= set(prov), \
+        f"macros with no provenance entry: {sorted(derived - set(prov))}"
 
 
 def test_manuscript_sources_are_present_and_self_consistent():

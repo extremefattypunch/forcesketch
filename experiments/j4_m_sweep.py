@@ -31,7 +31,8 @@ import sys
 import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(FROZEN / "src"))
 
@@ -84,8 +85,8 @@ def sweep_system(F: torch.Tensor, f_ref: torch.Tensor, *, top_p: float) -> list[
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cache-dirs", nargs="+",
-                    default=["results/processed/naive", str(FROZEN / "results/processed"),
-                             "results/processed"])
+                    default=[str(NAIVE_CACHES), str(FROZEN_CACHES),
+                             str(CACHES)])
     ap.add_argument("--top-p", type=float, default=0.05)
     ap.add_argument("--out", default="results/records/j4_m_sweep.jsonl")
     a = ap.parse_args()

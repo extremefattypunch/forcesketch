@@ -41,7 +41,8 @@ import sys
 import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(FROZEN / "src"))
 
@@ -70,7 +71,7 @@ def spectrum(F: torch.Tensor) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cache-dirs", nargs="+", default=["results/processed/naive"])
+    ap.add_argument("--cache-dirs", nargs="+", default=[str(NAIVE_CACHES)])
     ap.add_argument("--out", default="results/records/j6_naive_spectrum.json")
     ap.add_argument("--validate", default=None,
                     help="recompute and diff against an existing spectrum record")

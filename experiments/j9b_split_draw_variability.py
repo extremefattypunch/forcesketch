@@ -33,7 +33,8 @@ import torch
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(FROZEN / "src"))
 sys.path.insert(0, str(ROOT / "experiments"))
@@ -95,7 +96,7 @@ def main() -> int:
     rows = []
     for tag in args.systems:
         cache = next((d / f"head_forces_{tag}.pt" for d in
-                      (FROZEN / "results/processed", ROOT / "results/processed")
+                      (FROZEN_CACHES, CACHES)
                       if (d / f"head_forces_{tag}.pt").exists()), None)
         if cache is None:
             print(f"{tag:28s} cache not found"); continue

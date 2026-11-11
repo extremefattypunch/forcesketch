@@ -37,9 +37,11 @@ import numpy as np
 import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(FROZEN / "src"))
 
+from forcesketch_journal.data.frames import reference_energies, species  # noqa: E402
 from forcesketch.adapters.mace_data import load_frames, make_loader, reference_forces  # noqa: E402
 from forcesketch.adapters.mace_mhc import MaceMHCAdapter  # noqa: E402
 from forcesketch.exact.member_forces import variance_from_member_forces  # noqa: E402
@@ -91,6 +93,7 @@ def build_cache(adapter, frames, *, batch_size: int) -> dict:
     assert done == S, f"{done} != {S}"
     return {"F": F, "E": E,
             "f_ref": reference_forces(frames).view(S, A, 3).double(),
+            "E_ref": reference_energies(frames), "species": species(frames),
             "frames": S, "M": M, "A": A, "n_periodic_edges": n_periodic_edges}
 
 
@@ -104,7 +107,7 @@ def main() -> int:
     args = ap.parse_args()
 
     pin_numerics()
-    outdir = pathlib.Path(args.outdir or (ROOT / "results/processed"))
+    outdir = pathlib.Path(args.outdir or (CACHES))
     outdir.mkdir(parents=True, exist_ok=True)
     sha, dirty = git_commit(FROZEN.parent)
     records = []

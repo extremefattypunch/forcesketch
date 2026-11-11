@@ -28,7 +28,8 @@ import torch
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(FROZEN / "src"))
 
@@ -65,7 +66,7 @@ def main() -> int:
           f"{'sig':>6s}{'CV worst':>10s}")
     print("-" * 86)
 
-    dirs=[pathlib.Path(d) for d in (args.cache_dirs or [FROZEN/"results/processed"])]
+    dirs=[pathlib.Path(d) for d in (args.cache_dirs or [FROZEN_CACHES])]
     for cache in sorted({p for d in dirs for p in d.glob("head_forces_*.pt")}):
         tag = cache.stem.replace("head_forces_", "")
         man = json.loads((ROOT / f"manifests/splits/{tag}__contiguous_block.json").read_text())

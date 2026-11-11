@@ -30,7 +30,8 @@ import torch
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(FROZEN / "src"))
 
@@ -70,8 +71,8 @@ def fixed_n_invariance(alphas, p: float) -> dict:
       mutation_caught      proof the real test has teeth: the three broken
                            implementations above must all FAIL it.
     """
-    dirs = [ROOT / "results/processed", ROOT / "results/processed/naive",
-            FROZEN / "results/processed"]
+    dirs = [CACHES, NAIVE_CACHES,
+            FROZEN_CACHES]
     worst, n_nan, sysids = 0.0, 0, {}
     for cache in sorted({q for d in dirs for q in d.glob("head_forces_*.pt")}):
         c = torch.load(cache, map_location="cpu", weights_only=False)
@@ -131,7 +132,7 @@ def fixed_n_invariance(alphas, p: float) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scan", default="results/records/j6b_foundation_scan.pt")
+    ap.add_argument("--scan", default=str(CACHES / "j6b_foundation_scan.pt"))
     ap.add_argument("--protocol", default="protocols/j6c_size_normalisation.yaml")
     ap.add_argument("--out", default="results/records/j6c_size_normalisation.json")
     ap.add_argument("--n-boot", type=int, default=1000)

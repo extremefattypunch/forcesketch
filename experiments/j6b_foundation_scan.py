@@ -43,7 +43,8 @@ import numpy as np
 import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(FROZEN / "src"))
 
@@ -52,14 +53,13 @@ from forcesketch.adapters.mace_mhc import MaceMHCAdapter  # noqa: E402
 from forcesketch.exact.centered_basis import helmert_basis  # noqa: E402
 from forcesketch.utils.reproducibility import pin_numerics  # noqa: E402
 
-FOUNDATION = pathlib.Path("/n/holylabs/hekstra_lab/Everyone/ianpoon/forcesketch-data/"
-                          "models/zenodo/foundation")
+from forcesketch_journal.paths import FOUNDATION  # noqa: E402
 POOL = FOUNDATION / "qbc/mp_traj_qbc_79th_not_selected.xyz"
 
 
 def self_test() -> None:
     """Assert the A_s compression reproduces the direct global statistic."""
-    cache = FROZEN / "results/processed/head_forces_disjoint_test_1200K.pt"
+    cache = FROZEN_CACHES / "head_forces_disjoint_test_1200K.pt"
     if not cache.exists():
         raise SystemExit(f"self-test needs {cache}")
     F = torch.load(cache, map_location="cpu", weights_only=False)["F"].double()[:64]
@@ -216,7 +216,7 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20260816)
     ap.add_argument("--batch-size", type=int, default=16)
     ap.add_argument("--dtype", default="float64")
-    ap.add_argument("--out", default="results/records/j6b_foundation_scan.pt")
+    ap.add_argument("--out", default=str(CACHES / "j6b_foundation_scan.pt"))
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--chunk", type=int, default=2000)

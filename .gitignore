@@ -1,0 +1,25 @@
+# Regenerable binary caches are not committed. Rebuild (all on gpu_test, free):
+#   sbatch slurm/j5_ladder.sbatch        -> $FORCESKETCH_CACHES/head_forces_3bpa-*_test_*.pt
+#   sbatch slurm/j5_water.sbatch         -> $FORCESKETCH_CACHES/head_forces_water-*.pt
+#   sbatch slurm/j6_naive_caches.sbatch  -> $FORCESKETCH_CACHES/naive/head_forces_*.pt
+#   sbatch slurm/j6b_foundation.sbatch   -> $FORCESKETCH_CACHES/j6b_foundation_scan.pt
+# Roots: src/forcesketch_journal/paths.py (defaults to netscratch; 90-day purge).
+*.pt
+*.partial
+results/processed/
+results/perstructure/
+slurm/logs/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+# LaTeX
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.fls
+paper/*.fdb_latexmk
+paper/.phcheck.txt

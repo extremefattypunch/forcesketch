@@ -43,7 +43,7 @@ from forcesketch_journal.evaluation.tail_metrics import (  # noqa: E402
     auprc, auroc, enrichment_at, recall_at, risk_coverage, top_p_mask,
 )
 
-FROZEN = pathlib.Path(__file__).resolve().parents[2] / "forcesketch"
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 EV_PER_A_TO_MEV = 1000.0
 
 
@@ -133,7 +133,7 @@ def main() -> int:
     ps_dir.mkdir(parents=True, exist_ok=True)
 
     records = []
-    dirs = [pathlib.Path(d) for d in (args.cache_dirs or [FROZEN / "results/processed"])]
+    dirs = [pathlib.Path(d) for d in (args.cache_dirs or [FROZEN_CACHES])]
     caches = sorted({p for d in dirs for p in d.glob("head_forces_*.pt")})
     for path in caches:
         tag = path.stem.replace("head_forces_", "")

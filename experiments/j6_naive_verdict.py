@@ -26,9 +26,10 @@ import torch
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
-CACHE_DIRS = [ROOT / "results/processed/naive", ROOT / "results/processed",
-              FROZEN / "results/processed"]
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
+CACHE_DIRS = [NAIVE_CACHES, CACHES,
+              FROZEN_CACHES]
 EV_TO_MEV = 1000.0
 
 

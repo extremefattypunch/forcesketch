@@ -47,15 +47,17 @@ import numpy as np
 import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 sys.path.insert(0, str(FROZEN / "src"))
 
+from forcesketch_journal.data.frames import reference_energies, species  # noqa: E402
 from forcesketch.adapters.mace_data import load_frames, reference_forces  # noqa: E402
 from forcesketch.exact.member_forces import variance_from_member_forces  # noqa: E402
 from forcesketch.utils.reproducibility import git_commit, pin_numerics  # noqa: E402
 
 EV_TO_MEV = 1000.0
-MODELS = pathlib.Path("/n/holylabs/hekstra_lab/Everyone/ianpoon/forcesketch-data/models/zenodo")
+from forcesketch_journal.paths import MODELS  # noqa: E402
 
 # (tag, committee dir, frames file, matched shared-trunk system tag)
 SYSTEMS = {
@@ -163,6 +165,7 @@ def build_cache(models, frames, *, batch_size: int, device: str, dtype: torch.dt
     assert done == S, f"{done} != {S}"
     return {"F": F, "E": E,
             "f_ref": reference_forces(frames).view(S, A, 3).double(),
+            "E_ref": reference_energies(frames), "species": species(frames),
             "frames": S, "M": M, "A": A, "n_periodic_edges": n_periodic_edges,
             "force_route_rel_err": force_route_rel}
 
@@ -173,7 +176,7 @@ def main() -> int:
     ap.add_argument("--n-frames", type=int, default=None)
     ap.add_argument("--batch-size", type=int, default=4)
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--outdir", default=str(ROOT / "results/processed/naive"))
+    ap.add_argument("--outdir", default=str(NAIVE_CACHES))
     args = ap.parse_args()
 
     pin_numerics()

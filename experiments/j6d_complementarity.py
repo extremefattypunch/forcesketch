@@ -69,9 +69,9 @@ def fixed_n_contrast(error_p: float, n_boot: int) -> list[dict]:
     contrast, and a contrast has to be measured on both sides with one method.
     Design role fits, test role scores -- the manifests already define both.
     """
-    FROZEN_P = ROOT.parents[0] / "forcesketch"
-    dirs = [ROOT / "results/processed", ROOT / "results/processed/naive",
-            FROZEN_P / "results/processed"]
+    from forcesketch_journal.paths import FROZEN_CACHES  # noqa: E402
+    dirs = [CACHES, NAIVE_CACHES,
+            FROZEN_CACHES]
     rows, seen = [], set()
     for cache in sorted({q for d in dirs for q in d.glob("head_forces_*.pt")}):
         tag = cache.stem.replace("head_forces_", "")
@@ -116,7 +116,7 @@ def fixed_n_contrast(error_p: float, n_boot: int) -> list[dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scan", default="results/records/j6b_foundation_scan.pt")
+    ap.add_argument("--scan", default=str(CACHES / "j6b_foundation_scan.pt"))
     ap.add_argument("--out", default="results/records/j6d_complementarity.json")
     ap.add_argument("--error-p", type=float, default=0.05)
     ap.add_argument("--design-frac", type=float, default=0.10)

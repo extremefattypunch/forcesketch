@@ -57,7 +57,7 @@ def main() -> int:
     rows = []
     for variant in ("disjoint", "overlapping", "same"):
         for temp in ("300K", "600K", "1200K"):
-            p = ROOT / f"results/processed/head_forces_3bpa-{variant}_test_{temp}.pt"
+            p = CACHES / f"head_forces_3bpa-{variant}_test_{temp}.pt"
             if not p.exists():
                 print(f"missing {p.name}"); continue
             d = torch.load(p, weights_only=True, map_location="cpu")

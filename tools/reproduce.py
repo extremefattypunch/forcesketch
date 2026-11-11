@@ -38,13 +38,14 @@ import sys
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-FROZEN = ROOT.parents[0] / "forcesketch"
+sys.path.insert(0, str(ROOT / "src"))
+from forcesketch_journal.paths import CACHES, FROZEN, FROZEN_CACHES, NAIVE_CACHES  # noqa: E402
 
 # (label, argv, records this step produces)
 OFFLINE = [
     ("j2a oracle panel", [
         "experiments/j2a_oracle_panel.py",
-        "--cache-dirs", str(FROZEN / "results/processed"),
+        "--cache-dirs", str(FROZEN_CACHES),
         "--out", "{rec}/j2a_oracle_panel.jsonl",
         "--perstructure", "{work}/perstructure"],
      ["j2a_oracle_panel.jsonl"]),
@@ -55,7 +56,7 @@ OFFLINE = [
      ["j2a_global_vs_maxcomp_ci.json", "j2a_free_signal_ci.json"]),
     ("j3 extreme-value law", [
         "experiments/j3_extreme_value.py",
-        "--cache-dirs", str(FROZEN / "results/processed"),
+        "--cache-dirs", str(FROZEN_CACHES),
         "--out", "{rec}/j3_extreme_value_v2.json"],
      ["j3_extreme_value_v2.json"]),
 ]
@@ -85,7 +86,7 @@ def main() -> int:
 
     print(f"reproduce --tier {a.tier}")
     print(f"  work dir : {work}")
-    print(f"  inputs   : {FROZEN / 'results/processed'} (git-tracked caches only)\n")
+    print(f"  inputs   : {FROZEN_CACHES} (git-tracked caches only)\n")
 
     produced, total, failed = [], 0.0, []
     for step in OFFLINE:

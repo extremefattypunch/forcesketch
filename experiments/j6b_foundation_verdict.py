@@ -49,7 +49,7 @@ def jaccard(a: torch.Tensor, b: torch.Tensor) -> float:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scan", default="results/records/j6b_foundation_scan.pt")
+    ap.add_argument("--scan", default=str(CACHES / "j6b_foundation_scan.pt"))
     ap.add_argument("--protocol", default="protocols/j6b_foundation_acquisition.yaml")
     ap.add_argument("--out", default="results/records/j6b_foundation_verdict.json")
     ap.add_argument("--design-frac", type=float, default=0.10)
