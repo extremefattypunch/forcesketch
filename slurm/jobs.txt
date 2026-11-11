@@ -5,3 +5,4 @@ slurm/g3_ood.sbatch
 slurm/g4_al_s0.sbatch
 slurm/g4_al_s1.sbatch
 slurm/g4_al_s2.sbatch
+slurm/g5_rmd17.sbatch

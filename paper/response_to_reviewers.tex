@@ -1,0 +1,550 @@
+% Response to the reviewers for ct-2026-01838j (JCTC). Standalone document.
+% Build from paper/ so that \input{macros} resolves:
+%   pdflatex response_to_reviewers && bibtex response_to_reviewers && pdflatex x2
+% Red bracketed text is a \fsTODO placeholder for a number or location that the
+% J10/J11/J12 experiments supply; tools/audit.py refuses a release while any
+% remain.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black}
+
+\providecommand{\fsTODO}[1]{\textcolor{red}{[#1]}}
+\input{macros}
+
+% A reviewer's point, quoted verbatim.
+\newcommand{\rpoint}[1]{\begin{quote}\itshape #1\end{quote}}
+\newcommand{\response}{\medskip\noindent\textbf{Response.} }
+\newcommand{\changes}{\medskip\noindent\textbf{Changes.}}
+
+\title{Response to the reviewers, manuscript ct-2026-01838j}
+\author{Ian Poon}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\noindent Dear Prof.\ Liu,
+
+\medskip\noindent
+Thank you for the two reviews. Both reviewers found the submitted text hard to
+read, found the committees and their accuracy insufficiently described, found
+the literature coverage thin, and found the materials result claimed more
+broadly than the evidence allowed. We agree on all four counts. The manuscript
+has been rewritten from the first page: the bespoke vocabulary is gone, the
+structure is conventional (Introduction, Methods, Results, Discussion), every
+committee is described down to its loss function and training-data assignment,
+a table of energy and force errors and a calibration figure have been added,
+and the introduction now situates the work in the uncertainty-quantification
+literature the reviewers pointed us to. Three new experiments address the
+substance of the materials criticism: an out-of-distribution scan on OMat24
+with all four foundation committees, a filtered re-analysis of the MPtraj pool
+that removes near-equilibrium and single-atom structures, and one real
+active-learning round on 3BPA with retraining. The claims have been rescoped to
+what these experiments show. Below, each point is quoted in full and followed
+by our answer and a list of the concrete changes. Two corrections we found
+ourselves are listed at the end.
+
+\section*{Reviewer 1}
+
+\subsection*{Point 1.1}
+\rpoint{The manuscript is difficult to follow. The large amount of
+manuscript-specific terminology (``Factor A/B,'' ``oracle,'' ``preservation,''
+``lane,'' ``gate,'' etc.) makes the main scientific questions unnecessarily
+difficult to understand. I suggest substantial rewriting with clearer
+definitions and a more straightforward presentation.}
+
+\response
+We agree. The manuscript has been rewritten in plain language with a
+conventional structure. Every term the reviewer lists has been removed, from
+the text, the captions and the tables, and replaced by a description of the
+quantity itself. The two questions the paper asks are now stated as questions:
+does committee disagreement identify the structures on which the model's
+forces are most wrong (we call this error-ranking quality), and how faithfully
+does a cheap screening rule reproduce the exact committee statistic. A
+projection of the per-head force matrix is called what it costs, one backward
+pass through the trunk. The rule that skips the exact computation is called a
+screening rule. The two quantities that cost no backward pass are called
+zero-cost baselines and named individually (the predicted force norm and the
+spread of the head energies). Pronouns without a referent in the same sentence
+and constructions of the form ``the former'' have been removed throughout.
+
+\changes
+\begin{itemize}
+\item Full rewrite of all sections (Introduction, Methods, Results,
+  Discussion); no section of the submitted text survives unchanged.
+\item A notation table (Table~\ref{tab:notation}) at the end of Methods lists
+  every symbol and every named score with its definition and cost.
+\item Each structure-level score is defined at first use in Methods,
+  Section~2.2 (``the sum over all $3N$ coordinates of the per-coordinate head
+  variance'', ``max-component'', ``max-atom'').
+\item Figure and table captions use the same names as the text.
+\end{itemize}
+
+\subsection*{Point 1.2}
+\rpoint{The committee models are insufficiently characterized. Since the main
+conclusions concern committee uncertainty, the manuscript should clearly
+describe how the committee members/heads are trained, how their diversity is
+generated, what loss function is used, and how the uncertainty is defined and
+calibrated. This is particularly important given the large calibration
+difference reported between the shared-trunk and independently trained
+committees.}
+
+\response
+We agree, and this information was available but not written down. The new
+Methods section gives the complete recipe of every committee. For the custom
+shared-trunk committees: the MACE architecture (two interaction layers, 32
+channels, maximum angular order one, correlation order three, cutoff
+6.0~\AA), the loss (a weighted sum of energy and force mean-squared errors
+with weights 10 and 1000, per-atom normalised as in MACE), the optimiser
+(Adam with an exponential moving average and stochastic weight averaging over
+the final quarter of training), and the head construction (each member is a
+separate readout attached to every layer's features, all sharing the trunk).
+Head diversity comes from the training-data assignment and is now stated
+explicitly for each of the three constructions: disjoint heads (the training
+set is split evenly across the eight heads with no overlap), overlapping
+heads (each head sees an independently drawn 80\% of the training set), and
+identical data (all heads see the full set and differ only by their random
+initialisation). The independently trained committees are eight full models
+of the same architecture with seeds zero to seven. The foundation committees
+are eight new disjoint readout heads on a frozen MACE-MP-0b trunk, fine-tuned
+on 8,000 (or 1,000) MPtraj structures, with the loss, optimiser and epoch
+count stated. The uncertainty is defined exactly as it is computed: the
+per-coordinate variance over heads, the per-atom standard deviation as the
+mean over the three Cartesian components of its square root, and the three
+structure-level scores built from these. Calibration is now assessed with two
+standard metrics in addition to the overconfidence ratio: the variance of the
+z-scores (error divided by predicted standard deviation, which is one for a
+calibrated Gaussian) and reliability curves (binned error against binned
+predicted standard deviation). The calibration gap the reviewer refers to is
+now quantified with both: the shared-trunk committees have z-score variances
+far above one (\fsTODO{range of z-score variance over shared-trunk
+committees}), the independently trained committees are much closer to one
+(\fsTODO{z-score variance of the independently trained committees}). The
+likely cause is also discussed: heads that share a trunk share its errors, so
+their spread underestimates the error of the shared part.
+
+\changes
+\begin{itemize}
+\item Methods, Section~2.1 ``Committees'': the full recipe for each
+  shared-trunk committee, each independently trained committee and each
+  foundation committee, including the training-data assignment that
+  generates head diversity, the loss function, the optimiser and the epoch
+  counts, with a citation to \citet{beck2025committee} for the archive the
+  checkpoints come from.
+\item Methods, Section~2.2 ``Uncertainty definitions'': the per-coordinate
+  variance, the per-atom standard deviation and the three structure-level
+  scores, written as equations.
+\item Methods, Section~2.5 ``Calibration metrics'': the overconfidence ratio,
+  the z-score variance and the reliability curve, each defined.
+\item Results, Section~3.1 and Table~\ref{tab:accuracy}: the calibration
+  metrics for every committee.
+\item Discussion: a paragraph on why shared-trunk committees are
+  overconfident and what that implies for a screening rule that is calibrated
+  to the committee rather than to the error.
+\end{itemize}
+
+\subsection*{Point 1.3}
+\rpoint{The underlying model accuracy and uncertainty--error relationship
+should be shown explicitly. Standard energy/force MAE or RMSE should be
+reported for the relevant models and datasets. I would also strongly suggest
+an error-versus-uncertainty scatter or calibration plot. AUROC alone does not
+show the actual error distribution or how reliably the uncertainty criterion
+correlates with model error.}
+
+\response
+We agree. A new table reports, for every committee and every test set, the
+energy mean absolute error and root-mean-square error per atom, the force
+mean absolute error and root-mean-square error of the committee mean, the
+mean of the per-head force root-mean-square errors, the median per-atom
+predicted standard deviation, the overconfidence ratio, the z-score variance
+and the Spearman rank correlation between the per-atom predicted standard
+deviation and the per-atom force error. A new figure shows, for
+representative committees, the per-atom force error against the per-atom
+predicted standard deviation as a binned reliability curve with the
+calibrated diagonal, and the per-structure version alongside. The rank
+correlations are moderate on the molecules (\fsTODO{range of per-atom
+Spearman correlation on the molecular systems}) and lower on liquid water
+(\fsTODO{range of per-atom Spearman correlation on water}), which is
+consistent with the AUROC values and now lets the reader see the error
+distribution behind them. AUROC is retained as the ranking metric because the
+acquisition decision is a ranking, but it is no longer the only view.
+
+\changes
+\begin{itemize}
+\item Results, Section~3.1 ``Accuracy and calibration'' and
+  Table~\ref{tab:accuracy}: energy and force errors, calibration metrics and
+  rank correlations for every system and construction, generated from
+  \texttt{results/records/j12\_accuracy.json}.
+\item Figure~\ref{fig:calibration}: per-atom error against predicted standard
+  deviation (reliability curves) with the calibrated diagonal, for the
+  shared-trunk and independently trained 3BPA committees and for water.
+\item Methods, Section~2.4 ``Error targets and ranking metric'': the error
+  targets are defined and the reason for using a rank metric is stated
+  without claiming more for it.
+\end{itemize}
+
+\subsection*{Point 1.4}
+\rpoint{The conclusion regarding the force-magnitude baseline appears too
+broad. The strong performance of the free force-magnitude signal on MPtraj is
+interesting, but it may reflect a model- or dataset-specific correlation
+between large forces and large prediction errors. More evidence is needed
+before drawing a general conclusion about the usefulness of committee
+uncertainty. In addition, since no active-learning retraining is performed,
+identifying high-error structures should be clearly distinguished from
+demonstrating a better active-learning acquisition strategy.}
+
+\response
+We agree on both counts, and the revision changes the evidence as well as the
+wording. On the first, the submitted text did not state that the MACE-MP-0b
+trunk was itself pretrained on MPtraj, so the MPtraj pool is in-distribution
+for the trunk and out-of-sample only for the readout heads; the revision
+states this plainly. The correlation between large forces and large force
+errors is a known effect, and we do not claim the predicted force norm as a
+discovery: the claim is that it is a strong baseline that committee methods
+must be scored against. To find out where that holds, three things were done.
+First, a pre-registered out-of-distribution scan on three OMat24 validation
+subsets (ab initio molecular dynamics from PBE at 1000~K in NVT and NPT, and
+rattled structures), with all four foundation committees. OMat24 post-dates
+MACE-MP-0 and is the out-of-distribution set that \citet{beck2025committee}
+used. Second, a filtered re-analysis of the MPtraj pool that removes
+structures whose largest reference force is below 0.05~eV/\AA\ and single-atom
+cells, plus AUROC computed within deciles of the reference force magnitude,
+so the near-equilibrium structures cannot carry the result. Third, the
+conclusions are rescoped: the predicted force norm is reported as the baseline
+in every setting, and the claim that the committee ``adds nothing'' is now
+confined to the settings where the nested comparison shows that
+(\fsTODO{which settings after J10 and the filtered re-analysis}). On the
+second count, the submitted text identified high-error structures and did not
+retrain, and the Discussion said so, but the title and the abstract did not.
+The revision adds one real active-learning round on 3BPA: from a pool of 2,139
+frames at 1200~K, each rule (the three committee scores, the two zero-cost
+baselines and random) selects 50 frames, a single-head model is retrained on
+the enlarged training set with three seeds, and the retrained models are
+scored on the pool frames no rule selected and on the 600~K and 300~K test
+sets. Everywhere else in the paper the wording now distinguishes
+``identifies high-error structures'' from ``is a better acquisition rule''.
+
+\changes
+\begin{itemize}
+\item Methods, Section~2.7 ``Datasets, splits and contamination statement'':
+  the MACE-MP-0b trunk was pretrained on MPtraj; the pool is in-distribution
+  for the trunk and out-of-sample only for the heads.
+\item Methods, Section~2.8 ``Out-of-distribution and active-learning
+  protocols'': the J10 and J11 protocols, registered before either ran.
+\item Results, Section~3.6 and Table~\ref{tab:ood}: AUROC of every score and
+  both zero-cost baselines on the three OMat24 subsets for all four foundation
+  committees (\fsTODO{OMat24 AUROC values}); the filtered MPtraj re-analysis
+  and the within-decile AUROC (\fsTODO{filtered and within-decile AUROC
+  values}).
+\item Results, Section~3.7 and Table~\ref{tab:al}: force errors of the
+  retrained models after one acquisition round, by rule
+  (\fsTODO{active-learning outcome}).
+\item Abstract, Introduction and Discussion: the force-norm result is stated
+  as a baseline, with the trunk-pretraining caveat, and limited to the
+  settings tested; a limitations paragraph states that a single acquisition
+  round on one molecule does not establish an acquisition strategy in general.
+\end{itemize}
+
+\subsection*{General remark}
+\rpoint{Overall, the manuscript contains potentially interesting
+observations, but I do not think the current analysis sufficiently supports
+its broader conclusions. Substantial additional analysis and rewriting would
+be needed.}
+
+\response
+Both have been done; the additional analysis is listed under Points~1.3 and
+1.4, and the rewriting under Point~1.1.
+
+\section*{Reviewer 2}
+
+\subsection*{Summary of the manuscript}
+\rpoint{The paper discusses the evaluation of committee uncertainties and
+different strategies to further process them in workflows such as query by
+committee. The key results are:
+\begin{itemize}
+\item A comparison against the actual error is important
+\item The selection rule for structures in a query by committee workflow
+  should be size independent
+\item A structure-wide average of force uncertainty performs better than
+  choosing the structure with the largest disagreement of a single atom or a
+  single force component.
+\item Given the additional cost associated with committee force
+  disagreements, the relevant benchmark to compare these strategies against
+  should not be limited to the random selection of structures, but also
+  include essentially-free metrics.
+\end{itemize}}
+
+\response
+We thank the reviewer for this summary, which is accurate, and we have used
+it as a check on the rewritten abstract: a reader should be able to recover
+these four statements from the new text without the old vocabulary. One
+clarification on the third item: the structure-wide sum of the per-coordinate
+head variances ranks error better than the maximum over components or atoms
+only at fixed system size; when sizes vary the sum grows with the number of
+atoms and must be normalised, which is the second item.
+
+\subsection*{Point 2.1}
+\rpoint{Some of the basic claims are - to my knowledge - not true, or at
+least not sufficiently referenced. The author claims that a comparison
+between the uncertainty metric and true error is uncommon in the field of
+uncertainty quantification and instead cheap uncertainty metrics are measured
+against more expensive ones. The author further claims that these uncertainty
+metrics are strongly size dependent. Neither of these claims are supported by
+the given references. In fact, there is only a single reference to another
+uncertainty-focused work and neither of the two claims are supported by it.}
+
+\response
+The reviewer is right about the first claim, and it is withdrawn. The
+uncertainty-quantification literature routinely compares an uncertainty
+estimate with the true error; \citet{kahle2022quality}, \citet{tan2023single},
+\citet{busk2021calibrated}, \citet{kellner2024shallow} and
+\citet{beck2025committee} all do so, and the revision says so and cites them.
+What the submitted text should have said, and the revision now says, is
+narrower: the literature on cheap approximations of a committee statistic
+(sketches, subsampled heads, low-rank estimators) validates the approximation
+against the exact committee, and our contribution is to evaluate both links,
+the committee against the error and the approximation against the committee,
+in one study. The second claim is kept but is now supported. That
+committee-based scores grow with system size unless normalised is documented
+by \citet{smith2018less}, who divide by the square root of the number of
+atoms; by \citet{kellner2024shallow}, who discuss how the energy uncertainty
+scales with the number of atoms; and by \citet{lortaraprasert2026size}, who
+study the question directly. Our own measurement of the effect on the MPtraj
+pool is reported with these citations rather than as a novel observation.
+
+\changes
+\begin{itemize}
+\item Introduction: the sentence claiming that comparison with the true error
+  is uncommon is removed; the paragraph now cites the works above as
+  examples of that comparison and states the narrower point about
+  approximation studies.
+\item Introduction and Methods, Section~2.2: the size dependence of the
+  summed score is introduced with citations to \citet{smith2018less},
+  \citet{kellner2024shallow} and \citet{lortaraprasert2026size}.
+\item The bibliography has been expanded substantially (see Point~2.3).
+\end{itemize}
+
+\subsection*{Point 2.2}
+\rpoint{Across most sections, the manuscript is incomprehensible. It uses
+terminology that is completely uncommon in the field. In the methods section
+it introduces methodology and concepts in very broad strokes and without any
+references to more detailed work. It excessively uses pronouns and ``the
+former'', ``others'' and similar constructions in a way that makes it
+impossible to identify what is being talked about in each sentence.}
+
+\response
+We agree, and the answer is the same rewrite described under Point~1.1 of
+Reviewer~1. In addition to the vocabulary change, the Methods section is now
+written at the level of detail a reader needs to reproduce each step, and
+each method is tied to the work it comes from: query by committee to
+\citet{seung1992query} and \citet{krogh1995neural}; committees for
+interatomic potentials to \citet{artrith2012high}, \citet{gastegger2017machine},
+\citet{schran2020committee} and \citet{imbalzano2021uncertainty}; shallow and
+multi-head ensembles to \citet{kellner2024shallow},
+\citet{vinchurkar2025gnn}, \citet{schafer2026shallow} and
+\citet{beck2025committee}; the trace estimator to \citet{meyer2021hutchpp};
+the conformal constant to \citet{vovk2005algorithmic} and
+\citet{lei2018distribution}; the calibration metrics to
+\citet{busk2021calibrated}, \citet{pernot2022long} and \citet{tran2020methods};
+and the block bootstrap to \citet{kunsch1989jackknife}. Every sentence of the
+new text was checked for a pronoun or a ``the former'' whose referent is not
+in the same sentence, and such sentences were rewritten.
+
+\changes
+\begin{itemize}
+\item Methods, Sections~2.1 to 2.8, each with the references above at the
+  point where the method is introduced.
+\item Table~\ref{tab:notation}: notation table.
+\item Removal of every ``the former'', ``the latter'', ``others'' and
+  unanchored pronoun from the manuscript.
+\end{itemize}
+
+\subsection*{Point 2.3}
+\rpoint{The manuscript lacks a proper introduction to the field and
+references to highly relevant work. A manuscript working on the topic of
+shallow ensembles/multi-head committees should at the very least cite papers
+such as doi.org/10.1088/2632-2153/ad594a or doi.org/10.1088/2632-2153/ae0bf0,
+as well as the review and papers contained in the review
+doi.org/10.1515/revce-2024-0028 to evaluate the performance of uncertainty
+estimates. The full list of relevant omitted publications is much longer and
+up to the author to collect.}
+
+\response
+We agree. The three works the reviewer names are the shallow-ensemble paper of
+\citet{kellner2024shallow}, the graph-network shallow-ensemble paper of
+\citet{vinchurkar2025gnn}, and the review of \citet{dai2025review}; all three
+are now cited and discussed, and the introduction has been rewritten to place
+the work in that literature. The new introduction covers committee
+uncertainty for interatomic potentials and its use in active learning
+\citep{artrith2012high,gastegger2017machine,smith2018less,zhang2019active,schran2020committee,imbalzano2021uncertainty,zaverkin2021exploration,kulichenko2023uncertainty,chepkasov2026active},
+alternatives to committees such as Gaussian-process and feature-space
+estimates
+\citep{podryabinkin2017active,janet2019quantitative,musil2019fast,vandermause2020flare,zhu2023fast},
+shallow and multi-head ensembles
+\citep{kellner2024shallow,vinchurkar2025gnn,schafer2026shallow,beck2025committee},
+the evaluation and calibration of uncertainty estimates
+\citep{tran2020methods,busk2021calibrated,kahle2022quality,pernot2022long,levi2022evaluating,tan2023single,heid2024spatially,dai2025review},
+conformal and distribution-free calibration
+\citep{vovk2005algorithmic,lei2018distribution,hu2022conformal}, the
+propagation of uncertainty into observables
+\citep{kellner2024shallow,bigi2024rigidity,schwalbekoda2025information}, and
+uncertainty for foundation models on materials pools
+\citep{deng2023chgnet,batatia2023foundation,barrosoluque2024omat24,riebesell2025matbench,bilbrey2025foundation}.
+Deep ensembles in the wider machine-learning literature are cited through
+\citet{lakshminarayanan2017simple}, and the open question of size scaling
+through \citet{lortaraprasert2026size}. We do not claim the list is complete,
+but it now reflects the state of the field.
+
+\changes
+\begin{itemize}
+\item Introduction: rewritten as a field introduction of about a page and a
+  half with the citations above; the previous ``Related work'' section is
+  merged into it.
+\item Bibliography: expanded with the works listed above.
+\end{itemize}
+
+\subsection*{Point 2.4 (Figures 1 and 2)}
+\rpoint{Figures 1 and 2 compare 3BPA disjoint, 3BPA overlapping, 3BPA same,
+ethanol, aspirin and azobenzene. Why are the first three system + committee
+type and the last three just a system? What committee type was used? Why
+change what is being compared mid-figure?}
+
+\response
+The reviewer is right that the labels were inconsistent. All six panels are
+one system evaluated with one committee construction. The three 3BPA panels
+are three constructions of the same system (disjoint heads, overlapping
+heads, identical data). The three rMD17 panels are one jointly trained
+committee with disjoint heads, trained on 50 frames of each of the ten rMD17
+molecules, and evaluated on the held-out frames of ethanol, aspirin and
+azobenzene. The figures now label every panel as ``system, construction'',
+so the rMD17 panels read ``ethanol, disjoint heads'' and so on, and the
+caption and Methods state that the three rMD17 panels share one committee.
+
+\changes
+\begin{itemize}
+\item Figures~\ref{fig:factora} and \ref{fig:gate}: every panel labelled
+  ``system, construction''.
+\item Methods, Section~2.1: the rMD17 committee is described as one jointly
+  trained committee evaluated on three molecules.
+\end{itemize}
+
+\subsection*{Point 2.5 (Table 1)}
+\rpoint{Table 1 shows that the force magnitude is the best ``uncertainty
+estimate'', beating every pooling of committee disagreement as well as the
+energy disagreement. Given the experimental setup, this revolutionary result
+does not hold up to scrutiny. It is stated that the model used was the
+MACE-MP foundation model with disjoint committee heads. This model was trained
+on the same MPtraj dataset used for testing. Furthermore, the dataset contains
+many crystal structures at equilibrium, where forces are exactly 0. This has
+massive implications on a test that uses force magnitude as an ``uncertainty
+estimate''. Neither are these aspects discussed, nor are the results tested
+on an out-of-domain test set.}
+
+\response
+We agree with the two factual criticisms and have acted on both. The
+MACE-MP-0b trunk was pretrained on MPtraj; the submitted text did not say so,
+and the revision states it plainly, together with the consequence that the
+MPtraj pool is in-distribution for the trunk and out-of-sample only for the
+readout heads. The pool does contain many near-equilibrium structures with
+very small reference forces, and on such structures the predicted force norm
+is small and the force error is small for a trivial reason. The revision
+adds a filtered re-analysis that removes structures whose largest reference
+force is below 0.05~eV/\AA\ and single-atom cells, and reports AUROC within
+deciles of the reference force magnitude, so the ordering of the scores can
+be read without that contribution. The revision also adds the
+out-of-distribution test the reviewer asks for: a pre-registered scan on
+three OMat24 validation subsets with all four foundation committees. OMat24
+post-dates MACE-MP-0 and is the out-of-distribution set used by
+\citet{beck2025committee}. We do not describe the force-norm result as
+revolutionary, and the revision does not either. Force error grows with
+force magnitude, which is well known, so the predicted force norm is a
+strong baseline; the claim we make is that committee methods must be scored
+against it, and the out-of-distribution, filtered and retraining evidence now
+bounds where it is sufficient and where the committee adds information
+(\fsTODO{summary of where the committee beats the force norm after J10 and
+the filtered re-analysis}).
+
+\changes
+\begin{itemize}
+\item Methods, Section~2.7: contamination statement for the MACE-MP-0b trunk.
+\item Results, Section~3.6: filtered MPtraj re-analysis and within-decile
+  AUROC (\fsTODO{values}); Table~\ref{tab:ood}: OMat24 results for all four
+  foundation committees (\fsTODO{values}).
+\item Table~\ref{tab:mptraj}: caption rewritten to state the trunk
+  pretraining and to point to the filtered analysis; the word ``free'' is
+  replaced by ``zero-cost baseline'' and the baseline is no longer described
+  as beating the committee without qualification.
+\item Abstract and Discussion: rescoped as described under Point~1.4 of
+  Reviewer~1.
+\end{itemize}
+
+\subsection*{Concluding assessment}
+\rpoint{In conclusion, the manuscript shows large problems in many core areas,
+such as knowledge of the state of the art of the field, the execution of the
+scientific experiments, the presentation of the data and the writing in
+general. The key results of the manuscript beyond these issues are the
+comparison of different pooling techniques for query by committee, the
+comparison against essentially-free metrics and an analysis of the effects
+of reducing the committee size of the uncertainty metric. These results of
+some interest to the field of uncertainty quantification in atomistic
+simulations. However, even after a hypothetical major revision that rectifies
+all issues, the results would still not be of sufficient relevance to justify
+a publication in a journal such as JCTC.}
+
+\response
+We have tried to rectify all of the issues, and we have also changed what the
+paper offers. The three results the reviewer lists as being of some interest
+are kept and are now stated clearly. The revision adds, on top of them, a
+complete characterisation of the committees with their accuracy and
+calibration, an out-of-distribution test of the zero-cost baseline on a
+dataset the foundation model did not see, a filtered analysis that removes
+the near-equilibrium confound, and a retraining experiment that tests whether
+the ranking differences between rules survive one acquisition round. We
+think that the resulting paper answers a question practitioners face
+directly, namely when the backward passes of a force committee are worth
+computing and what the alternative costs, and we leave the judgement of
+relevance to the editor.
+
+\section*{Corrections made on our own initiative}
+
+\begin{enumerate}
+\item \textbf{A mismatched comparison of overconfidence ratios.} The submitted
+  text (Section ``Independently trained committees'') compared an
+  overconfidence ratio of $\fsNaiveOverconfLo\times$ for an independently
+  trained committee with $\fsSharedOverconfHi\times$ for ``the matched
+  shared-trunk committee''. The first number belongs to the water
+  molecular-dynamics committee and the second to the 3BPA identical-data
+  committee; the two are not a matched pair. The revision reports the four
+  matched pairs (3BPA identical data, 3BPA resampled data, water molecular
+  dynamics, water path-integral molecular dynamics), each independently
+  trained committee against the shared-trunk committee with the same training
+  data and evaluation frames: 3BPA identical data
+  $\fsOverconfNaiveSame\times$ against $\fsOverconfSharedSame\times$, 3BPA
+  resampled data $\fsOverconfNaiveResampled\times$ against
+  $\fsOverconfSharedResampled\times$, water molecular dynamics
+  $\fsOverconfNaiveWaterMD\times$ against $\fsOverconfSharedWaterMD\times$,
+  and water path-integral molecular dynamics
+  $\fsOverconfNaiveWaterPIMD\times$ against
+  $\fsOverconfSharedWaterPIMD\times$. The direction of the conclusion, that independently trained
+  committees are far better calibrated in magnitude, is unchanged, and the
+  revision now also reports the z-score variance for every pair.
+\item \textbf{Wrong citation for MACE-MP.} The submitted text cited
+  \citet{batatia2022mace} for the MACE-MP foundation model. That reference
+  describes the MACE architecture; the foundation model is
+  \citet{batatia2023foundation}. The revision cites each for what it is.
+\end{enumerate}
+
+\medskip\noindent
+We are grateful to both reviewers for reviews that were detailed enough to act
+on, and we hope the revised manuscript is now suitable for consideration.
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

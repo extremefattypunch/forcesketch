@@ -1,0 +1,85 @@
+% Data and Software Availability, and the disclosure of language-model use.
+% Labels defined here: sec:avail, sec:llm.
+% Every locator comes from artifact.tex (\fsArtifactLink, \fsUpstreamZenodo);
+% nothing is typed in by hand.
+
+\section*{Data and Software Availability}
+\label{sec:avail}
+
+The complete artifact for this work is deposited at \fsArtifactLink. It holds
+the source code, the environment lockfile with the exact version of every
+dependency, the scripts that fetch the input data, the sha256 hash of every
+dataset file and checkpoint, the split manifests, the probe seeds, every raw
+per-structure prediction and every timing record, the scripts that draw each
+figure and table, the test suite, and a worked example. The code is released
+under the MIT licence and the records under CC~BY~4.0. File paths below are
+given relative to the root of the artifact.
+
+The inputs are not ours and are not redistributed. The committee checkpoints
+and the 3BPA, rMD17 and liquid-water frames are the supporting data of
+\citet{beck2025committee}, archived at \texttt{\fsUpstreamZenodo}. The MPtraj
+structures are the ones distributed with CHGNet~\citep{deng2023chgnet}. The
+OMat24 validation structures used in the out-of-distribution scan are from
+\citet{barrosoluque2024omat24} and are released under CC~BY~4.0. The fetch
+scripts download each file and compare it with its recorded hash before any
+use, so a substituted or corrupted input stops the run instead of changing a
+result silently.
+
+Every statistical result regenerates on a CPU. The command
+\texttt{tools/reproduce.py --tier offline} re-derives each headline quantity
+from the committed records, with no model execution, no CUDA and no download,
+and checks each quantity against its committed value. \texttt{tools/audit.py}
+verifies the frozen prior-work tree, the sha256 binding of each pre-registered
+protocol to a registration record written before that experiment produced any
+output, the provenance of every number in this manuscript, the split manifests
+and the test-access ledger. \texttt{tools/report\_go\_no\_go.py} prints every
+scored prediction as data, next to the confidence that was stated for it in
+advance.
+
+Three kinds of computation need a GPU. Regenerating the cached per-head force
+matrices for the molecular and water systems needs one GPU; everything
+downstream of that cache is linear algebra on the CPU. The materials scans
+need one GPU each: the MPtraj scan ran on one A100, and the OMat24 scan and
+the active-learning round on 3BPA ran on partitioned (MIG) slices of A100
+cards. Such slices are suitable for predictions and for training but not for
+timing, so no wall-clock number in this paper comes from a slice. The timing
+experiments of Section~\ref{sec:wallclock} ran on A100-SXM4-80GB, H200 and
+RTX~PRO~6000 Blackwell cards under one pinned toolchain. The device, driver,
+streaming-multiprocessor count and clock state of every timing run are
+recorded next to the measurements of that run, because the wall-clock
+conclusions are properties of the hardware as much as of the method.
+
+The records added for this revision are included in the artifact. They are
+the per-structure predictions, reference forces and scores of the
+out-of-distribution scan on OMat24 (Table~\ref{tab:ood}); the selected sets,
+retraining logs and held-out errors of the active-learning round on 3BPA
+(Table~\ref{tab:al}); and the accuracy and calibration record
+\texttt{results/records/j12\_accuracy.json} behind Table~\ref{tab:accuracy}
+and Figure~\ref{fig:calibration}. The protocols for the two new experiments
+were registered before either experiment produced any output, and the
+registration records are included alongside the results.
+
+\section*{Use of Large Language Models}
+\label{sec:llm}
+
+Large-language-model coding agents were used substantially throughout this
+work and throughout this revision: for research ideation, for writing the
+experiment scripts and the analysis code, for the adversarial review described
+below, and for drafting and revising the manuscript. The author directed the
+work, chose the questions, and is responsible for the contents.
+
+Because that exposure is broad, verification is mechanical rather than a
+matter of inspection. Every number in this paper is generated from a committed
+record by \texttt{tools/paper\_numbers.py} and re-checked by
+\texttt{tools/audit.py}; none is transcribed, so an agent cannot introduce a
+value by typing one. The protocol of each experiment was registered and
+hash-bound to a record written before that experiment produced any output, so
+a hypothesis cannot be adjusted after the outcome is known. Split roles are
+content-hashed and recompute from recorded seeds. An adversarial review,
+itself agent-driven and documented in \texttt{results/REVIEW\_FINDINGS.md},
+found real defects in agent-written code and in the supporting documents,
+among them a benchmark that measured fewer backward passes than it reported
+and a filename collision that destroyed a result file; a cross-document audit
+found many stale numbers in the supporting documents. The macro-derived
+numbers, which are the ones in this manuscript, were not among the failures.
+That record is the reason every number here is derived rather than copied.
