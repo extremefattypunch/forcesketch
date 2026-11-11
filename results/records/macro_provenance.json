@@ -290,7 +290,7 @@
   "description": "how much more accurate a matched independent committee is on shifted (PIMD) water",
   "formatted": "2.7",
   "source": "j5_water_caches.jsonl",
-  "source_sha256": "10ac038386f59682aa266fab5c75f9ed435bae3f23bde045474d0e478f673021",
+  "source_sha256": "cdbdc36f9b90275045f14db79a42ea4c67868faf90e4060ba6961790a142bd8f",
   "value": 2.700150077949352
  },
  "fsNaiveOverconfLo": {
@@ -334,6 +334,62 @@
   "source": "j6c_size_normalisation.json",
   "source_sha256": "7909b222443486365f10bf37af7c9c6ca534e6c14aa4dcb14adca6556c826a7b",
   "value": 2
+ },
+ "fsOverconfNaiveResampled": {
+  "description": "overconfidence ratio of the independently trained committee (3BPA, resampled training data)",
+  "formatted": "2.56",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 2.556977733324639
+ },
+ "fsOverconfNaiveSame": {
+  "description": "overconfidence ratio of the independently trained committee (3BPA, identical training data)",
+  "formatted": "2.58",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 2.5845186525153876
+ },
+ "fsOverconfNaiveWaterMD": {
+  "description": "overconfidence ratio of the independently trained committee (liquid water, classical MD)",
+  "formatted": "2.28",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 2.275669722007112
+ },
+ "fsOverconfNaiveWaterPIMD": {
+  "description": "overconfidence ratio of the independently trained committee (liquid water, PIMD)",
+  "formatted": "3.08",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 3.0780798919532155
+ },
+ "fsOverconfSharedResampled": {
+  "description": "overconfidence ratio of the matched shared-trunk committee (3BPA, resampled training data)",
+  "formatted": "13.52",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 13.516011985967081
+ },
+ "fsOverconfSharedSame": {
+  "description": "overconfidence ratio of the matched shared-trunk committee (3BPA, identical training data)",
+  "formatted": "25.77",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 25.768896366814374
+ },
+ "fsOverconfSharedWaterMD": {
+  "description": "overconfidence ratio of the matched shared-trunk committee (liquid water, classical MD)",
+  "formatted": "6.40",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 6.397537758340045
+ },
+ "fsOverconfSharedWaterPIMD": {
+  "description": "overconfidence ratio of the matched shared-trunk committee (liquid water, PIMD)",
+  "formatted": "24.08",
+  "source": "j6_naive_verdict.json",
+  "source_sha256": "a7e327b31f82a497e7ec4c51f1c80455329e9ce06f0ffd1aed3b2a93f9c75fdd",
+  "value": 24.077365167653877
  },
  "fsSharedOverconfHi": {
   "description": "highest matched shared-trunk overconfidence ratio",

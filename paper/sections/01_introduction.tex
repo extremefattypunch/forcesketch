@@ -1,0 +1,192 @@
+% 01_introduction.tex -- Introduction for the JCTC revision (ct-2026-01838j).
+% Replaces the submitted Introduction and Related work. Every number is a
+% \fs... macro from paper/macros.tex; \fsTODO{...} marks a number that will
+% come from J10/J11/J12 and must be defined before the build.
+
+\section{Introduction}
+\label{sec:intro}
+
+Machine-learned interatomic potentials are fitted to energies and forces from
+electronic-structure calculations. Each label costs orders of magnitude more
+than one evaluation of the fitted model. Which structures receive a label
+therefore matters as much as any choice of architecture. The selection rule in
+common use is query by committee~\citep{seung1992query,krogh1995neural}: train
+several models, evaluate the spread of their predictions on every candidate
+structure, and label the structures on which the spread is largest. The rule
+entered atomistic modelling with neural-network
+potentials~\citep{artrith2012high,gastegger2017machine,smith2018less,zhang2019active,schran2020committee}
+and with linear and Gaussian-process
+models~\citep{podryabinkin2017active,vandermause2020flare}, and it remains the
+default in current active-learning
+workflows~\citep{kulichenko2023uncertainty,chepkasov2026active}. For a
+potential used in molecular dynamics the relevant spread is over forces, because
+forces drive the dynamics and because force errors are larger and more local
+than energy errors~\citep{christensen2020role}. Obtaining the force spread
+exactly costs one reverse-mode pass through each committee member.
+
+Committee disagreement is one of several uncertainty estimates available for
+these models, and a substantial literature evaluates every such estimate
+against the true error on held-out reference data; \citet{dai2025review}
+review that literature. Ensembles are the
+incumbent~\citep{lakshminarayanan2017simple}. Repeated comparisons of ensemble
+spread with the actual error show that ensembles rank errors usefully but
+understate the error magnitude, so the spread must be recalibrated before it
+can be read as an error
+bar~\citep{imbalzano2021uncertainty,kahle2022quality,busk2021calibrated,tan2023single,carrete2023deep}.
+The same literature has settled how a calibrated estimate is recognised: by
+reliability diagrams, by the variance of the standardised error, and by ranking
+metrics such as the area under the receiver operating characteristic curve
+(AUROC)~\citep{tran2020methods,pernot2022long,levi2022evaluating}. Conformal
+prediction adds a distribution-free coverage guarantee on top of any such
+score~\citep{hu2022conformal}. Single-model alternatives avoid the cost of
+training and running several models: Gaussian-process and kernel
+variances~\citep{musil2019fast,vandermause2020flare}, distances in feature
+space~\citep{janet2019quantitative,zhu2023fast}, information-theoretic
+scores~\citep{schwalbekoda2025information}, and estimators built into the
+network
+itself~\citep{wollschlager2023uncertainty,bigi2024rigidity,heid2024spatially}.
+We state plainly, correcting the submitted version of this paper, that
+comparing an uncertainty estimate with the true error is standard practice.
+The distinction we draw is narrower. Work on cheap approximations of an
+ensemble statistic validates the approximation against the exact ensemble, as
+it should, because the approximation is meant to reproduce the ensemble. Two
+links are therefore involved: the link from the ensemble to the error, and the
+link from the approximation to the ensemble. A cheap approximation is only as
+useful as the weaker of the two links, and this paper measures both links on
+the same systems.
+
+Deep ensembles are expensive to train and to run. Shallow ensembles reduce
+the cost by sharing one network body, which we call the trunk, between $M$
+output heads~\citep{kellner2024shallow,schafer2026shallow,vinchurkar2025gnn};
+related multi-head constructions for graph networks and for committee-based
+materials screening are given by \citet{carrete2023deep} and
+\citet{beck2025committee}. The heads differ by their random initialisation, by
+the subset of the training data each head sees, or by a loss term that pushes
+the heads apart. Such a multi-head committee amortises the trunk: one forward
+pass yields all $M$ energies, so the spread of the head energies costs no more
+than a single model. What a multi-head committee does not amortise is the
+force. Each head's force is the gradient of that head's energy, so obtaining
+all $M$ force vectors exactly still costs $M$ backward passes through the
+trunk. The alternative is a projection of the per-head forces onto a chosen
+direction in head space, which costs one backward pass per direction
+probed~\citep{beck2025committee}. Multi-head committees are also less diverse
+than independently trained committees, because the heads share every feature
+of the trunk, and they are correspondingly more
+overconfident~\citep{kellner2024shallow,beck2025committee}. \citet{beck2025committee}
+call an ensemble of separately trained models a naive committee; we call such an
+ensemble an independently trained committee.
+
+A second issue concerns how per-coordinate disagreement is reduced to one
+number per structure. The score in common use sums the per-coordinate head
+variance over all $3N$ coordinates of a structure with $N$ atoms. A sum over
+coordinates grows with $N$ whether or not the model is uncertain about any one
+of them. That this score depends on size is known. \citet{smith2018less} divide
+the ensemble spread by $\sqrt{N}$ before comparing structures;
+\citet{kellner2024shallow} show that the uncertainty of a total energy grows
+between $\sqrt{N}$ and $N$ depending on how the per-atom errors are correlated;
+and \citet{lortaraprasert2026size} show that a per-atom uncertainty averaged
+over atoms and the same uncertainty taken as a maximum over atoms behave
+differently as the structure grows. Every benchmark on which the summed score
+has been recommended, however, uses one molecule at one fixed size. At fixed
+size an extensive score and an intensive score differ by a constant, and the
+dependence on $N$ cannot show. We show below that on a pool of variable size
+the summed score selects the largest structures rather than the most uncertain
+ones, and that a size normalisation restores parity with a per-coordinate
+maximum rather than superiority over it.
+
+The setting in which committee uncertainty is now most often proposed is a
+foundation model: a potential pretrained on a large materials database and
+then fine-tuned, or equipped with committee readouts, for a new
+task~\citep{deng2023chgnet,batatia2023foundation,bilbrey2025foundation}.
+Candidate pools in this setting are large, span many elements, and contain
+structures of very different sizes, which is exactly where the size dependence
+above bites. Such pools also carry a trap. The MACE-MP trunk used here was
+pretrained on the MPtraj trajectories of \citet{deng2023chgnet}, so scoring an
+MPtraj pool tests the committee heads out of sample but tests the trunk on its
+own pretraining data. The submitted version of this paper did not state this.
+The revision keeps the MPtraj scan, labels that scan as in-distribution for the
+trunk, and adds a scan of the OMat24 validation
+subsets~\citep{barrosoluque2024omat24}, which post-date the pretraining of the
+trunk and which \citet{beck2025committee} used as an out-of-distribution test;
+the standard benchmarks for universal potentials provide the
+context~\citep{riebesell2025matbench}. MPtraj also contains many relaxed
+crystals whose reference forces are close to zero, which favours any score
+built from force magnitude; the materials results are therefore reported with
+and without those structures.
+
+This paper asks two questions, in this order. First: does committee
+disagreement identify the structures on which the model's forces are most
+wrong, when the error is measured against the reference forces? We call this
+property the error-ranking quality of the committee. Second: how faithfully
+does a cheap screening rule reproduce the decisions of the exact committee,
+and at what cost? A screening rule spends a small number of backward passes on
+a cheap score and skips the exact computation when that score, multiplied by a
+calibration constant, falls below a threshold. The order of the two questions
+matters. The second question takes the exact committee as its ground truth, so
+the answer to the second question is worth having only once the first question
+has been answered. Answering the first question needs no approximation at all:
+it needs the per-head forces, which we cache, and the reference forces, which
+the test sets contain. Answering it also needs baselines that cost nothing. We
+use two zero-cost baselines: the norm of the predicted mean force, which is a
+by-product of the forward pass, and the spread of the head energies, which
+costs one forward pass and no backward pass. A committee statistic that costs
+$M$ backward passes must beat both baselines before it is worth computing.
+
+The findings of the paper, in plain words, are as follows. Items 1 to 3 were
+in the submitted version; items 4 to 6 are new in this revision.
+\begin{enumerate}
+\item At fixed system size, exact committee disagreement ranks reference-force
+error with AUROC $\fsFactorALo$--$\fsFactorAHi$ across six molecular test sets,
+and the summed score is the best of the three structure-level scores, winning
+$\fsGlobalWins$ of $\fsGlobalCells$ comparisons (Figure~\ref{fig:factora}). On
+a pool of $\fsMPtrajN$ MPtraj crystals of variable size the summed score selects
+structures whose median atom count is $\fsMPtrajExtensivity\times$ that of the
+per-coordinate maximum, and the ordering of the scores reverses
+(Figure~\ref{fig:extensivity}, Table~\ref{tab:mptraj}).
+\item A deterministic estimator that spends every backward pass on the leading
+directions of the head space skips $\fsLOSkipLoPct$--$\fsLOSkipHiPct$\% of
+exact committee evaluations without changing a decision, and beats a randomised
+low-rank sketch with the same number of backward passes on $\fsLOBeatsCV$ of
+$\fsLOSystems$ systems (Figure~\ref{fig:gate}). A finite-sample law with no
+free parameters predicts why the randomised sketch fails.
+\item On the MPtraj pool the predicted force norm, which costs nothing, reaches
+AUROC $\fsMPtrajFree$ against $\fsMPtrajGlobal$ for the exact committee, and
+adding the committee to the force norm raises the AUROC by
+$\fsCompMarginal$, which is not significant. Force errors grow with force
+magnitude, so this is not a surprising result; what follows from it is that the
+predicted force norm is the baseline every committee statistic must be scored
+against. On fixed-composition molecular sets the committee beats that baseline
+significantly on $\fsCompFixedSig$ of $\fsCompFixedN$ systems.
+\item Every committee is now characterised by its energy and force errors and
+by its calibration (Table~\ref{tab:accuracy}, Figure~\ref{fig:calibration}).
+Per-atom disagreement correlates with per-atom error, with a Spearman
+coefficient of \fsTODO{Spearman range of per-atom disagreement against
+per-atom force error on the molecular sets}, but every shared-trunk committee
+is overconfident: the variance of the standardised error is
+\fsTODO{range of z-score variance for the shared-trunk committees} against
+\fsTODO{z-score variance of the independently trained committees} for
+independently trained committees of the same architecture.
+\item On the OMat24 subsets, which are out of distribution for the trunk, the
+exact committee reaches AUROC \fsTODO{OMat24 AUROC of the exact committee}
+against \fsTODO{OMat24 AUROC of the predicted force norm} for the predicted
+force norm, with all four foundation committees (Table~\ref{tab:ood}).
+\item One round of active learning with retraining on 3BPA, in which each
+selection rule chooses the same number of structures from the same pool,
+changes the retrained model's force error on the unselected pool by
+\fsTODO{J11 force-error change per rule relative to random selection}
+relative to random selection (Table~\ref{tab:al}). Identifying high-error
+structures and improving a retrained model are distinct outcomes, and the paper
+reports them separately.
+\end{enumerate}
+The scope is one architecture family, MACE~\citep{batatia2022mace}, and
+committees of $M=8$ members; smaller committees are studied by enumerating
+sub-committees of the eight, and no larger committee was trained. The paper is
+an evaluation of a selection rule, not a new potential, and claims are limited
+to the systems and committee constructions listed in the Methods.
+
+Every number in this paper is derived programmatically from a committed record,
+and none is transcribed by hand. The protocol of each experiment was registered
+and bound by a hash to a record written before that experiment produced any
+output, so no hypothesis was adjusted after its outcome was seen. The
+availability section (Section~\ref{sec:avail}) describes the archive, the
+inputs that are not ours, and the commands that regenerate every quantity.

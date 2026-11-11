@@ -141,6 +141,15 @@ def naive_overconf(which: str):
     return min(v) if which == "naive" else max(v)
 
 
+def overconf_pair(naive_tag: str, which: str):
+    """One matched pair from J6's P4 table. The submitted text quoted the LOWEST
+    naive ratio against the HIGHEST shared-trunk ratio as if they were a pair;
+    they came from different systems. These macros are system-matched."""
+    d = load("j6_naive_verdict.json")["detail"]["P4"]
+    row = next(r for r in d if r["naive"] == naive_tag)
+    return row["naive_ratio"] if which == "naive" else row["matched_ratio"]
+
+
 def naive_passed():
     return load("j6_naive_verdict.json")["n_passed"]
 
@@ -374,6 +383,22 @@ MACROS = [
      "lowest naive-committee overconfidence ratio"),
     ("fsSharedOverconfHi", "j6_naive_verdict.json", lambda: naive_overconf("matched"), "{:.2f}",
      "highest matched shared-trunk overconfidence ratio"),
+    ("fsOverconfNaiveSame", "j6_naive_verdict.json", lambda t="3bpa-naive-same_test_1200K": overconf_pair(t, "naive"), "{:.2f}",
+     "overconfidence ratio of the independently trained committee (3BPA, identical training data)"),
+    ("fsOverconfSharedSame", "j6_naive_verdict.json", lambda t="3bpa-naive-same_test_1200K": overconf_pair(t, "matched"), "{:.2f}",
+     "overconfidence ratio of the matched shared-trunk committee (3BPA, identical training data)"),
+    ("fsOverconfNaiveResampled", "j6_naive_verdict.json", lambda t="3bpa-naive_test_1200K": overconf_pair(t, "naive"), "{:.2f}",
+     "overconfidence ratio of the independently trained committee (3BPA, resampled training data)"),
+    ("fsOverconfSharedResampled", "j6_naive_verdict.json", lambda t="3bpa-naive_test_1200K": overconf_pair(t, "matched"), "{:.2f}",
+     "overconfidence ratio of the matched shared-trunk committee (3BPA, resampled training data)"),
+    ("fsOverconfNaiveWaterMD", "j6_naive_verdict.json", lambda t="water-naive_md_T300K": overconf_pair(t, "naive"), "{:.2f}",
+     "overconfidence ratio of the independently trained committee (liquid water, classical MD)"),
+    ("fsOverconfSharedWaterMD", "j6_naive_verdict.json", lambda t="water-naive_md_T300K": overconf_pair(t, "matched"), "{:.2f}",
+     "overconfidence ratio of the matched shared-trunk committee (liquid water, classical MD)"),
+    ("fsOverconfNaiveWaterPIMD", "j6_naive_verdict.json", lambda t="water-naive_pimd_T300K": overconf_pair(t, "naive"), "{:.2f}",
+     "overconfidence ratio of the independently trained committee (liquid water, PIMD)"),
+    ("fsOverconfSharedWaterPIMD", "j6_naive_verdict.json", lambda t="water-naive_pimd_T300K": overconf_pair(t, "matched"), "{:.2f}",
+     "overconfidence ratio of the matched shared-trunk committee (liquid water, PIMD)"),
     ("fsNaivePassed", "j6_naive_verdict.json", naive_passed, "{:d}",
      "pre-registered naive-committee predictions confirmed, of five"),
     ("fsMPtrajN", "j6b_foundation_verdict.json", mptraj_n, "{:,d}",

@@ -265,9 +265,48 @@ def fig_beta_law():
     plt.close(fig)
 
 
+# ---------------------------------------------------------------- figure 6
+def fig_calibration():
+    """Per-atom committee std against per-atom force error, six systems.
+
+    The question a reader of an uncertainty paper asks first: does the spread
+    track the error at all, and by how much is it too small? Each panel is a
+    subsample of atoms (one point per atom), the solid line is the equal-count
+    reliability curve (RMSE of the error within 20 bins of std), and the dashed
+    diagonal is where a calibrated committee would sit. Log axes, because both
+    quantities span two decades.
+    """
+    d = rd("j12_calibration_points.json")
+    systems = list(d["systems"])
+    fig, axes = plt.subplots(2, 3, figsize=(7.0, 4.6), sharex=False, sharey=False)
+    for ax, label in zip(axes.flat, systems):
+        s = d["systems"][label]
+        sig, err = np.asarray(s["sigma"]), np.asarray(s["error"])
+        lo = max(min(sig.min(), err.min()), 0.3)
+        hi = max(sig.max(), err.max()) * 1.2
+        ax.scatter(sig, err, s=3, color=C[0], alpha=0.18, linewidths=0, zorder=2, rasterized=True)
+        rb = s["reliability"]
+        ax.plot([b["sigma_mean"] for b in rb], [b["rmse"] for b in rb], color=C[1], lw=1.6,
+                marker="o", ms=2.6, zorder=4, label="binned RMSE")
+        ax.plot([lo, hi], [lo, hi], color=INK2, lw=1.0, ls=(0, (4, 3)), zorder=3, label="calibrated")
+        ax.set_xscale("log"); ax.set_yscale("log")
+        ax.set_xlim(lo, hi); ax.set_ylim(lo, hi)
+        style(ax, title=label)
+        ax.text(0.03, 0.95, rf"$\rho_s$ = {s['spearman']:.2f}", transform=ax.transAxes,
+                fontsize=7.5, color=INK2, va="top")
+    for ax in axes[1]:
+        ax.set_xlabel("committee std per atom (meV/Å)", fontsize=8, color=INK)
+    for ax in axes[:, 0]:
+        ax.set_ylabel("force error per atom (meV/Å)", fontsize=8, color=INK)
+    axes[0, 0].legend(fontsize=7, frameon=False, loc="lower right", labelcolor=INK2, handletextpad=0.4)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig6_calibration.pdf", bbox_inches="tight", dpi=200)
+    plt.close(fig)
+
+
 FIGS = {"fig1_factor_a": fig_factor_a, "fig2_gate_forest": fig_gate_forest,
         "fig3_extensivity": fig_extensivity, "fig4_speedup": fig_speedup,
-        "fig5_beta_law": fig_beta_law}
+        "fig5_beta_law": fig_beta_law, "fig6_calibration": fig_calibration}
 
 
 def main() -> int:

@@ -1,0 +1,12 @@
+[
+ {
+  "dropped": 0,
+  "energy_mae_mev_atom": 86.00709373798735,
+  "force_rmse_mev_A": 214.631911813421,
+  "median_ref_force_max": 1.3309922388786959,
+  "model": "qbc8000",
+  "n": 32,
+  "seconds": 3.3647379875183105,
+  "subset": "aimd-from-PBE-1000-nvt"
+ }
+]

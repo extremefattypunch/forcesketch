@@ -31,5 +31,10 @@
   "records": {
    "j3_extreme_value_v2.json": "846b6de75bd46b49b67ff9ab8e94d2a0b473993306a7283d90de676f712a3bbc"
   }
+ },
+ "fig6_calibration": {
+  "records": {
+   "j12_calibration_points.json": "d15c6622f6367b22685a3ae7b31fbc05ac8b9e585dbeb57e7c59a99a2f30a060"
+  }
  }
 }

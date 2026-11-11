@@ -1,0 +1,163 @@
+% 04_discussion.tex : Discussion, recommendations, limitations.
+% Every number is a \fs... macro from macros.tex. \fsTODO marks a number or
+% verdict that arrives with J10 (out of distribution) or J11 (active learning).
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{What the evidence supports}
+
+Committee force disagreement does identify the structures on which a model's
+forces are most wrong. On the six fixed-size molecular systems the exact global
+statistic ranks the top-5\% highest-error structures at AUROC
+\fsFactorALo--\fsFactorAHi, and it beats the better of the two zero-cost
+baselines by \fsFreeGainLo--\fsFreeGainHi (Figure~\ref{fig:factora}). On the
+same class of systems, adding the committee to a model that already has the
+predicted force norm raises held-out AUROC by \fsCompFixedLo--\fsCompFixedHi,
+significantly on \fsCompFixedSig of \fsCompFixedN systems. There the backward
+passes buy something real.
+
+The evidence does not support a general claim that committee disagreement beats
+the predicted force norm. On the MPtraj pool (Table~\ref{tab:mptraj}) the
+predicted force norm reaches AUROC \fsMPtrajFree against the committee's
+\fsMPtrajGlobal, and adding the committee to the norm changes a nested model by
+\fsCompMarginal, which is not significant. That pool is in distribution for the
+trunk, because the MACE-MP trunk was pretrained on
+MPtraj~\citep{batatia2023foundation,deng2023chgnet}, and it contains many
+near-equilibrium cells whose reference forces are close to zero. Both facts
+favour the baseline, so the materials result needed two further checks. First,
+removing near-equilibrium and single-atom cells from the pool
+\fsTODO{J10 P3: whether the force-norm margin over the best committee statistic shrinks but stays positive on the filtered MPtraj pool}.
+Second, on OMat24 structures the trunk never saw~\citep{barrosoluque2024omat24},
+\fsTODO{J10 P2: whether the force-norm baseline stays within 0.02 of, or above, the best committee statistic on both AIMD subsets, Table tab:ood}.
+% if J10 P2 passes: the force-norm baseline is not an artefact of trunk
+%   pretraining. It stays within 0.02 of, or above, the best committee statistic
+%   on both AIMD subsets, so the materials conclusion extends to structures the
+%   trunk never saw and the committee's incremental value on this model family
+%   is small in and out of distribution.
+% if J10 P2 fails: the force-norm advantage on MPtraj was partly an artefact of
+%   in-distribution scoring. Out of distribution the committee recovers a margin
+%   of \fsTODO{OOD committee minus force-norm AUROC}, so the baseline must still
+%   be beaten in distribution, but the committee earns its cost under shift.
+Third, identifying high-error structures is not the same as acquiring the
+structures that most improve a retrained model. In one active-learning round
+on 3BPA with retraining (Table~\ref{tab:al}),
+\fsTODO{J11 P3: whether the force-norm rule's held-out 1200 K force RMSE is within 10\% of the best committee rule's}.
+% if J11 P3 passes: the zero-cost rule is competitive as an acquisition rule in
+%   this one setting as well, so the error-ranking and acquisition pictures
+%   agree, and the force-norm baseline must be reported for both.
+% if J11 P3 fails: the committee rules train measurably better models than the
+%   force-norm rule, so error ranking and acquisition quality diverge here, and
+%   the force-norm baseline is weaker for acquisition than its error-ranking
+%   AUROC suggests.
+The claim we make is therefore scoped: committee force uncertainty must be
+scored against the predicted force norm, and on the systems measured here it
+clears that bar on single-composition molecular sets and fails to clear it on a
+chemically diverse materials pool under a frozen foundation trunk.
+
+\subsection{Why the predicted force norm is a strong baseline}
+
+The force error of a machine-learned potential grows with the magnitude of the
+force being predicted. The effect is visible in Table~\ref{tab:accuracy}: every
+3BPA committee has a larger force error on the 1200\,K test set, where forces
+are largest, than on the 300\,K set. Wherever the largest errors fall on the
+frames with the largest forces, the predicted force norm ranks error well
+without any model of uncertainty at all. A pool built from relaxation
+trajectories, such as MPtraj, has that composition: most cells sit near
+equilibrium with small forces and small absolute errors, and the few
+far-from-equilibrium cells carry both the largest forces and the largest
+errors. The water PIMD set shows a second route to the same outcome. The
+shared-trunk committee fails badly there, its errors collapse onto one
+force-correlated mode, and the predicted force norm ranks them almost as well as
+the committee does. An independently trained committee that is
+\fsNaiveAccuracyRatio$\times$ more accurate removes most of that failure, and
+every signal, committee included, falls back toward chance.
+
+The committee does carry information beyond force magnitude. Within
+force-magnitude quintiles on MPtraj it still beats chance
+(Table~\ref{tab:mptraj}), and on the molecular systems it adds up to
+\fsCompFixedHi\ AUROC on top of the norm. The point is that this incremental
+value is what must be measured. A committee that beats a random null has not
+been shown to be worth its backward passes; a committee that beats the
+predicted force norm has.
+
+\subsection{Size dependence of summed scores}
+
+Any score that sums per-coordinate variances over all $3N$ coordinates grows
+with $N$ whether or not the model is uncertain. The defect is not specific to
+this committee or to this architecture. Earlier work divides the committee
+standard deviation by $\sqrt{N}$ before selecting~\citep{smith2018less},
+\citet{kellner2024shallow} discuss whether the energy spread of an ensemble
+should scale as $N$ or as $\sqrt{N}$, and \citet{lortaraprasert2026size} study
+the size dependence of ensemble uncertainty directly. At fixed $N$ the summed
+score and its per-coordinate mean differ by one constant, so no ranking changes
+and the defect cannot be seen; that is why the molecular results, all at fixed
+$N$, did not expose it. On MPtraj the summed score selects structures whose
+median atom count is \fsMPtrajExtensivity$\times$ that of the max-component
+selection (Figure~\ref{fig:extensivity}).
+
+Dividing by $(3N)^{\alpha}$ with $\alpha=\fsAlphaStar$, chosen on a design
+split, raises held-out AUROC from \fsNormAurocZero\ to \fsNormAurocStar. Against
+max-component the normalised score records \fsNormWins\ significant wins, one
+tie and \fsNormLosses\ significant loss across the four error targets, which is
+parity rather than superiority. The exponent is not universal. An error target
+that is itself intensive, such as the force RMSE, prefers $\alpha$ near one; a
+maximum over atoms grows mildly with $N$ and prefers a smaller exponent; and
+$\alpha$ moves with the size composition of the pool. The scope of the repair is
+therefore narrow and exact: at fixed size it changes nothing, and at variable
+size it must be refitted for the pool and the target in hand.
+
+\subsection{Recommendations}
+
+\begin{enumerate}
+\item Score any committee uncertainty against the predicted force norm, not
+only against a random null. Report the AUROC of the norm alone, the AUROC of
+the committee alone, and the gain from adding the committee to the norm.
+\item Use the summed score only when every structure has the same size. When
+sizes vary, divide by $(3N)^{\alpha}$ with $\alpha$ chosen on a held-out design
+split for that pool and that error target, and report $\alpha$ as
+pool-dependent, or use an intensive score such as the maximum per-atom
+disagreement.
+\item When a cheap screening rule is used to skip the exact committee
+computation, spend every backward pass on the deterministic leading subspace
+rather than on a randomised sketch. At equal numbers of backward passes the
+deterministic estimator skips \fsLOSkipLoPct--\fsLOSkipHiPct\% of exact
+evaluations and beats the randomised estimator on \fsLOBeatsCV\ of
+\fsLOSystems\ systems (Figure~\ref{fig:gate}).
+\item Treat committee size as insurance and committee construction as the lever
+for calibration. Halving the committee to four heads retains \fsMFourRetained\
+of the error-ranking quality on average, but the worst four-head subset retains
+only \fsMFourWorstSubset\ and the worst two-head subset \fsMTwoWorstSubset.
+Calibration does not improve with size but does change with construction: on
+3BPA with identical training data the shared-trunk committee understates its
+force error by \fsOverconfSharedSame$\times$ and the matched independently
+trained committee by \fsOverconfNaiveSame$\times$; on water MD the matched pair
+gives \fsOverconfSharedWaterMD$\times$ against \fsOverconfNaiveWaterMD$\times$
+(Table~\ref{tab:accuracy}).
+\item Report energy and force errors and a calibration measure beside any
+ranking metric~\citep{tran2020methods,pernot2022long}. An AUROC is invariant to
+any monotone rescaling of the uncertainty, so it says nothing about whether the
+magnitude of the uncertainty is right (Figure~\ref{fig:calibration}).
+\end{enumerate}
+
+\subsection{Limitations}
+
+All committees belong to one architecture family, MACE, and every committee has
+$M=8$ members; smaller committees were studied only as subsets of the eight, so
+nothing is said about $M=16$. The active-learning evidence is one round on one
+molecular system, 3BPA, with a fixed acquisition budget and three seeds; it
+shows whether the rules differ after one round and not how they compound.
+OMat24 is the only out-of-distribution set, and the in-distribution materials
+pool is in distribution for the trunk only because that trunk was pretrained on
+it. The normalisation exponent $\alpha$ is pool- and target-dependent and must
+be refitted. The shared-trunk committees are poorly calibrated in magnitude,
+with z-score variances far above one (Table~\ref{tab:accuracy}); the ranking
+results do not depend on calibrated magnitudes, but any use of these
+uncertainties as error bars would. Finally, error ranking and acquisition
+quality are distinct questions and are answered here to different depths. Error
+ranking is measured on twenty fixed-size systems and two materials pools with
+block-bootstrap intervals; acquisition quality is measured by one retraining
+round. The selection-overlap bound that would have linked the two without
+retraining is unavailable, since the cheap and exact selections agree only to
+Jaccard \fsMPtrajJaccard\ at a realistic acquisition rate, so the materials
+conclusion is a statement about error ranking and nothing more.

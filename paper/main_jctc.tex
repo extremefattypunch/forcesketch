@@ -45,6 +45,9 @@
 % author block itself, so \authorblock is a no-op here.
 \providecommand{\authorblock}[2]{}
 \providecommand{\note}[1]{\textcolor{gray}{\small[#1]}}
+% Visible placeholder for a number that a pending experiment will supply; the
+% release build fails if any remain (tools/audit.py).
+\providecommand{\fsTODO}[1]{\textcolor{red}{[TODO: #1]}}
 
 \input{macros}
 
