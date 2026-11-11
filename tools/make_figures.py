@@ -79,9 +79,16 @@ def style(ax, *, xlabel="", ylabel="", title=""):
         ax.set_title(title, fontsize=9.5, color=INK, loc="left", pad=6)
 
 
-SHORT = {"disjoint_test_1200K": "3BPA disjoint", "overlapping_test_1200K": "3BPA overlapping",
-         "same_test_1200K": "3BPA same", "rmd17-disjoint_ethanol": "ethanol",
-         "rmd17-disjoint_aspirin": "aspirin", "rmd17-disjoint_azobenzene": "azobenzene"}
+# Every label names BOTH the system and the committee construction, so a reader
+# is never left to guess what "ethanol" was scored with (reviewer 2 of the first
+# submission asked exactly that). The three rMD17 rows share one jointly trained
+# disjoint committee.
+SHORT = {"disjoint_test_1200K": "3BPA, disjoint heads",
+         "overlapping_test_1200K": "3BPA, overlapping heads",
+         "same_test_1200K": "3BPA, identical data",
+         "rmd17-disjoint_ethanol": "ethanol, disjoint heads",
+         "rmd17-disjoint_aspirin": "aspirin, disjoint heads",
+         "rmd17-disjoint_azobenzene": "azobenzene, disjoint heads"}
 ORDER = list(SHORT)
 
 
