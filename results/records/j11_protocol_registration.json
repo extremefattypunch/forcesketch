@@ -1,0 +1,6 @@
+{
+ "protocol": "protocols/j11_active_learning.yaml",
+ "protocol_sha256": "872275443d5a5333b54354fa07e7c141ad5454b3fb1e59d7bf9e5e68b642aba3",
+ "registered_utc": "2026-11-11T16:22:13+00:00",
+ "j11_records_existing_at_registration": []
+}

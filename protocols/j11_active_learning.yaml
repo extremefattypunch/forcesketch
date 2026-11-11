@@ -1,0 +1,67 @@
+experiment_id: j11_active_learning
+version: 1
+status: pre-registered
+# =============================================================================
+# Written BEFORE any model was trained on an acquired set. Consulted first: the
+# J2A/J5 error-ranking results on 3BPA (which rules rank error best at fixed
+# size), the naive-committee training recipe shipped with Beck et al.'s archive,
+# and the referee comment that error identification is not acquisition quality.
+# =============================================================================
+
+setting: >
+  3BPA. Base training set: the 100 frames at 300 K used for every 3BPA committee
+  in this work. Pool: the 2,139 labelled frames of the 1200 K test set. Each
+  selection rule scores the pool with the shared-trunk disjoint committee and
+  picks k = 50 frames; a single-head MACE (2 layers, 32 channels, L = 1,
+  r_max = 6 A, 10/1000 energy/force weights, EMA + SWA, 625 epochs, float32)
+  is trained from scratch on the 150 frames with model seeds 0, 1, 2. The
+  `random` rule draws a different subset per seed; `none` trains on the 100
+  frames alone. Evaluation: force RMSE/MAE and per-atom energy MAE on (i) the
+  pool frames selected by no rule (common held-out set), (ii) the 600 K test
+  set, (iii) the 300 K test set.
+
+predictions:
+  - id: P1
+    statement: >
+      Acquisition helps: every rule with k = 50, random included, lowers the
+      held-out 1200 K force RMSE relative to the `none` control, averaged over
+      seeds.
+    confidence: high
+
+  - id: P2
+    statement: >
+      Informed selection beats random: each of global, maxcomp, maxatom and
+      force_norm gives a lower mean held-out 1200 K force RMSE than random.
+    confidence: medium
+
+  - id: P3
+    statement: >
+      The zero-cost rule is competitive: force_norm's mean held-out 1200 K force
+      RMSE is within 10% (relative) of the best committee rule's.
+    confidence: medium
+    note: >
+      The finding this bears on. If the committee rules beat force_norm by more
+      than 10% after retraining, the manuscript must say that error-ranking
+      parity does not translate into acquisition parity.
+
+  - id: P4
+    statement: >
+      At fixed system size the extensive and intensive committee rules acquire
+      similar sets and train similar models: |RMSE(global) - RMSE(maxcomp)| is
+      below the across-seed standard deviation of either.
+    confidence: medium
+
+  - id: P5
+    statement: >
+      Gains do not transfer downward in temperature: on the 300 K test set no
+      rule improves force RMSE over `none` by more than 5% (relative).
+    confidence: low
+
+analysis:
+  script: experiments/j11_active_learning.py
+  verdict: experiments/j11_verdict.py
+  settings:
+    k: 50
+    seeds: [0, 1, 2]
+    selection_cache: head_forces_3bpa-disjoint_test_1200K.pt
+    recipe: models/zenodo/3BPA/trainset_100/naive-committee/run_mace.sh with --valid_file=val_300K_300.xyz
