@@ -101,8 +101,8 @@ def fig_factor_a():
         if r["error_score"] == "e_max":
             by[r["cache_tag"]][r["signal"]] = r["auroc_top05"]
     sigs = [("exact_global", "exact global"), ("exact_maxcomp", "exact max-component"),
-            ("exact_maxatom", "exact max-atom"), ("force_norm", r"$\|\bar{f}\|$ (free)"),
-            ("energy_std", "energy std (free)")]
+            ("exact_maxatom", "exact max-atom"), ("force_norm", r"$\|\bar{f}\|$ (zero cost)"),
+            ("energy_std", "energy std (zero cost)")]
     fig, ax = plt.subplots(figsize=(6.4, 3.3))
     y = np.arange(len(ORDER))[::-1]
     ax.axvline(0.5, color=MUTED, lw=1.0, ls=(0, (4, 3)), zorder=1)

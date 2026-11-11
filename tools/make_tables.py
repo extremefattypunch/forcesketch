@@ -27,8 +27,8 @@ def table_mptraj():
     ph = rd("j6b_foundation_verdict.json")["post_hoc"]
     rows = [("exact max-atom", "exact_maxatom"), ("exact max-component", "exact_maxcomp"),
             ("exact global", "exact_global"), ("leading-only, 5 lanes", "leading_only"),
-            (r"$\|\bar{f}\|$ \emph{(free)}", "force_norm"),
-            ("energy std \\emph{(free)}", "energy_std"), ("random null", "random_null")]
+            (r"$\|\bar{f}\|$ \emph{(zero cost)}", "force_norm"),
+            ("energy std \\emph{(zero cost)}", "energy_std"), ("random null", "random_null")]
     L = [r"\begin{tabular}{lcccccc}", r"\toprule",
          r"& \multicolumn{4}{c}{AUROC by error score} & \multicolumn{2}{c}{stratified (post hoc)}\\",
          r"\cmidrule(lr){2-5}\cmidrule(lr){6-7}",
@@ -79,7 +79,67 @@ def table_pairs():
     return "table_pairs"
 
 
+def table_accuracy():
+    """Accuracy and calibration of every committee (reviewer 1, point 3).
+
+    One row per (system, construction, split): force RMSE/MAE of the committee
+    mean, energy MAE per atom where a reference energy is cached, the median
+    per-atom committee std, the overconfidence ratio and the per-atom Spearman
+    correlation between std and error (per structure for the materials pools).
+    """
+    rows = rd("j12_accuracy.json")["rows"]
+    NAMES = {  # tag -> (system, construction, split)
+        "3bpa-disjoint_test_300K": ("3BPA", "disjoint heads", "300 K"),
+        "3bpa-disjoint_test_600K": ("3BPA", "disjoint heads", "600 K"),
+        "3bpa-disjoint_test_1200K": ("3BPA", "disjoint heads", "1200 K"),
+        "3bpa-overlapping_test_300K": ("3BPA", "overlapping heads", "300 K"),
+        "3bpa-overlapping_test_600K": ("3BPA", "overlapping heads", "600 K"),
+        "3bpa-overlapping_test_1200K": ("3BPA", "overlapping heads", "1200 K"),
+        "3bpa-same_test_300K": ("3BPA", "identical data", "300 K"),
+        "3bpa-same_test_600K": ("3BPA", "identical data", "600 K"),
+        "3bpa-same_test_1200K": ("3BPA", "identical data", "1200 K"),
+        "3bpa-naive-same_test_1200K": ("3BPA", "independent, identical data", "1200 K"),
+        "3bpa-naive_test_1200K": ("3BPA", "independent, resampled data", "1200 K"),
+        "rmd17-disjoint_ethanol": ("ethanol", "disjoint heads", "test"),
+        "rmd17-disjoint_aspirin": ("aspirin", "disjoint heads", "test"),
+        "rmd17-disjoint_azobenzene": ("azobenzene", "disjoint heads", "test"),
+        "water-disjoint_md_T300K": ("water", "disjoint heads", "MD"),
+        "water-disjoint_pimd_T300K": ("water", "disjoint heads", "PIMD"),
+        "water-overlapping_md_T300K": ("water", "overlapping heads", "MD"),
+        "water-overlapping_pimd_T300K": ("water", "overlapping heads", "PIMD"),
+        "water-naive_md_T300K": ("water", "independent", "MD"),
+        "water-naive_pimd_T300K": ("water", "independent", "PIMD"),
+        "j6b_foundation_scan": ("MPtraj pool", "foundation, QbC-8000 heads", "in-distribution"),
+        "j10_qbc8000_aimd-from-PBE-1000-nvt": ("OMat24 AIMD NVT", "foundation, QbC-8000 heads", "out-of-distribution"),
+        "j10_qbc8000_aimd-from-PBE-1000-npt": ("OMat24 AIMD NpT", "foundation, QbC-8000 heads", "out-of-distribution"),
+        "j10_qbc8000_rattled-1000-subsampled": ("OMat24 rattled", "foundation, QbC-8000 heads", "out-of-distribution"),
+    }
+    by = {r["tag"]: r for r in rows}
+
+    def f(x, n=1):
+        return "--" if x is None else f"{x:.{n}f}"
+
+    L = [r"\begin{tabular}{lllrrrrrr}", r"\toprule",
+         r"system & construction & split & $F$ RMSE & $F$ MAE & $E$ MAE & $\tilde\sigma_a$ & overconf. & $\rho_s$ \\",
+         r" & & & \multicolumn{2}{c}{(meV/\AA)} & (meV/atom) & (meV/\AA) & & \\", r"\midrule"]
+    last = None
+    for tag, (sys_, con, split) in NAMES.items():
+        r = by.get(tag)
+        if r is None:
+            continue
+        if last and last != sys_:
+            L.append(r"\addlinespace[2pt]")
+        last = sys_
+        rho = r.get("spearman_atom", r.get("spearman_struct"))
+        oc = "--" if r.get("overconfidence") is None else f(r["overconfidence"]) + r"$\times$"
+        L.append(f"{sys_} & {con} & {split} & {f(r.get('force_rmse'))} & {f(r.get('force_mae'))} & "
+                 f"{f(r.get('energy_mae_atom'), 2)} & {f(r.get('disagreement_median'))} & {oc} & {f(rho, 2)} " + r"\\")
+    L += [r"\bottomrule", r"\end{tabular}"]
+    (OUT / "table_accuracy.tex").write_text("\n".join(L) + "\n")
+    return "table_accuracy"
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for f in (table_mptraj, table_pairs):
+    for f in (table_mptraj, table_pairs, table_accuracy):
         print(f"  wrote paper/tables/{f()}.tex")
