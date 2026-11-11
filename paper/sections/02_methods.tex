@@ -85,7 +85,7 @@ each head sees more data per epoch.
 
 An independently trained committee consists of eight complete MACE models of
 the architecture above, each trained from scratch with the loss of
-Eq.~\eqref{eq:loss} and the same optimiser, from random seeds 0 to 7
+Eq.~(\ref{eq:loss}) and the same optimiser, from random seeds 0 to 7
 \citep{krogh1995neural,lakshminarayanan2017simple}.
 \citet{beck2025committee} call this construction a naive committee. Two
 variants match two of the shared-trunk constructions. In the identical-data
@@ -182,7 +182,7 @@ centred head-space matrix is needed because every cheap estimator of the
 global score in Section~\ref{sec:screening} is a function of $A(x)$ alone:
 $A(x)$ has $r\times r$ entries whatever the value of $N$, so a pool scan can
 store $A(x)$ for every structure instead of $F(x)$, and the exactness of each
-estimator can be checked against Eq.~\eqref{eq:vd} directly. The two maximum
+estimator can be checked against Eq.~(\ref{eq:vd}) directly. The two maximum
 scores are not functions of $A(x)$ and are computed from $F(x)$.
 
 \subsection{Zero-cost baselines}
@@ -322,7 +322,7 @@ g=F(x)\,w\in\mathbb{R}^{3N}.
 \end{equation}
 The mean force is the projection with $w=\mathbf{1}/M$ and costs one backward
 pass, which the simulation pays in any case. The exact per-coordinate variances
-of Eq.~\eqref{eq:vd} need the $r=M-1$ projections onto the columns of $Q_c$,
+of Eq.~(\ref{eq:vd}) need the $r=M-1$ projections onto the columns of $Q_c$,
 hence $r$ further backward passes, after which $A(x)$ follows exactly. A cheap
 estimator uses $K<r$ projections onto directions $w_1,\dots,w_K$ in the centred
 subspace. Throughout, $K$ denotes the number of head-space projections an
@@ -456,7 +456,7 @@ near-equilibrium frames whose reference forces are close to zero. Structures of
 different size cannot be stacked into one array, so the scan stores
 $A(x)$ (Eq.~\ref{eq:A}) and the two maximum scores for each structure, and
 the identity between the stored $A(x)$ and the direct computation of
-Eq.~\eqref{eq:vd} is asserted before the scan starts.
+Eq.~(\ref{eq:vd}) is asserted before the scan starts.
 
 \subsubsection{Contamination between training and evaluation}
 
@@ -480,7 +480,7 @@ of every committee.
 
 Three quantities are fitted in this paper: the leading subspace and the
 threshold $\tau$ (on a design split), the constant $c_\alpha$ (on a calibration
-split), and the exponent $\alpha$ of Eq.~\eqref{eq:salpha} (on a design
+split), and the exponent $\alpha$ of Eq.~(\ref{eq:salpha}) (on a design
 split). Every number that involves a fitted quantity is reported on a test
 split disjoint from the split the quantity was fitted on. Trajectory frames
 are ordered in time, so a random split of frames can place near-duplicate
