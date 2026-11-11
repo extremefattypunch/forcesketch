@@ -1,0 +1,4 @@
+# one sbatch script per line; the orchestrator walks this top to bottom and keeps
+# at most two of them on gpu_test. A job is finished when $SCRATCH/done/<-J name> exists.
+slurm/g2_mptraj.sbatch
+slurm/g3_ood.sbatch

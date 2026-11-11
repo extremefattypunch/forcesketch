@@ -1,0 +1,98 @@
+experiment_id: j10_ood
+version: 1
+status: pre-registered
+# =============================================================================
+# Written BEFORE any OMat24 structure was scored by any committee. Consulted
+# first: the J6B records (in-distribution MPtraj), the OMat24 dataset card, and
+# Beck et al.'s statement that they used OMat24 NVT/NpT as their OOD test.
+# Motivated by referee comments on the first JCTC submission (ct-2026-01838j):
+# the MPtraj pool is in the MACE-MP trunk's pretraining set and contains
+# near-equilibrium frames, so the free force-norm result may be an artefact.
+# =============================================================================
+
+setting: >
+  The four foundation committees of Beck et al. (MACE-MP-0b medium trunk, frozen;
+  8 disjoint readout heads fine-tuned on 8,000 QbC-selected, 8,000 random,
+  8,000 max-mean-force-selected, or 1,000 QbC-selected MPtraj structures) scored
+  on seeded 10,000-structure subsamples of three OMat24 validation subsets:
+  aimd-from-PBE-1000-nvt, aimd-from-PBE-1000-npt (both 1000 K ab initio MD,
+  far from equilibrium) and rattled-1000-subsampled (rattled static frames).
+  Nothing in OMat24 was seen by the trunk or by any readout.
+
+data:
+  source: OMat24 validation split, corrected release of 2024-12-20
+  subsample: 10000 per subset, numpy default_rng(20261111), without replacement
+  filter: structures containing an element outside the model's 89-element table are dropped and counted
+  outliers: none removed at scan time; any filtering happens in the scoring script and is reported
+
+predictions:
+  - id: P1
+    statement: >
+      Committee disagreement still ranks reference-force error out of
+      distribution: for the QbC-8000 committee, AUROC of the exact max-atom
+      statistic for the top-5% highest-e_max structures is at least 0.70 on both
+      AIMD subsets.
+    confidence: medium
+    criteria:
+      - metric: auroc_maxatom_e_max
+        op: ge
+        threshold: 0.70
+        require: both_aimd_subsets
+
+  - id: P2
+    statement: >
+      The zero-cost baseline (max over atoms of the predicted mean-force norm)
+      is NOT an in-distribution artefact: on both AIMD subsets its AUROC for
+      top-5% e_max is within 0.02 of, or above, the best committee statistic.
+    confidence: medium
+    note: >
+      This is the prediction the referees' objection bears on. If it fails --
+      the committee beats the free signal by more than 0.02 out of distribution
+      -- the manuscript's recommendation must be restated as an in-distribution
+      result.
+    criteria:
+      - metric: auroc_free_minus_best_committee
+        op: ge
+        threshold: -0.02
+        require: both_aimd_subsets
+
+  - id: P3
+    statement: >
+      On the in-distribution MPtraj pool, excluding near-equilibrium structures
+      (max reference-force norm below 0.05 eV/A) and single-atom cells shrinks
+      the free signal's margin but does not reverse it: AUROC(free) -
+      AUROC(best committee statistic) remains positive for top-5% e_max.
+    confidence: medium
+    criteria:
+      - metric: auroc_free_minus_best_committee_filtered
+        op: gt
+        threshold: 0.0
+
+  - id: P4
+    statement: >
+      The committee carries information beyond force magnitude out of
+      distribution: averaged within reference-force-magnitude deciles, the
+      max-atom statistic's AUROC exceeds 0.55 on both AIMD subsets.
+    confidence: medium
+    criteria:
+      - metric: auroc_maxatom_within_ref_force_deciles
+        op: gt
+        threshold: 0.55
+        require: both_aimd_subsets
+
+  - id: P5
+    statement: >
+      The ranking of the four committee constructions by error-ranking quality
+      is the same out of distribution as the ranking by force RMSE: the
+      committee with the lowest OOD force RMSE has the highest max-atom AUROC.
+    confidence: low
+
+analysis:
+  scan_script: experiments/j10_ood_scan.py
+  scoring_script: experiments/j10_ood_verdict.py
+  settings:
+    error_p: 0.05
+    precision: float64
+    filtered_force_threshold_eV_A: 0.05
+    deciles: 10
+    bootstrap: paired, 1000 resamples, seed 20261111
